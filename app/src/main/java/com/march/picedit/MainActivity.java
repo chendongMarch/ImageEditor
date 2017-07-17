@@ -1,9 +1,11 @@
 package com.march.picedit;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.march.dev.app.activity.BaseActivity;
 import com.march.dev.utils.FileUtils;
 import com.march.dev.utils.GlideUtils;
@@ -28,6 +30,8 @@ public class MainActivity extends BaseActivity {
         LogUtils.e(TAG, file.getAbsolutePath());
         GlideUtils.with(mContext, file.getAbsolutePath())
                 .into(mImageView);
+
+        Glide.with(mContext).load(R.mipmap.ic_launcher).into(mImageView);
     }
 
     @Override
