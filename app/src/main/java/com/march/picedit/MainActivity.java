@@ -1,41 +1,26 @@
 package com.march.picedit;
 
-import android.os.Bundle;
-import android.os.Environment;
 import android.view.View;
-import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
 import com.march.dev.app.activity.BaseActivity;
-import com.march.dev.utils.FileUtils;
-import com.march.dev.utils.GlideUtils;
-import com.march.dev.utils.LogUtils;
-import com.march.dev.widget.TitleBarView;
+import com.march.picedit.ui.CropActivity;
 
-import java.io.File;
-
-import butterknife.BindView;
+import butterknife.OnClick;
 
 public class MainActivity extends BaseActivity {
 
-    public static final String TAG = MainActivity.class.getSimpleName();
-
-    @BindView(R.id.iv_image) ImageView mImageView;
-
-    @Override
-    public void onInitViews(View view, Bundle saveData) {
-        super.onInitViews(view, saveData);
-        mTitleBarView.setText(TitleBarView.CENTER, "裁剪");
-        File file = FileUtils.newRootFile("1.jpg");
-        LogUtils.e(TAG, file.getAbsolutePath());
-        GlideUtils.with(mContext, file.getAbsolutePath())
-                .into(mImageView);
-
-        Glide.with(mContext).load(R.mipmap.ic_launcher).into(mImageView);
-    }
 
     @Override
     protected int getLayoutId() {
         return R.layout.activity_main;
+    }
+
+    @OnClick({R.id.btn_crop})
+    public void clickView(View view) {
+        switch (view.getId()) {
+            case R.id.btn_crop:
+                CropActivity.start(mActivity);
+                break;
+        }
     }
 }

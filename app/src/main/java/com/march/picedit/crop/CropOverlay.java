@@ -6,6 +6,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.support.v4.util.SparseArrayCompat;
@@ -555,5 +556,14 @@ public class CropOverlay extends View {
     public void setShowGridIndicator(boolean showGridIndicator) {
         mIsShowGridIndicator = showGridIndicator;
         postInvalidate();
+    }
+
+    public Rect getCropRect(int imageWidth, int imageHeight) {
+        int left = (int) (imageWidth * (mCenterRectF.left / mWidth));
+        int top = (int) (imageHeight * (mCenterRectF.top / mHeight));
+        int right = (int) (imageWidth * (mCenterRectF.right / mWidth));
+        int bottom = (int) (imageHeight * (mCenterRectF.bottom / mHeight));
+
+        return new Rect(left, top, right, bottom);
     }
 }
