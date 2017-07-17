@@ -32,4 +32,36 @@
         android:layout_height="wrap_content"
         android:text="crop"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_size_43"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="4/3"/>
+
+        <Button
+            android:id="@+id/btn_size_916"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="9/16"/>
+        <Button
+            android:id="@+id/btn_size_11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1/1"/>
+
+        <Button
+            android:id="@+id/btn_size_free"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="free"/>
+    </LinearLayout>
+
+
 </LinearLayout>

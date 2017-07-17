@@ -4,8 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapRegionDecoder;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -23,10 +21,18 @@ import com.march.picedit.MainActivity;
 import com.march.picedit.R;
 import com.march.picedit.crop.CropOverlay;
 
+import java.io.File;
 import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * CreateAt : 7/17/17
@@ -67,29 +73,42 @@ public class CropActivity extends BaseActivity {
     }
 
 
-    private void decodeRegion(String filePath, String targetFilePath) {
-        try {
-            // 生成decoder对象
-            BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(filePath, true);
-            final int imgWidth = decoder.getWidth();
-            final int imgHeight = decoder.getHeight();
-            Rect rect = mCropOverlay.getCropRect(imgWidth, imgHeight);
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            // 为了内存考虑，将图片格式转化为RGB_565
-            opts.inPreferredConfig = Bitmap.Config.RGB_565;
-            // 将矩形区域解码生成要加载的Bitmap对象
-            Bitmap bm = decoder.decodeRegion(rect, opts);
-            BitmapUtils.compressImage(bm, FileUtils.newRootFile("crop.jpg"), Bitmap.CompressFormat.JPEG, 100, true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    @OnClick({R.id.btn_crop})
+    @OnClick({R.id.btn_crop, R.id.btn_size_916, R.id.btn_size_43, R.id.btn_size_11, R.id.btn_size_free})
     public void clickView(View view) {
         switch (view.getId()) {
             case R.id.btn_crop:
-                decodeRegion(mPicFilePath, FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath());
+                Observable.create(new ObservableOnSubscribe<Bitmap>() {
+                    @Override
+                    public void subscribe(@NonNull ObservableEmitter<Bitmap> e) throws Exception {
+                        e.onNext(mCropOverlay.crop(mPicFilePath, Bitmap.Config.RGB_565));
+                    }
+                }).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Consumer<Bitmap>() {
+                            @Override
+                            public void accept(@NonNull Bitmap bitmap) throws Exception {
+                                String absolutePath = FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath();
+                                BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
+                                ToastUtils.show("成功- " + absolutePath);
+                            }
+                        }, new Consumer<Throwable>() {
+                            @Override
+                            public void accept(@NonNull Throwable throwable) throws Exception {
+                                ToastUtils.show("失败- " + throwable.getMessage());
+                            }
+                        });
+                break;
+            case R.id.btn_size_916:
+                mCropOverlay.setAspectRatio(9f / 16);
+                break;
+            case R.id.btn_size_43:
+                mCropOverlay.setAspectRatio(4f / 3);
+                break;
+            case R.id.btn_size_free:
+                mCropOverlay.setAspectRatio(CropOverlay.NO_ASPECT_RATIO);
+                break;
+            case R.id.btn_size_11:
+                mCropOverlay.setAspectRatio(1f / 1);
                 break;
         }
     }

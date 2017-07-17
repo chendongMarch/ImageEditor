@@ -3,6 +3,9 @@ package com.march.picedit.crop;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -22,7 +25,7 @@ import java.util.Locale;
 
 /**
  * CreateAt : 7/15/17
- * Describe :
+ * Describe : 裁剪蒙版操作层
  *
  * @author chendong
  */
@@ -84,22 +87,8 @@ public class CropOverlay extends View {
         mIndicatorLinePaint = DrawUtils.newPaint(Color.WHITE, mIndicatorLineStrokeWidth, Paint.Style.STROKE);
         mTextPaint = DrawUtils.newPaint(Color.WHITE, 2, Paint.Style.FILL_AND_STROKE);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
-        mTextPaint.setTextSize(40);
-
+        mTextPaint.setTextSize(45);
         setShowGridIndicator(true);
-//        postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                setAspectRatio(9 / 16f);
-//            }
-//        }, 1000);
-//
-//        postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                setAspectRatio(4f / 3);
-//            }
-//        }, 2000);
     }
 
     @Override
@@ -178,12 +167,12 @@ public class CropOverlay extends View {
             }
         }
         // 文字
-        String msg = String.format(Locale.CHINA, "%.0fX%.0f", mCenterRectF.width(), mCenterRectF.height());
-//        String msg = String.format(Locale.CHINA, "%.0fX%.0f/%.2f", mCenterRectF.width(), mCenterRectF.height(), mCenterRectF.width() / mCenterRectF.height());
+        String msg = String.format(Locale.CHINA, "%.0fx%.0f", mCenterRectF.width(), mCenterRectF.height());
+//      String msg = String.format(Locale.CHINA, "%.0fX%.0f/%.2f", mCenterRectF.width(), mCenterRectF.height(), mCenterRectF.width() / mCenterRectF.height());
         canvas.drawText(msg, mCenterRectF.left + mCenterRectF.width() / 2, mCenterRectF.top + mCenterRectF.height() / 2 + DrawUtils.measureTextHeight(mTextPaint) / 2, mTextPaint);
 
-        if (mTestRectF != null)
-            canvas.drawRect(mTestRectF, DrawUtils.newPaint(Color.RED, 5, Paint.Style.STROKE));
+//        if (mTestRectF != null)
+//            canvas.drawRect(mTestRectF, DrawUtils.newPaint(Color.RED, 5, Paint.Style.STROKE));
     }
 
     // 根据确定的中间区域矩形更新其他矩形
@@ -206,6 +195,15 @@ public class CropOverlay extends View {
     }
 
 
+    private float calculateFingersDiatance(MotionEvent event) {
+        float disX = Math.abs(event.getX(0) - event.getX(1));
+        float disY = Math.abs(event.getY(0) - event.getY(1));
+        return (float) Math.sqrt(disX * disX + disY * disY);
+    }
+
+
+    private float mLastFingersDistance;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!isEnabled()) {
@@ -215,6 +213,9 @@ public class CropOverlay extends View {
 
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN:
+                if (event.getPointerCount() == 2) {
+                    mLastFingersDistance = calculateFingersDiatance(event);
+                }
                 mIsInTouching = true;
                 mInitX = event.getX();
                 mInitY = event.getY();
@@ -245,22 +246,6 @@ public class CropOverlay extends View {
                 break;
         }
         return true;
-    }
-
-    public interface TouchRegionHandler {
-
-        int LEFT   = 0;
-        int TOP    = 1;
-        int RIGHT  = 2;
-        int BOTTOM = 3;
-        int CENTER = 4;
-
-        int LEFT_TOP     = 5;
-        int LEFT_BOTTOM  = 6;
-        int RIGHT_TOP    = 7;
-        int RIGHT_BOTTOM = 8;
-
-        void handleTouch(float diffX, float diffY);
     }
 
 
@@ -402,8 +387,6 @@ public class CropOverlay extends View {
 
             switch (touchRegion) {
                 case LEFT_TOP:
-//                    aspectNewTop = Math.min(mCenterRectF.bottom - mMinHeight, mCenterRectF.top + (diffX + diffY) / 2);
-//                    aspectNewLeft = Math.min(mCenterRectF.right - mMinWidth, mCenterRectF.left + ((diffX + diffY) / 2) * mAspectRatio);
                     aspectNewTop = mCenterRectF.top + ((diffX + diffY) / 2);
                     aspectNewLeft = mCenterRectF.left + ((diffX + diffY) / 2) * mAspectRatio;
                     if (aspectNewTop <= (mCenterRectF.bottom - mMinHeight)
@@ -482,6 +465,8 @@ public class CropOverlay extends View {
 
     // 动画转为成目标矩形
     private void animToTargetRectF(final RectF targetRectF) {
+        if (targetRectF == null)
+            return;
         final RectF currentRectF = new RectF(mCenterRectF);
         ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
         valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -518,7 +503,7 @@ public class CropOverlay extends View {
 
             }
         });
-        valueAnimator.setDuration(300);
+        valueAnimator.setDuration(250);
         valueAnimator.setInterpolator(new LinearInterpolator());
         valueAnimator.start();
         setEnabled(false);
@@ -531,22 +516,33 @@ public class CropOverlay extends View {
      * @param aspectRatio 比例,w/h的值
      */
     public void setAspectRatio(float aspectRatio) {
-        if (aspectRatio <= 0)
-            return;
-        mAspectRatio = aspectRatio;
-        // w/h
-        int width;
-        int height;
-        if (mAspectRatio > 1) {
-            width = (int) (mWidth * ORIGIN_SCALE_FACTOR);
-            height = (int) (width / mAspectRatio);
+        RectF target;
+        float left;
+        float top;
+        float width;
+        float height;
+        if (aspectRatio == NO_ASPECT_RATIO) {
+            mAspectRatio = aspectRatio;
+            width = mWidth * ORIGIN_SCALE_FACTOR;
+            height = mHeight * ORIGIN_SCALE_FACTOR;
+            left = (mWidth - width) / 2;
+            top = (mHeight - height) / 2;
+            target = new RectF(left, top, left + width, top + height);
         } else {
-            height = (int) (mHeight * ORIGIN_SCALE_FACTOR);
-            width = (int) (height * mAspectRatio);
+            if (aspectRatio <= 0)
+                return;
+            mAspectRatio = aspectRatio;
+            if (mAspectRatio > 1) {
+                width = (int) (mWidth * ORIGIN_SCALE_FACTOR);
+                height = (int) (width / mAspectRatio);
+            } else {
+                height = (int) (mHeight * ORIGIN_SCALE_FACTOR);
+                width = (int) (height * mAspectRatio);
+            }
+            left = (mWidth - width) / 2;
+            top = (mHeight - height) / 2;
+            target = new RectF(left, top, left + width, top + height);
         }
-        int left = (mWidth - width) / 2;
-        int top = (mHeight - height) / 2;
-        RectF target = new RectF(left, top, left + width, top + height);
         animToTargetRectF(target);
     }
 
@@ -563,7 +559,25 @@ public class CropOverlay extends View {
         int top = (int) (imageHeight * (mCenterRectF.top / mHeight));
         int right = (int) (imageWidth * (mCenterRectF.right / mWidth));
         int bottom = (int) (imageHeight * (mCenterRectF.bottom / mHeight));
-
         return new Rect(left, top, right, bottom);
+    }
+
+
+    public Bitmap crop(String filePath, Bitmap.Config config) {
+        try {
+            // 生成decoder对象
+            BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(filePath, true);
+            final int imgWidth = decoder.getWidth();
+            final int imgHeight = decoder.getHeight();
+            Rect rect = getCropRect(imgWidth, imgHeight);
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            // 为了内存考虑，将图片格式转化为RGB_565
+            opts.inPreferredConfig = config;
+            // 将矩形区域解码生成要加载的Bitmap对象
+            return decoder.decodeRegion(rect, opts);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
