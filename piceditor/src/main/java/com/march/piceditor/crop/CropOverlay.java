@@ -100,6 +100,7 @@ public class CropOverlay extends View {
             mWidth = getMeasuredWidth();
             mHeight = getMeasuredHeight();
 
+            setMeasuredDimension(mWidth, mHeight);
             int centerWidth = (int) (mWidth / 2f);
             int centerHeight = (int) (mHeight / 2f);
             mCenterRectF = new RectF((mWidth - centerWidth) / 2, (mHeight - centerHeight) / 2, (mWidth - centerWidth) / 2 + centerWidth, (mHeight - centerHeight) / 2 + centerHeight);
@@ -112,6 +113,15 @@ public class CropOverlay extends View {
             updateBackgroundRectF();
         }
     }
+
+
+    public void reset() {
+        mWidth = 0;
+        mHeight = 0;
+        mAspectRatio = NO_ASPECT_RATIO;
+        postInvalidate();
+    }
+
 
     private boolean hasNoAspectRatio() {
         return mAspectRatio == NO_ASPECT_RATIO;
@@ -397,7 +407,9 @@ public class CropOverlay extends View {
             if (aspectRatio <= 0)
                 return;
             mAspectRatio = aspectRatio;
-            if (mAspectRatio > 1) {
+            if (mAspectRatio == 1) {
+                width = height = Math.min(mWidth, mHeight) * ORIGIN_SCALE_FACTOR;
+            } else if (mAspectRatio > 1) {
                 width = (int) (mWidth * ORIGIN_SCALE_FACTOR);
                 height = (int) (width / mAspectRatio);
             } else {
