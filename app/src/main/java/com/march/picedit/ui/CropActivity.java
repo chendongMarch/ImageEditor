@@ -19,7 +19,7 @@ import com.march.dev.utils.ToastUtils;
 import com.march.dev.widget.TitleBarView;
 import com.march.picedit.MainActivity;
 import com.march.picedit.R;
-import com.march.picedit.crop.CropOverlay;
+import com.march.piceditor.crop.CropOverlay;
 
 import java.io.File;
 import java.util.Map;

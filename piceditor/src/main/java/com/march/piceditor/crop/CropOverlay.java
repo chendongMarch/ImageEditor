@@ -1,4 +1,4 @@
-package com.march.picedit.crop;
+package com.march.piceditor.crop;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
@@ -19,7 +19,11 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 
 import com.march.dev.utils.DrawUtils;
-import com.march.dev.utils.LogUtils;
+import com.march.piceditor.crop.handler.AbsTouchRegionHandler;
+import com.march.piceditor.crop.handler.impl.AspectRatioHandler;
+import com.march.piceditor.crop.handler.impl.MoveHandler;
+import com.march.piceditor.crop.handler.impl.NoAspectRatioHandler;
+import com.march.piceditor.crop.handler.impl.TwoFingerHandler;
 
 import java.util.Locale;
 
@@ -77,8 +81,8 @@ public class CropOverlay extends View {
     private float mInitX       = INVALID_VALUE; // 按压位置记录
     private float mInitY       = INVALID_VALUE; // 按压位置记录
 
-    private SparseArrayCompat<TouchRegionHandler> mHandlerMap; // 触摸处理类的管理，避免多次初始化
-    private TouchRegionHandler                    mTouchRegionHandler; // 触摸处理
+    private SparseArrayCompat<AbsTouchRegionHandler> mHandlerMap; // 触摸处理类的管理，避免多次初始化
+    private AbsTouchRegionHandler                    mTouchRegionHandler; // 触摸处理
 
 
     private void init() {
@@ -194,14 +198,6 @@ public class CropOverlay extends View {
     }
 
 
-    private float calculateFingersDistance(MotionEvent event) {
-        float disX = Math.abs(event.getX(0) - event.getX(1));
-        float disY = Math.abs(event.getY(0) - event.getY(1));
-        return (float) Math.sqrt(disX * disX + disY * disY);
-    }
-
-    private float mLastFingersDistance;
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!isEnabled()) {
@@ -212,45 +208,26 @@ public class CropOverlay extends View {
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN:
                 mIsInTouching = true;
-                mInitX = event.getX();
-                mInitY = event.getY();
-                mTouchRegionHandler = findTouchHandler(mInitX, mInitY);
+                mTouchRegionHandler = findTouchHandlerOnTouchDown(event);
                 postInvalidate();
                 break;
             case MotionEvent.ACTION_POINTER_DOWN:
-                if (event.getPointerCount() == 2) {
-                    mLastFingersDistance = calculateFingersDistance(event);
-                }
+                mIsInTouching = true;
+                mTouchRegionHandler = findTouchHandlerOnTouchDown(event);
+                postInvalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (event.getPointerCount() == 2) {
-                    float distance = calculateFingersDistance(event);
-                    if (mLastFingersDistance != 0) {
-                        scaleRect((distance * 1f / mLastFingersDistance));
-                    }
-                    mLastFingersDistance = distance;
-                } else {
-                    if (mInitX == INVALID_VALUE
-                            || mInitY == INVALID_VALUE
-                            || mTouchRegionHandler == null) {
-                        return false;
-                    }
-                    float diffX = event.getX() - mInitX;
-                    float diffY = event.getY() - mInitY;
-                    mInitX = event.getX();
-                    mInitY = event.getY();
-                    mTouchRegionHandler.handleTouch(diffX, diffY);
+                if (mTouchRegionHandler == null) {
+                    return false;
                 }
+                mTouchRegionHandler.onTouchMove(event);
                 updateBackgroundRectF();
                 postInvalidate();
                 break;
             case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-                mLastFingersDistance = 0;
                 mIsInTouching = false;
-                mInitX = INVALID_VALUE;
-                mInitX = INVALID_VALUE;
                 mTouchRegionHandler = null;
                 postInvalidate();
                 break;
@@ -258,238 +235,101 @@ public class CropOverlay extends View {
         return true;
     }
 
-    private void scaleRect(float scale) {
 
-        float centerX = mCenterRectF.left + mCenterRectF.width() / 2;
-        float centerY = mCenterRectF.top + mCenterRectF.height() / 2;
+    private AbsTouchRegionHandler findTouchHandlerOnTouchDown(MotionEvent event) {
 
-        float newWidth = mCenterRectF.width() * scale;
-        float newHeight = mCenterRectF.height() * scale;
-
-        float left = centerX - newWidth / 2;
-        float top = centerY - newHeight / 2;
-        float right = left + newWidth;
-        float bottom = top + newHeight;
-
-        if (left >= 0 && top >= 0 && right <= mWidth && bottom <= mHeight) {
-            if (newWidth >= mMinWidth && newHeight >= mMinHeight) {
-                mCenterRectF.set(left, top, left + newWidth, top + newHeight);
-            }
-        }
-    }
-
-    private TouchRegionHandler findTouchHandler(float initX, float initY) {
-
-        // left center
-        if (hasNoAspectRatio() && createRectF(mCenterRectF.left - mTouchEnlargeCheckRegion / 2,
+        float initX = event.getX();
+        float initY = event.getY();
+        AbsTouchRegionHandler handler = null;
+        // 双指缩放
+        if (event.getPointerCount() == 2) {
+            handler = getTouchRegionHandler(AbsTouchRegionHandler.TWO_FINGER);
+            // left center
+        } else if (hasNoAspectRatio() && createRectF(mCenterRectF.left - mTouchEnlargeCheckRegion / 2,
                 mCenterRectF.top + (mCenterRectF.height() - mTriggerLength) / 2,
                 mTouchEnlargeCheckRegion,
                 mTriggerLength).contains(initX, initY)) {
-            return getTouchRegionHandler(TouchRegionHandler.LEFT);
+            handler = getTouchRegionHandler(AbsTouchRegionHandler.LEFT);
             // bottom center
         } else if (hasNoAspectRatio() && createRectF(mCenterRectF.left + (mCenterRectF.width() - mTriggerLength) / 2,
                 mCenterRectF.bottom - mTouchEnlargeCheckRegion / 2,
                 mTriggerLength,
                 mTouchEnlargeCheckRegion).contains(initX, initY)) {
-            return getTouchRegionHandler(TouchRegionHandler.BOTTOM);
+            handler = getTouchRegionHandler(AbsTouchRegionHandler.BOTTOM);
             // right center
         } else if (hasNoAspectRatio() && createRectF(mCenterRectF.left + mCenterRectF.width() - mTouchEnlargeCheckRegion / 2,
                 mCenterRectF.top + (mCenterRectF.height() - mTriggerLength) / 2,
                 mTouchEnlargeCheckRegion,
                 mTriggerLength).contains(initX, initY)) {
-            return getTouchRegionHandler(TouchRegionHandler.RIGHT);
+            handler = getTouchRegionHandler(AbsTouchRegionHandler.RIGHT);
             // top center
         } else if (hasNoAspectRatio() && createRectF(mCenterRectF.left + (mCenterRectF.width() - mTriggerLength) / 2,
                 mCenterRectF.top - mTouchEnlargeCheckRegion / 2,
                 mTriggerLength,
                 mTouchEnlargeCheckRegion).contains(initX, initY)) {
-            return getTouchRegionHandler(TouchRegionHandler.TOP);
+            handler = getTouchRegionHandler(AbsTouchRegionHandler.TOP);
             // left top corner
         } else if (createRectF(mCenterRectF.left - mTouchEnlargeCheckRegion / 2,
                 mCenterRectF.top - mTouchEnlargeCheckRegion / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2).contains(initX, initY)) {
-            return getTouchRegionHandler(TouchRegionHandler.LEFT_TOP);
+            handler = getTouchRegionHandler(AbsTouchRegionHandler.LEFT_TOP);
             // left bottom
         } else if (createRectF(mCenterRectF.left - mTouchEnlargeCheckRegion / 2,
                 mCenterRectF.bottom - mTriggerLength / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2).contains(initX, initY)) {
-            return getTouchRegionHandler(TouchRegionHandler.LEFT_BOTTOM);
+            handler = getTouchRegionHandler(AbsTouchRegionHandler.LEFT_BOTTOM);
             // right bottom
         } else if (createRectF(mCenterRectF.left + mCenterRectF.width() - mTriggerLength / 2,
                 mCenterRectF.bottom - mTriggerLength / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2).contains(initX, initY)) {
-            return getTouchRegionHandler(TouchRegionHandler.RIGHT_BOTTOM);
+            handler = getTouchRegionHandler(AbsTouchRegionHandler.RIGHT_BOTTOM);
             // right top
         } else if (createRectF(mCenterRectF.left + mCenterRectF.width() - mTriggerLength / 2,
                 mCenterRectF.top - mTouchEnlargeCheckRegion / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2).contains(initX, initY)) {
-            return getTouchRegionHandler(TouchRegionHandler.RIGHT_TOP);
+            handler = getTouchRegionHandler(AbsTouchRegionHandler.RIGHT_TOP);
         } else if (createRectF(mCenterRectF.left + mTouchEnlargeCheckRegion / 2,
                 mCenterRectF.top + mTouchEnlargeCheckRegion / 2,
                 mCenterRectF.width() - mTouchEnlargeCheckRegion,
                 mCenterRectF.height() - mTouchEnlargeCheckRegion).contains(initX, initY)) {
-            return getTouchRegionHandler(TouchRegionHandler.CENTER);
+            handler = getTouchRegionHandler(AbsTouchRegionHandler.CENTER);
         }
-        return null;
+        if (handler != null) {
+            handler.onTouchDown(event);
+        }
+        return handler;
     }
-
 
     private RectF createRectF(float left, float top, float width, float height) {
         return mTestRectF = new RectF(left, top, left + width, top + height);
     }
 
-
     // 获取触摸处理器
-    private TouchRegionHandler getTouchRegionHandler(int touchRegion) {
+    private AbsTouchRegionHandler getTouchRegionHandler(int touchRegion) {
         if (mHandlerMap == null) {
             mHandlerMap = new SparseArrayCompat<>();
         }
-        TouchRegionHandler handler = mHandlerMap.get(touchRegion);
+        AbsTouchRegionHandler handler = mHandlerMap.get(touchRegion);
         if (handler == null) {
-            handler = new TouchRegionHandlerImpl(touchRegion);
+            if (touchRegion == AbsTouchRegionHandler.TWO_FINGER) {
+                handler = new TwoFingerHandler();
+            } else if (touchRegion == AbsTouchRegionHandler.CENTER) {
+                handler = new MoveHandler();
+            } else if (hasNoAspectRatio()) {
+                handler = new NoAspectRatioHandler();
+            } else {
+                handler = new AspectRatioHandler();
+            }
             mHandlerMap.put(touchRegion, handler);
         }
+        handler.init(touchRegion, mCenterRectF, mWidth, mHeight, mMinWidth, mMinHeight, mAspectRatio);
         return handler;
     }
 
-
-    //  触摸处理器的实现
-    public class TouchRegionHandlerImpl implements TouchRegionHandler {
-
-        private int touchRegion;
-
-        public TouchRegionHandlerImpl(int touchRegion) {
-            this.touchRegion = touchRegion;
-        }
-
-        // 没有强制比例时的处理，此时会触发 edge trigger
-        private void handleNoAspectRatioTriggerScale(float diffX, float diffY) {
-            float newLeft = Math.min(mCenterRectF.right - mMinWidth, Math.max(0, mCenterRectF.left + diffX));
-            float newTop = Math.min(mCenterRectF.bottom - mMinHeight, Math.max(0, mCenterRectF.top + diffY));
-            float newRight = Math.max(mCenterRectF.left + mMinWidth, Math.min(mWidth, mCenterRectF.right + diffX));
-            float newBottom = Math.max(mCenterRectF.top + mMinHeight, Math.min(mHeight, mCenterRectF.bottom + diffY));
-
-            switch (touchRegion) {
-                case LEFT:
-                    mCenterRectF.left = newLeft;
-                    break;
-                case RIGHT:
-                    mCenterRectF.right = newRight;
-                    break;
-                case TOP:
-                    mCenterRectF.top = newTop;
-                    break;
-                case BOTTOM:
-                    mCenterRectF.bottom = newBottom;
-                    break;
-                case LEFT_TOP:
-                    mCenterRectF.top = newTop;
-                    mCenterRectF.left = newLeft;
-                    break;
-                case LEFT_BOTTOM:
-                    mCenterRectF.left = newLeft;
-                    mCenterRectF.bottom = newBottom;
-                    break;
-                case RIGHT_TOP:
-                    mCenterRectF.right = newRight;
-                    mCenterRectF.top = newTop;
-                    break;
-                case RIGHT_BOTTOM:
-                    mCenterRectF.right = newRight;
-                    mCenterRectF.bottom = newBottom;
-                    break;
-            }
-        }
-
-        // 强制比例时的处理，此时不会触发 edge trigger
-        private void handleAspectRatioTriggerScale(float diffX, float diffY) {
-
-            float aspectNewTop;
-            float aspectNewLeft;
-            float aspectNewRight;
-            float aspectNewBottom;
-
-            switch (touchRegion) {
-                case LEFT_TOP:
-                    aspectNewTop = mCenterRectF.top + ((diffX + diffY) / 2);
-                    aspectNewLeft = mCenterRectF.left + ((diffX + diffY) / 2) * mAspectRatio;
-                    if (aspectNewTop <= (mCenterRectF.bottom - mMinHeight)
-                            && aspectNewLeft <= (mCenterRectF.right - mMinWidth)) {
-                        LogUtils.e(TAG, aspectNewTop + "," + aspectNewLeft);
-                        if (aspectNewTop >= 0 && aspectNewLeft >= 0) {
-                            mCenterRectF.top = aspectNewTop;
-                            mCenterRectF.left = aspectNewLeft;
-                        }
-                    }
-                    break;
-                case LEFT_BOTTOM:
-                    aspectNewLeft = mCenterRectF.left + ((diffX - diffY) / 2) * mAspectRatio;
-                    aspectNewBottom = mCenterRectF.bottom + (-diffX + diffY) / 2;
-                    if (aspectNewLeft <= (mCenterRectF.right - mMinWidth)
-                            && aspectNewBottom >= mCenterRectF.top + mMinHeight) {
-                        if (aspectNewLeft >= 0 && aspectNewBottom <= mHeight) {
-                            mCenterRectF.left = aspectNewLeft;
-                            mCenterRectF.bottom = aspectNewBottom;
-                        }
-                    }
-                    break;
-                case RIGHT_TOP:
-                    aspectNewRight = mCenterRectF.right + ((diffX - diffY) / 2) * mAspectRatio;
-                    aspectNewTop = mCenterRectF.top + (-diffX + diffY) / 2;
-                    if (aspectNewRight >= mCenterRectF.left + mMinWidth
-                            && aspectNewTop <= mCenterRectF.bottom - mMinHeight) {
-                        if (aspectNewRight <= mWidth && aspectNewTop >= 0) {
-                            mCenterRectF.right = aspectNewRight;
-                            mCenterRectF.top = aspectNewTop;
-                        }
-                    }
-                    break;
-                case RIGHT_BOTTOM:
-                    aspectNewRight = mCenterRectF.right + ((diffX + diffY) / 2) * mAspectRatio;
-                    aspectNewBottom = mCenterRectF.bottom + (diffX + diffY) / 2;
-                    if (aspectNewRight >= mCenterRectF.left + mMinWidth
-                            && aspectNewBottom >= (mCenterRectF.top + mMinHeight)) {
-                        if (aspectNewRight <= mWidth && aspectNewBottom <= mHeight) {
-                            mCenterRectF.right = aspectNewRight;
-                            mCenterRectF.bottom = aspectNewBottom;
-                        }
-                    }
-                    break;
-            }
-        }
-
-        // 中间移动处理
-        private void handleCenterTouchMove(float diffX, float diffY) {
-            if (touchRegion == CENTER) {
-                float newLeft = Math.max(0, mCenterRectF.left + diffX);
-                float newTop = Math.max(0, mCenterRectF.top + diffY);
-
-                if (newLeft + mCenterRectF.width() >= mWidth) {
-                    newLeft = mCenterRectF.left;
-                }
-                if (newTop + mCenterRectF.height() >= mHeight) {
-                    newTop = mCenterRectF.top;
-                }
-                RectF temp = new RectF(newLeft, newTop, newLeft + mCenterRectF.width(), newTop + mCenterRectF.height());
-                mCenterRectF.set(temp);
-            }
-        }
-
-        @Override
-        public void handleTouch(float diffX, float diffY) {
-            if (touchRegion == CENTER) {
-                handleCenterTouchMove(diffX, diffY);
-            } else if (hasNoAspectRatio()) {
-                handleNoAspectRatioTriggerScale(diffX, diffY);
-            } else {
-                handleAspectRatioTriggerScale(diffX, diffY);
-            }
-        }
-    }
 
     // 动画转为成目标矩形
     private void animToTargetRectF(final RectF targetRectF) {
@@ -608,6 +448,4 @@ public class CropOverlay extends View {
         }
         return null;
     }
-
-
 }

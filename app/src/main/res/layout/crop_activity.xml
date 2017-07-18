@@ -18,7 +18,7 @@
             android:scaleType="centerCrop"
             android:src="@drawable/ic_launcher"/>
 
-        <com.march.picedit.crop.CropOverlay
+        <com.march.piceditor.crop.CropOverlay
             android:id="@+id/col_crop"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
