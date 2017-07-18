@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 
-          package="com.march.cropper"
+          package="com.march.piceditor"
 >
 
     <application android:allowBackup="true"

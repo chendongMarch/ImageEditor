@@ -42,12 +42,16 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class CropActivity extends BaseActivity {
 
-    public static final String TAG = MainActivity.class.getSimpleName();
+    public static final String KEY_PATH = "KEY_PATH";
+    public static final String TAG      = MainActivity.class.getSimpleName();
+
     private String mPicFilePath;
 
-    public static void start(Activity activity) {
+    public static void start(Activity activity, String path) {
         Intent intent = new Intent(activity, CropActivity.class);
+        intent.putExtra(KEY_PATH, path);
         activity.startActivity(intent);
+
         ActivityAnimUtils.translateStart(activity);
     }
 
@@ -56,16 +60,21 @@ public class CropActivity extends BaseActivity {
     @BindView(R.id.col_crop)  CropOverlay mCropOverlay;
 
     @Override
+    public void onReceiveData() {
+        super.onReceiveData();
+        mPicFilePath = getIntent().getStringExtra(KEY_PATH);
+    }
+
+    @Override
     public void onInitViews(View view, Bundle saveData) {
         super.onInitViews(view, saveData);
         mTitleBarView.setText(TitleBarView.CENTER, "裁剪");
         mTitleBarView.setText(TitleBarView.LEFT, "back");
         mTitleBarView.setLeftBackListener(mActivity);
-        mPicFilePath = FileUtils.newRootFile("2.jpg").getAbsolutePath();
+
         GlideUtils.with(mContext, mPicFilePath).into(mImageView);
 
         BitmapFactory.Options bitmapSize = BitmapUtils.getBitmapSize(mPicFilePath);
-
         int width = (int) (DimensUtils.getScreenWidth(mContext) * 0.8f);
         int height = (int) (width * (bitmapSize.outHeight * 1f / bitmapSize.outWidth));
         mParentFl.getLayoutParams().width = width;

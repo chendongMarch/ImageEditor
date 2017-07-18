@@ -85,7 +85,7 @@ public class CropOverlay extends View {
         mBgPaint = DrawUtils.newPaint(Color.parseColor("#2f000000"), 0, Paint.Style.FILL_AND_STROKE);
         mTriggerPaint = DrawUtils.newPaint(Color.WHITE, mTriggerLineStrokeWidth, Paint.Style.STROKE);
         mIndicatorLinePaint = DrawUtils.newPaint(Color.WHITE, mIndicatorLineStrokeWidth, Paint.Style.STROKE);
-        mTextPaint = DrawUtils.newPaint(Color.WHITE, 2, Paint.Style.FILL_AND_STROKE);
+        mTextPaint = DrawUtils.newPaint(Color.WHITE, 2, Paint.Style.FILL);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mTextPaint.setTextSize(45);
         setShowGridIndicator(true);
@@ -110,7 +110,6 @@ public class CropOverlay extends View {
             updateBackgroundRectF();
         }
     }
-
 
     private boolean hasNoAspectRatio() {
         return mAspectRatio == NO_ASPECT_RATIO;
@@ -195,12 +194,11 @@ public class CropOverlay extends View {
     }
 
 
-    private float calculateFingersDiatance(MotionEvent event) {
+    private float calculateFingersDistance(MotionEvent event) {
         float disX = Math.abs(event.getX(0) - event.getX(1));
         float disY = Math.abs(event.getY(0) - event.getY(1));
         return (float) Math.sqrt(disX * disX + disY * disY);
     }
-
 
     private float mLastFingersDistance;
 
@@ -213,31 +211,43 @@ public class CropOverlay extends View {
 
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN:
-                if (event.getPointerCount() == 2) {
-                    mLastFingersDistance = calculateFingersDiatance(event);
-                }
                 mIsInTouching = true;
                 mInitX = event.getX();
                 mInitY = event.getY();
                 mTouchRegionHandler = findTouchHandler(mInitX, mInitY);
                 postInvalidate();
                 break;
-            case MotionEvent.ACTION_MOVE:
-                if (mInitX == INVALID_VALUE
-                        || mInitY == INVALID_VALUE
-                        || mTouchRegionHandler == null) {
-                    return false;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                if (event.getPointerCount() == 2) {
+                    mLastFingersDistance = calculateFingersDistance(event);
                 }
-                float diffX = event.getX() - mInitX;
-                float diffY = event.getY() - mInitY;
-                mInitX = event.getX();
-                mInitY = event.getY();
-                mTouchRegionHandler.handleTouch(diffX, diffY);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (event.getPointerCount() == 2) {
+                    float distance = calculateFingersDistance(event);
+                    if (mLastFingersDistance != 0) {
+                        scaleRect((distance * 1f / mLastFingersDistance));
+                    }
+                    mLastFingersDistance = distance;
+                } else {
+                    if (mInitX == INVALID_VALUE
+                            || mInitY == INVALID_VALUE
+                            || mTouchRegionHandler == null) {
+                        return false;
+                    }
+                    float diffX = event.getX() - mInitX;
+                    float diffY = event.getY() - mInitY;
+                    mInitX = event.getX();
+                    mInitY = event.getY();
+                    mTouchRegionHandler.handleTouch(diffX, diffY);
+                }
                 updateBackgroundRectF();
                 postInvalidate();
                 break;
+            case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                mLastFingersDistance = 0;
                 mIsInTouching = false;
                 mInitX = INVALID_VALUE;
                 mInitX = INVALID_VALUE;
@@ -248,6 +258,25 @@ public class CropOverlay extends View {
         return true;
     }
 
+    private void scaleRect(float scale) {
+
+        float centerX = mCenterRectF.left + mCenterRectF.width() / 2;
+        float centerY = mCenterRectF.top + mCenterRectF.height() / 2;
+
+        float newWidth = mCenterRectF.width() * scale;
+        float newHeight = mCenterRectF.height() * scale;
+
+        float left = centerX - newWidth / 2;
+        float top = centerY - newHeight / 2;
+        float right = left + newWidth;
+        float bottom = top + newHeight;
+
+        if (left >= 0 && top >= 0 && right <= mWidth && bottom <= mHeight) {
+            if (newWidth >= mMinWidth && newHeight >= mMinHeight) {
+                mCenterRectF.set(left, top, left + newWidth, top + newHeight);
+            }
+        }
+    }
 
     private TouchRegionHandler findTouchHandler(float initX, float initY) {
 
@@ -336,7 +365,6 @@ public class CropOverlay extends View {
         public TouchRegionHandlerImpl(int touchRegion) {
             this.touchRegion = touchRegion;
         }
-
 
         // 没有强制比例时的处理，此时会触发 edge trigger
         private void handleNoAspectRatioTriggerScale(float diffX, float diffY) {
@@ -580,4 +608,6 @@ public class CropOverlay extends View {
         }
         return null;
     }
+
+
 }

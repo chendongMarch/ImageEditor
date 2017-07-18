@@ -35,5 +35,5 @@ dependencies {
     apt rootProject.ext.support.butterknife840_processor
     compile rootProject.ext.support.butterknife840
 
-    compile project(':cropper')
+    compile project(':piceditor')
 }
