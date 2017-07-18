@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorEFEFEF"
+    android:background="@color/unsureColor"
     android:gravity="bottom"
     android:orientation="vertical">
 
@@ -13,15 +13,21 @@
         android:layout_height="0dp"
         android:layout_gravity="center_horizontal"
         android:layout_weight="1"
-        android:background="@color/unsureColor">
+        android:animateLayoutChanges="true">
 
-        <ImageView
-            android:id="@+id/iv_image"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_launcher"/>
+        <com.march.piceditor.rotate.RotateFrameLayout
+            android:id="@+id/rfl_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+
+            <ImageView
+                android:id="@+id/iv_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_launcher"/>
+        </com.march.piceditor.rotate.RotateFrameLayout>
 
         <com.march.piceditor.crop.CropOverlay
             android:id="@+id/col_crop"
@@ -32,48 +38,55 @@
     </FrameLayout>
 
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_crop_mode"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"/>
+        android:animateLayoutChanges="true"
+        android:background="@color/white">
 
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:orientation="horizontal"
-        android:padding="5dp">
-
-        <TextView
-            android:id="@+id/tv_reset"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/ll_crop_ly"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingBottom="5dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:paddingTop="5dp"
-            android:text="重置"
-            android:textColor="@color/white"
-            android:textSize="14sp"/>
+            android:layout_gravity="center"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tv_confirm"
-            android:layout_width="wrap_content"
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_crop_mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"/>
+
+            <!--重置和裁剪-->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white"
+                android:orientation="horizontal"
+                android:padding="5dp">
+
+                <TextView
+                    android:id="@+id/tv_reset"
+                    style="@style/TvBtn"
+                    android:text="重置"/>
+
+                <TextView
+                    android:id="@+id/tv_confirm"
+                    style="@style/TvBtn"
+                    android:layout_alignParentRight="true"
+                    android:text="确定裁剪"/>
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_rotate_mode"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:gravity="center"
-            android:paddingBottom="5dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:paddingTop="5dp"
-            android:text="确定裁剪"
-            android:textColor="@color/white"
-            android:textSize="14sp"/>
-    </RelativeLayout>
+            android:layout_gravity="center"
+            android:visibility="gone"/>
 
+    </FrameLayout>
 
     <View style="@style/common_line"/>
 
@@ -83,13 +96,10 @@
         android:background="@color/white">
 
         <ImageView
-            android:padding="10dp"
+            style="@style/IvIcon"
             android:id="@+id/tv_close"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
-            android:scaleType="centerInside"
             android:src="@drawable/common_btn_close"/>
 
         <LinearLayout
@@ -101,34 +111,26 @@
             android:orientation="horizontal">
 
             <ImageView
-                android:padding="10dp"
+                style="@style/IvIcon"
                 android:id="@+id/iv_tab_crop"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:scaleType="centerInside"
                 android:src="@drawable/img_edit_tab_clip_a"/>
 
             <ImageView
-                android:padding="10dp"
+                style="@style/IvIcon"
+
                 android:id="@+id/iv_tab_rotate"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
                 android:layout_centerInParent="true"
                 android:layout_marginLeft="30dp"
-                android:scaleType="centerInside"
                 android:src="@drawable/img_edit_tab_rotate_b"/>
 
         </LinearLayout>
 
         <ImageView
-            android:padding="10dp"
+            style="@style/IvIcon"
             android:id="@+id/tv_complete"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="10dp"
-            android:scaleType="centerInside"
             android:src="@drawable/common_btn_ok"/>
     </RelativeLayout>
 </LinearLayout>

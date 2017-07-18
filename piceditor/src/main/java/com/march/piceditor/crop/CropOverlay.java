@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -17,8 +18,11 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
+import android.widget.ImageView;
 
+import com.march.dev.utils.BitmapUtils;
 import com.march.dev.utils.DrawUtils;
+import com.march.dev.utils.ViewUtils;
 import com.march.piceditor.crop.handler.AbsTouchRegionHandler;
 import com.march.piceditor.crop.handler.impl.AspectRatioHandler;
 import com.march.piceditor.crop.handler.impl.MoveHandler;
@@ -39,6 +43,7 @@ public class CropOverlay extends View {
     public static final float  ORIGIN_SCALE_FACTOR = 0.618f;
     public static final int    NO_ASPECT_RATIO     = -1;
     public static final int    INVALID_VALUE       = -1;
+    private Matrix mMatrix;
 
 
     public CropOverlay(Context context) {
@@ -84,7 +89,7 @@ public class CropOverlay extends View {
 
 
     private void init() {
-        mBgPaint = DrawUtils.newPaint(Color.parseColor("#2f000000"), 0, Paint.Style.FILL_AND_STROKE);
+        mBgPaint = DrawUtils.newPaint(Color.parseColor("#5f000000"), 0, Paint.Style.FILL_AND_STROKE);
         mTriggerPaint = DrawUtils.newPaint(Color.WHITE, mTriggerLineStrokeWidth, Paint.Style.STROKE);
         mIndicatorLinePaint = DrawUtils.newPaint(Color.WHITE, mIndicatorLineStrokeWidth, Paint.Style.STROKE);
         mTextPaint = DrawUtils.newPaint(Color.WHITE, 2, Paint.Style.FILL);
@@ -177,6 +182,7 @@ public class CropOverlay extends View {
                 DrawUtils.drawVLine(canvas, mIndicatorLinePaint, mCenterRectF.left + mCenterRectF.width() / 3 * i, mCenterRectF.top, mCenterRectF.height());
             }
         }
+
         // 文字
         String msg = String.format(Locale.CHINA, "%.0fx%.0f", mCenterRectF.width(), mCenterRectF.height());
 //      String msg = String.format(Locale.CHINA, "%.0fX%.0f/%.2f", mCenterRectF.width(), mCenterRectF.height(), mCenterRectF.width() / mCenterRectF.height());
@@ -429,6 +435,22 @@ public class CropOverlay extends View {
     public void setShowGridIndicator(boolean showGridIndicator) {
         mIsShowGridIndicator = showGridIndicator;
         postInvalidate();
+    }
+
+
+    public void attachImage(String filePath, ImageView imageView, int maxWidth, int maxHeight, float scale) {
+        reset();
+        int width;
+        int height;
+        BitmapFactory.Options bitmapSize = BitmapUtils.getBitmapSize(filePath);
+        if (bitmapSize.outWidth > bitmapSize.outHeight) {
+            width = (int) (maxWidth * scale);
+            height = (int) (width * (bitmapSize.outHeight * 1f / bitmapSize.outWidth));
+        } else {
+            height = (int) (maxHeight * scale);
+            width = (int) (height * (bitmapSize.outWidth * 1f / bitmapSize.outHeight));
+        }
+        ViewUtils.setLayoutParam(width, height, imageView, this);
     }
 
     public Rect getCropRect(int imageWidth, int imageHeight) {

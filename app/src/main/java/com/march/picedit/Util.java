@@ -13,7 +13,7 @@ import android.support.v4.content.ContextCompat;
  */
 public class Util {
 //
-//    private StateListDrawable newSelectDrawable(Context context) {
+//    private StateListDrawable newSelectedDrawable(Context context) {
 //        Drawable checked = ContextCompat.getDrawable(context, );
 //        Drawable unchecked = context.getResources().getDrawable(R.drawable.switch_bg_off_emui);
 //        Drawable disabled = context.getResources().getDrawable(R.drawable.switch_bg_disabled_emui);
@@ -33,14 +33,25 @@ public class Util {
 //    }
 
 
-    public static StateListDrawable newSelectDrawable(Context context, int selectRes, int unSelectRes) {
+    public static StateListDrawable newSelectedDrawable(Context context, int selectRes, int unSelectRes) {
         Drawable selectDrawable = ContextCompat.getDrawable(context, selectRes);
         Drawable unSelectDrawable = ContextCompat.getDrawable(context, unSelectRes);
         StateListDrawable stateList = new StateListDrawable();
         int stateSelected = android.R.attr.state_selected;
         stateList.addState(new int[]{stateSelected}, selectDrawable);
-        stateList.addState(new int[]{stateSelected}, unSelectDrawable);
+        stateList.addState(new int[]{-stateSelected}, unSelectDrawable);
         stateList.addState(new int[]{}, unSelectDrawable);
+        return stateList;
+    }
+
+    public static StateListDrawable newPressedDrawable(Context context, int pressRes, int releaseRes) {
+        Drawable pressDrawable = ContextCompat.getDrawable(context, pressRes);
+        Drawable releaseDrawable = ContextCompat.getDrawable(context, releaseRes);
+        StateListDrawable stateList = new StateListDrawable();
+        int statePressed = android.R.attr.state_pressed;
+        stateList.addState(new int[]{statePressed}, pressDrawable);
+        stateList.addState(new int[]{statePressed}, releaseDrawable);
+        stateList.addState(new int[]{}, releaseDrawable);
         return stateList;
     }
 }
