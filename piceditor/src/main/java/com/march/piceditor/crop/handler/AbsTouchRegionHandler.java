@@ -5,7 +5,7 @@ import android.view.MotionEvent;
 
 /**
  * CreateAt : 7/18/17
- * Describe :
+ * Describe : 事件处理基类
  *
  * @author chendong
  */

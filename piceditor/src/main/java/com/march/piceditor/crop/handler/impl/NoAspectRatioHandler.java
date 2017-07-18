@@ -7,7 +7,7 @@ import com.march.piceditor.crop.handler.AbsTouchRegionHandler;
 
 /**
  * CreateAt : 7/18/17
- * Describe :
+ * Describe : 不指定比例缩放
  *
  * @author chendong
  */

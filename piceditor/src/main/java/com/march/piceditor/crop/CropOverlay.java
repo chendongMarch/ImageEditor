@@ -78,8 +78,6 @@ public class CropOverlay extends View {
     private boolean mIsShowGridIndicator;// 是否显示网格指示器
 
     private float mAspectRatio = NO_ASPECT_RATIO; // 确定的比例 ,w/h
-    private float mInitX       = INVALID_VALUE; // 按压位置记录
-    private float mInitY       = INVALID_VALUE; // 按压位置记录
 
     private SparseArrayCompat<AbsTouchRegionHandler> mHandlerMap; // 触摸处理类的管理，避免多次初始化
     private AbsTouchRegionHandler                    mTouchRegionHandler; // 触摸处理
@@ -376,7 +374,6 @@ public class CropOverlay extends View {
         valueAnimator.start();
         setEnabled(false);
     }
-
 
     /**
      * 设置比例，使用 {@link #NO_ASPECT_RATIO} 表示没有设定比例的自由模式

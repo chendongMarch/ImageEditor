@@ -6,7 +6,7 @@ import com.march.piceditor.crop.handler.AbsTouchRegionHandler;
 
 /**
  * CreateAt : 7/18/17
- * Describe :
+ * Describe : 双指缩放事件处理
  *
  * @author chendong
  */
