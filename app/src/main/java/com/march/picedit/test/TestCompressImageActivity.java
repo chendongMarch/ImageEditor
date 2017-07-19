@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.blueberry.compress.ImageCompress;
 import com.march.dev.app.activity.BaseActivity;
 import com.march.dev.model.ImageInfo;
 import com.march.dev.uikit.selectimg.SelectImageActivity;
@@ -15,7 +14,7 @@ import com.march.dev.utils.GlideUtils;
 import com.march.dev.utils.PermissionUtils;
 import com.march.dev.utils.ToastUtils;
 import com.march.picedit.R;
-import com.xiaoqi.libjpegcompress.ImageUtils;
+import com.march.turbojpeg.TurboJpegUtils;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -72,15 +71,13 @@ public class TestCompressImageActivity extends BaseActivity {
                         if (!file.exists()) {
                             file.createNewFile();
                         }
-                        //ImageCompress.nativeCompressBitmap(bitmap, 100, file.getAbsolutePath(), true);
-                        ImageUtils.compressBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), 100, file.getAbsolutePath().getBytes(), true);
+                        TurboJpegUtils.compressBitmap(bitmap, 100, file.getAbsolutePath(), true);
                         mPath = file.getAbsolutePath();
 
                         // android 算法
                         Bitmap bitmap2 = BitmapFactory.decodeFile(mPath2);
                         File file2 = FileUtils.newRootFile("/ztemp2/" + System.currentTimeMillis() + ".jpg");
-                        //BitmapUtils.compressImage(bitmap2, file2, Bitmap.CompressFormat.JPEG, 100, true);
-                        ImageCompress.nativeCompressBitmap(bitmap2, 100, file2.getAbsolutePath(), true);
+                        BitmapUtils.compressImage(bitmap2, file2, Bitmap.CompressFormat.JPEG, 100, true);
                         mPath2 = file2.getAbsolutePath();
                         e.onNext(mPath);
                     }
