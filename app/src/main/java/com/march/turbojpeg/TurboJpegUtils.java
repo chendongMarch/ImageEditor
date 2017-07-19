@@ -6,6 +6,8 @@ import android.util.Log;
 
 import com.march.dev.utils.BitmapUtils;
 
+import java.io.File;
+
 /**
  * CreateAt : 7/19/17
  * Describe :
@@ -50,8 +52,18 @@ public class TurboJpegUtils {
     public static int compressBitmap(Bitmap bit, int quality, String fileName, boolean isRecycle) {
         Bitmap result = null;
         try {
+            File file = new File(fileName);
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            if (!file.exists()) {
+                file.createNewFile();
+            }
             result = bit.copy(Bitmap.Config.ARGB_8888, true);
             return compress(result, quality, fileName, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
         } finally {
             BitmapUtils.recycleBitmaps(result);
             if (isRecycle) {
