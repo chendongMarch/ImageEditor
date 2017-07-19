@@ -131,6 +131,10 @@ public class RotateFrameLayout extends FrameLayout {
     }
 
 
+    public boolean isNotOperate() {
+        return getScaleX() == 1 && getScaleY() == 1 && getRotation() % 360 == 0;
+    }
+
     public Bitmap rotateBitmap(String filePath) {
         Bitmap bitmap = BitmapFactory.decodeFile(filePath);
         Matrix matrix = new Matrix();

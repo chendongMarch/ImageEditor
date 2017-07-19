@@ -15,26 +15,44 @@
         android:layout_weight="1"
         android:animateLayoutChanges="true">
 
-        <com.march.piceditor.rotate.RotateFrameLayout
-            android:id="@+id/rfl_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center">
+        <FrameLayout
+            android:id="@+id/fl_crop_ly"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
             <ImageView
-                android:id="@+id/iv_image"
+                android:id="@+id/iv_crop_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_launcher"/>
+
+            <com.march.piceditor.crop.CropOverlay
+                android:id="@+id/col_crop"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"/>
+
+        </FrameLayout>
+
+        <!--旋转区域-->
+        <com.march.piceditor.rotate.RotateFrameLayout
+            android:id="@+id/rfl_rotate_ly"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="@color/unsureColor">
+
+            <ImageView
+                android:id="@+id/iv_rotate_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_launcher"/>
         </com.march.piceditor.rotate.RotateFrameLayout>
-
-        <com.march.piceditor.crop.CropOverlay
-            android:id="@+id/col_crop"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"/>
-
     </FrameLayout>
 
 
@@ -66,12 +84,12 @@
                 android:padding="5dp">
 
                 <TextView
-                    android:id="@+id/tv_reset"
+                    android:id="@+id/tv_crop_reset"
                     style="@style/TvBtn"
                     android:text="重置"/>
 
                 <TextView
-                    android:id="@+id/tv_confirm"
+                    android:id="@+id/tv_crop_confirm"
                     style="@style/TvBtn"
                     android:layout_alignParentRight="true"
                     android:text="确定裁剪"/>
@@ -96,8 +114,8 @@
         android:background="@color/white">
 
         <ImageView
-            style="@style/IvIcon"
             android:id="@+id/tv_close"
+            style="@style/IvIcon"
             android:layout_centerVertical="true"
             android:layout_marginLeft="10dp"
             android:src="@drawable/common_btn_close"/>
@@ -111,14 +129,14 @@
             android:orientation="horizontal">
 
             <ImageView
-                style="@style/IvIcon"
                 android:id="@+id/iv_tab_crop"
+                style="@style/IvIcon"
                 android:src="@drawable/img_edit_tab_clip_a"/>
 
             <ImageView
-                style="@style/IvIcon"
-
                 android:id="@+id/iv_tab_rotate"
+
+                style="@style/IvIcon"
                 android:layout_centerInParent="true"
                 android:layout_marginLeft="30dp"
                 android:src="@drawable/img_edit_tab_rotate_b"/>
@@ -126,8 +144,8 @@
         </LinearLayout>
 
         <ImageView
-            style="@style/IvIcon"
             android:id="@+id/tv_complete"
+            style="@style/IvIcon"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="10dp"

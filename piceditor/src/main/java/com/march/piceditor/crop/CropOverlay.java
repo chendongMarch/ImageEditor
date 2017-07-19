@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -18,7 +17,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
-import android.widget.ImageView;
 
 import com.march.dev.utils.BitmapUtils;
 import com.march.dev.utils.DrawUtils;
@@ -43,7 +41,6 @@ public class CropOverlay extends View {
     public static final float  ORIGIN_SCALE_FACTOR = 0.618f;
     public static final int    NO_ASPECT_RATIO     = -1;
     public static final int    INVALID_VALUE       = -1;
-    private Matrix mMatrix;
 
 
     public CropOverlay(Context context) {
@@ -127,7 +124,6 @@ public class CropOverlay extends View {
         postInvalidate();
     }
 
-
     private boolean hasNoAspectRatio() {
         return mAspectRatio == NO_ASPECT_RATIO;
     }
@@ -135,6 +131,7 @@ public class CropOverlay extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
         if (mCenterRectF == null)
             return;
 
@@ -190,6 +187,7 @@ public class CropOverlay extends View {
 
 //        if (mTestRectF != null)
 //            canvas.drawRect(mTestRectF, DrawUtils.newPaint(Color.RED, 5, Paint.Style.STROKE));
+
     }
 
     // 根据确定的中间区域矩形更新其他矩形
@@ -438,7 +436,7 @@ public class CropOverlay extends View {
     }
 
 
-    public void attachImage(String filePath, ImageView imageView, int maxWidth, int maxHeight, float scale) {
+    public void attachImage(String filePath, int maxWidth, int maxHeight, float scale, View... views) {
         reset();
         int width;
         int height;
@@ -450,7 +448,8 @@ public class CropOverlay extends View {
             height = (int) (maxHeight * scale);
             width = (int) (height * (bitmapSize.outWidth * 1f / bitmapSize.outHeight));
         }
-        ViewUtils.setLayoutParam(width, height, imageView, this);
+        ViewUtils.setLayoutParam(width, height, views);
+        ViewUtils.setLayoutParam(width, height, this);
     }
 
     public Rect getCropRect(int imageWidth, int imageHeight) {
