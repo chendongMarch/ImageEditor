@@ -5,18 +5,22 @@ import android.graphics.BitmapFactory;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.blueberry.compress.ImageCompress;
 import com.march.dev.app.activity.BaseActivity;
 import com.march.dev.model.ImageInfo;
 import com.march.dev.uikit.selectimg.SelectImageActivity;
 import com.march.dev.utils.BitmapUtils;
 import com.march.dev.utils.FileUtils;
 import com.march.dev.utils.GlideUtils;
+import com.march.dev.utils.PermissionUtils;
+import com.march.dev.utils.ToastUtils;
 import com.march.picedit.R;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -41,21 +45,39 @@ public class TestCompressImageActivity extends BaseActivity {
     }
 
     private String mPath;
+    private String mPath2;
 
-    @BindView(R.id.iv_image) ImageView mImageView;
+    @BindView(R.id.iv_image)  ImageView mImageView;
+    @BindView(R.id.iv_image2) ImageView mImageView2;
 
 
     @OnClick({R.id.btn_action, R.id.btn_choose_pic})
     public void clickView(View view) {
         switch (view.getId()) {
             case R.id.btn_action:
+                if (mPath == null) return;
                 Observable.create(new ObservableOnSubscribe<String>() {
                     @Override
                     public void subscribe(@NonNull ObservableEmitter<String> e) throws Exception {
+
+                        FileUtils.newRootFile("/ztemp1/").mkdirs();
+                        FileUtils.newRootFile("/ztemp2/").mkdirs();
+
                         Bitmap bitmap = BitmapFactory.decodeFile(mPath);
-                        File file = FileUtils.newRootFile(System.currentTimeMillis() + ".jpg");
-                        BitmapUtils.compressImage(bitmap, file, Bitmap.CompressFormat.JPEG, 100, true);
+
+                        // so保存
+                        File file = FileUtils.newRootFile("/ztemp1/" + System.currentTimeMillis() + ".jpg");
+                        if (!file.exists()) {
+                            file.createNewFile();
+                        }
+                        ImageCompress.nativeCompressBitmap(bitmap, 100, file.getAbsolutePath(), true);
                         mPath = file.getAbsolutePath();
+
+                        // android 算法
+                        Bitmap bitmap2 = BitmapFactory.decodeFile(mPath2);
+                        File file2 = FileUtils.newRootFile("/ztemp2/" + System.currentTimeMillis() + ".jpg");
+                        BitmapUtils.compressImage(bitmap2, file2, Bitmap.CompressFormat.JPEG, 100, true);
+                        mPath2 = file2.getAbsolutePath();
                         e.onNext(mPath);
                     }
                 }).subscribeOn(Schedulers.io())
@@ -63,7 +85,8 @@ public class TestCompressImageActivity extends BaseActivity {
                         .subscribe(new Consumer<String>() {
                             @Override
                             public void accept(@NonNull String s) throws Exception {
-                                GlideUtils.with(mContext, s).into(mImageView);
+                                GlideUtils.with(mContext, mPath).into(mImageView);
+                                GlideUtils.with(mContext, mPath2).into(mImageView2);
                             }
                         }, new Consumer<Throwable>() {
                             @Override
@@ -85,10 +108,24 @@ public class TestCompressImageActivity extends BaseActivity {
         switch (event.getMessage()) {
             case SelectImageActivity.SelectImageEvent.ON_SUCCESS:
                 ImageInfo imageInfo = event.mImageInfos.get(0);
-                mPath = imageInfo.getPath();
+                mPath = mPath2 = imageInfo.getPath();
                 GlideUtils.with(mContext, mPath).into(mImageView);
+                GlideUtils.with(mContext, mPath2).into(mImageView2);
                 break;
         }
+    }
+
+
+    @Override
+    protected String[] getPermission2Check() {
+        return new String[]{PermissionUtils.PER_READ_EXTERNAL_STORAGE,
+                PermissionUtils.PER_WRITE_EXTERNAL_STORAGE};
+    }
+
+    @Override
+    protected boolean handlePermissionResult(Map<String, Integer> reqPermissionsAndResult) {
+        ToastUtils.show("permission denied");
+        return super.handlePermissionResult(reqPermissionsAndResult);
     }
 
 }
