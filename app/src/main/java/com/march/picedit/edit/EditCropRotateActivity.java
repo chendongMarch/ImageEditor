@@ -14,7 +14,6 @@ import android.widget.ImageView;
 
 import com.march.dev.app.activity.BaseActivity;
 import com.march.dev.utils.ActivityAnimUtils;
-import com.march.dev.utils.BitmapUtils;
 import com.march.dev.utils.DimensUtils;
 import com.march.dev.utils.DrawableUtils;
 import com.march.dev.utils.FileUtils;
@@ -32,8 +31,8 @@ import com.march.picedit.MainActivity;
 import com.march.picedit.R;
 import com.march.piceditor.crop.CropOverlay;
 import com.march.piceditor.rotate.RotateFrameLayout;
+import com.march.turbojpeg.TurboJpegUtils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -155,7 +154,8 @@ public class EditCropRotateActivity extends BaseActivity {
                             public void accept(@NonNull Bitmap bitmap) throws Exception {
                                 ToastUtils.show("裁剪成功");
                                 String absolutePath = FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath();
-                                BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
+                                TurboJpegUtils.compressBitmap(bitmap, 100, absolutePath, true);
+                                //BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
                                 initCropAndRotateShow(absolutePath);
                             }
                         }, new Consumer<Throwable>() {
@@ -196,7 +196,8 @@ public class EditCropRotateActivity extends BaseActivity {
                             public void accept(@NonNull Bitmap bitmap) throws Exception {
                                 ToastUtils.show("旋转成功");
                                 String absolutePath = FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath();
-                                BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
+                                //BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
+                                TurboJpegUtils.compressBitmap(bitmap, 100, absolutePath, true);
                                 initCropAndRotateShow(absolutePath);
 
                                 mRotateTabView.setSelected(false);
