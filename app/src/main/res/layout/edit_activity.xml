@@ -12,8 +12,24 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="center_horizontal"
-        android:layout_weight="1"
-        android:animateLayoutChanges="true">
+        android:layout_weight="1">
+        <!--旋转区域-->
+        <com.march.piceditor.rotate.RotateFrameLayout
+            android:id="@+id/rfl_rotate_ly"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="@color/unsureColor"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/iv_rotate_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_launcher"/>
+        </com.march.piceditor.rotate.RotateFrameLayout>
 
         <FrameLayout
             android:id="@+id/fl_crop_ly"
@@ -36,30 +52,13 @@
 
         </FrameLayout>
 
-        <!--旋转区域-->
-        <com.march.piceditor.rotate.RotateFrameLayout
-            android:id="@+id/rfl_rotate_ly"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:background="@color/unsureColor">
 
-            <ImageView
-                android:id="@+id/iv_rotate_image"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_launcher"/>
-        </com.march.piceditor.rotate.RotateFrameLayout>
     </FrameLayout>
 
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:animateLayoutChanges="true"
         android:background="@color/white">
 
         <LinearLayout

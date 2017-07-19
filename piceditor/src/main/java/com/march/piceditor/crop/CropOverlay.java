@@ -20,6 +20,7 @@ import android.view.animation.LinearInterpolator;
 
 import com.march.dev.utils.BitmapUtils;
 import com.march.dev.utils.DrawUtils;
+import com.march.dev.utils.LogUtils;
 import com.march.dev.utils.ViewUtils;
 import com.march.piceditor.crop.handler.AbsTouchRegionHandler;
 import com.march.piceditor.crop.handler.impl.AspectRatioHandler;
@@ -441,15 +442,40 @@ public class CropOverlay extends View {
         int width;
         int height;
         BitmapFactory.Options bitmapSize = BitmapUtils.getBitmapSize(filePath);
-        if (bitmapSize.outWidth > bitmapSize.outHeight) {
+        int bitmapHeight = bitmapSize.outHeight;
+        int bitmapWidth = bitmapSize.outWidth;
+        if (bitmapWidth == bitmapHeight) {
+            width = height = (int) (Math.min(maxWidth, maxHeight) * scale);
+        } else if (bitmapWidth > bitmapHeight) {
             width = (int) (maxWidth * scale);
-            height = (int) (width * (bitmapSize.outHeight * 1f / bitmapSize.outWidth));
+            height = (int) (width * (bitmapHeight * 1f / bitmapWidth));
         } else {
             height = (int) (maxHeight * scale);
-            width = (int) (height * (bitmapSize.outWidth * 1f / bitmapSize.outHeight));
+            width = (int) (height * (bitmapWidth * 1f / bitmapHeight));
         }
         ViewUtils.setLayoutParam(width, height, views);
         ViewUtils.setLayoutParam(width, height, this);
+    }
+
+    public void attachImage(Bitmap bitmap, int maxWidth, int maxHeight, float scale, View... views) {
+        reset();
+        int width;
+        int height;
+        int bitmapWidth = bitmap.getWidth();
+        int bitmapHeight = bitmap.getHeight();
+        if (bitmapWidth == bitmapHeight) {
+            width = height = (int) (Math.min(maxWidth, maxHeight) * scale);
+        } else if (bitmapWidth > bitmapHeight) {
+            width = (int) (maxWidth * scale);
+            height = (int) (width * (bitmapHeight * 1f / bitmapWidth));
+        } else {
+            height = (int) (maxHeight * scale);
+            width = (int) (height * (bitmapWidth * 1f / bitmapHeight));
+        }
+        ViewUtils.setLayoutParam(width, height, views);
+        ViewUtils.setLayoutParam(width, height, this);
+
+        LogUtils.e(TAG,"width = "+width + ",height = " + height);
     }
 
     public Rect getCropRect(int imageWidth, int imageHeight) {
@@ -457,6 +483,11 @@ public class CropOverlay extends View {
         int top = (int) (imageHeight * (mCenterRectF.top / mHeight));
         int right = (int) (imageWidth * (mCenterRectF.right / mWidth));
         int bottom = (int) (imageHeight * (mCenterRectF.bottom / mHeight));
+        if (mAspectRatio == 1) {
+            int size = right - left;
+            bottom = top + size;
+        }
+
         return new Rect(left, top, right, bottom);
     }
 

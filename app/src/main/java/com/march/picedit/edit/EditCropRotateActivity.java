@@ -3,6 +3,9 @@ package com.march.picedit.edit;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -14,10 +17,10 @@ import android.widget.ImageView;
 
 import com.march.dev.app.activity.BaseActivity;
 import com.march.dev.utils.ActivityAnimUtils;
+import com.march.dev.utils.BitmapUtils;
 import com.march.dev.utils.DimensUtils;
 import com.march.dev.utils.DrawableUtils;
 import com.march.dev.utils.FileUtils;
-import com.march.dev.utils.GlideUtils;
 import com.march.dev.utils.PermissionUtils;
 import com.march.dev.utils.ToastUtils;
 import com.march.dev.utils.ViewUtils;
@@ -63,6 +66,8 @@ public class EditCropRotateActivity extends BaseActivity {
     private LightAdapter<CropMode> mCropModeAdapter;
     private int                    mEnsureColor;
     private int                    mUnsureColor;
+
+    private Bitmap mCurrentBitmap;
 
     public static void start(Activity activity, String path) {
         Intent intent = new Intent(activity, EditCropRotateActivity.class);
@@ -113,26 +118,34 @@ public class EditCropRotateActivity extends BaseActivity {
         ViewUtils.setBackground(mConfirmTv, DrawableUtils.newRoundRectDrawable(mContext, mEnsureColor, 20));
         ViewUtils.setBackground(mResetTv, DrawableUtils.newRoundRectDrawable(mContext, mUnsureColor, 20));
 
-        initCropAndRotateShow(mOriginPicturePath);
+        mCurrentBitmap = BitmapFactory.decodeFile(mOriginPicturePath);
+
+        initCropAndRotateShow(mCurrentBitmap);
 
         createCropModeAdapter();
         createRotateModeAdapter();
     }
 
 
+    private int mParentHeight;
+
     // 初始化裁剪旋转显示
-    private void initCropAndRotateShow(final String path) {
-        mCurrentPicturePath = path;
-        mParentFl.post(new Runnable() {
+    private void initCropAndRotateShow(final Bitmap bitmap) {
+        Runnable action = new Runnable() {
             @Override
             public void run() {
-                mCropOverlay.attachImage(path,
+                mParentHeight = mParentFl.getMeasuredHeight();
+                mCropOverlay.attachImage(bitmap,
                         DimensUtils.getScreenWidth(mContext),
-                        mParentFl.getHeight(), .9f, mCropImageView, mRotateImageView);
-                GlideUtils.with(mContext, path).into(mCropImageView);
-                GlideUtils.with(mContext, path).into(mRotateImageView);
+                        mParentHeight, .9f, mCropImageView);
+                mCropImageView.setImageBitmap(bitmap);
+                mRotateImageView.setImageBitmap(bitmap);
+                ViewUtils.setLayoutParam((int) (DimensUtils.getScreenWidth(mContext) * .9f), (int) (mParentHeight * .9f), mRotateImageView);
             }
-        });
+        };
+        if (mParentHeight == 0)
+            mParentFl.post(action);
+        else action.run();
     }
 
     @OnClick({R.id.tv_crop_reset, R.id.tv_crop_confirm,
@@ -145,7 +158,10 @@ public class EditCropRotateActivity extends BaseActivity {
                 Observable.create(new ObservableOnSubscribe<Bitmap>() {
                     @Override
                     public void subscribe(@NonNull ObservableEmitter<Bitmap> e) throws Exception {
-                        e.onNext(mCropOverlay.crop(mCurrentPicturePath, Bitmap.Config.ARGB_8888));
+                        Rect cropRect = mCropOverlay.getCropRect(mCurrentBitmap.getWidth(), mCurrentBitmap.getHeight());
+                        Bitmap bitmap = Bitmap.createBitmap(mCurrentBitmap, cropRect.left, cropRect.top, cropRect.width(), cropRect.height());
+
+                        e.onNext(bitmap);
                     }
                 }).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -153,10 +169,9 @@ public class EditCropRotateActivity extends BaseActivity {
                             @Override
                             public void accept(@NonNull Bitmap bitmap) throws Exception {
                                 ToastUtils.show("裁剪成功");
-                                String absolutePath = FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath();
-                                TurboJpegUtils.compressBitmap(bitmap, 100, absolutePath, true);
-                                //BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
-                                initCropAndRotateShow(absolutePath);
+                                initCropAndRotateShow(bitmap);
+                                BitmapUtils.recycleBitmaps(mCurrentBitmap);
+                                mCurrentBitmap = bitmap;
                             }
                         }, new Consumer<Throwable>() {
                             @Override
@@ -168,16 +183,20 @@ public class EditCropRotateActivity extends BaseActivity {
             case R.id.tv_crop_reset:
                 mRotateFrameLayout.setVisibility(View.GONE);
                 mRotateFrameLayout.reset();
-                initCropAndRotateShow(mOriginPicturePath);
+                Bitmap bitmap = BitmapFactory.decodeFile(mOriginPicturePath);
+                initCropAndRotateShow(bitmap);
+                BitmapUtils.recycleBitmaps(mCurrentBitmap);
+                mCurrentBitmap = bitmap;
                 break;
             case R.id.iv_tab_crop:
+
                 // 保存旋转新图
                 if (mRotateFrameLayout.isNotOperate()) {
                     mRotateTabView.setSelected(false);
                     mCropTabView.setSelected(true);
 
-                    mCropLy.setVisibility(View.VISIBLE);
                     mRotateRv.setVisibility(View.GONE);
+                    mCropLy.setVisibility(View.VISIBLE);
 
                     mCropFrameLayout.setVisibility(View.VISIBLE);
                     mRotateFrameLayout.setVisibility(View.GONE);
@@ -187,7 +206,12 @@ public class EditCropRotateActivity extends BaseActivity {
                 Observable.create(new ObservableOnSubscribe<Bitmap>() {
                     @Override
                     public void subscribe(@NonNull ObservableEmitter<Bitmap> e) throws Exception {
-                        e.onNext(mRotateFrameLayout.rotateBitmap(mCurrentPicturePath));
+                        Matrix matrix = new Matrix();
+                        matrix.postScale(mRotateFrameLayout.getScaleX(), mRotateFrameLayout.getScaleY());
+                        matrix.postRotate(mRotateFrameLayout.getRotate());
+                        Bitmap newBitmap = Bitmap.createBitmap(mCurrentBitmap, 0, 0,
+                                mCurrentBitmap.getWidth(), mCurrentBitmap.getHeight(), matrix, true);
+                        e.onNext(newBitmap);
                     }
                 }).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -195,20 +219,23 @@ public class EditCropRotateActivity extends BaseActivity {
                             @Override
                             public void accept(@NonNull Bitmap bitmap) throws Exception {
                                 ToastUtils.show("旋转成功");
-                                String absolutePath = FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath();
-                                //BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
-                                TurboJpegUtils.compressBitmap(bitmap, 100, absolutePath, true);
-                                initCropAndRotateShow(absolutePath);
+
+                                initCropAndRotateShow(bitmap);
 
                                 mRotateTabView.setSelected(false);
                                 mCropTabView.setSelected(true);
 
-                                mCropLy.setVisibility(View.VISIBLE);
-                                mRotateRv.setVisibility(View.GONE);
-
                                 mCropFrameLayout.setVisibility(View.VISIBLE);
                                 mRotateFrameLayout.setVisibility(View.GONE);
+
+                                mCropLy.setVisibility(View.VISIBLE);
+                                mRotateRv.setVisibility(View.GONE);
                                 mRotateFrameLayout.reset();
+
+
+                                BitmapUtils.recycleBitmaps(mCurrentBitmap);
+                                mCurrentBitmap = bitmap;
+
                             }
                         }, new Consumer<Throwable>() {
                             @Override
@@ -221,14 +248,33 @@ public class EditCropRotateActivity extends BaseActivity {
                 mRotateTabView.setSelected(true);
                 mCropTabView.setSelected(false);
 
-                mRotateRv.setVisibility(View.VISIBLE);
                 mCropLy.setVisibility(View.INVISIBLE);
+
+                mRotateRv.setVisibility(View.VISIBLE);
 
                 mRotateFrameLayout.setVisibility(View.VISIBLE);
                 mCropFrameLayout.setVisibility(View.GONE);
                 break;
             case R.id.tv_complete:
-                onBackPressed();
+                Observable.create(new ObservableOnSubscribe<String>() {
+                    @Override
+                    public void subscribe(@NonNull ObservableEmitter<String> e) throws Exception {
+                        TurboJpegUtils.compressBitmap(mCurrentBitmap, 100, FileUtils.newRootFile("result.jpg").getAbsolutePath(), true);
+                    }
+                }).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Consumer<String>() {
+                            @Override
+                            public void accept(@NonNull String s) throws Exception {
+                                ToastUtils.show("图片保存成功 - " + s);
+                                onBackPressed();
+                            }
+                        }, new Consumer<Throwable>() {
+                            @Override
+                            public void accept(@NonNull Throwable throwable) throws Exception {
+                                ToastUtils.show("图片保存失败");
+                            }
+                        });
                 break;
             case R.id.tv_close:
                 onBackPressed();
