@@ -5,8 +5,22 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <Button
+        android:id="@+id/btn_action"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="compress _ decode"/>
+
+    <Button
+        android:id="@+id/btn_choose_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="选图"/>
+
     <ImageView
         android:id="@+id/iv_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
+
+
 </LinearLayout>

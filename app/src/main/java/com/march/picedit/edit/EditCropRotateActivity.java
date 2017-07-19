@@ -16,10 +16,10 @@ import com.march.dev.app.activity.BaseActivity;
 import com.march.dev.utils.ActivityAnimUtils;
 import com.march.dev.utils.BitmapUtils;
 import com.march.dev.utils.DimensUtils;
+import com.march.dev.utils.DrawableUtils;
 import com.march.dev.utils.FileUtils;
 import com.march.dev.utils.GlideUtils;
 import com.march.dev.utils.PermissionUtils;
-import com.march.dev.utils.ShapeUtils;
 import com.march.dev.utils.ToastUtils;
 import com.march.dev.utils.ViewUtils;
 import com.march.dev.widget.TitleBarView;
@@ -30,7 +30,6 @@ import com.march.lightadapter.listener.SimpleItemListener;
 import com.march.lightadapter.module.SelectorModule;
 import com.march.picedit.MainActivity;
 import com.march.picedit.R;
-import com.march.picedit.Util;
 import com.march.piceditor.crop.CropOverlay;
 import com.march.piceditor.rotate.RotateFrameLayout;
 
@@ -51,11 +50,11 @@ import io.reactivex.schedulers.Schedulers;
 
 /**
  * CreateAt : 7/17/17
- * Describe :
+ * Describe : 裁剪旋转界面
  *
  * @author chendong
  */
-public class CropRotateActivity extends BaseActivity {
+public class EditCropRotateActivity extends BaseActivity {
 
     public static final String KEY_PATH = "KEY_PATH";
     public static final String TAG      = MainActivity.class.getSimpleName();
@@ -67,7 +66,7 @@ public class CropRotateActivity extends BaseActivity {
     private int                    mUnsureColor;
 
     public static void start(Activity activity, String path) {
-        Intent intent = new Intent(activity, CropRotateActivity.class);
+        Intent intent = new Intent(activity, EditCropRotateActivity.class);
         intent.putExtra(KEY_PATH, path);
         activity.startActivity(intent);
 
@@ -105,15 +104,15 @@ public class CropRotateActivity extends BaseActivity {
         mTitleBarView.setText(TitleBarView.LEFT, "返回");
         mTitleBarView.setLeftBackListener(mActivity);
 
-        mCropTabView.setImageDrawable(Util.newSelectedDrawable(mContext, R.drawable.img_edit_tab_clip_b, R.drawable.img_edit_tab_clip_a));
-        mRotateTabView.setImageDrawable(Util.newSelectedDrawable(mContext, R.drawable.img_edit_tab_rotate_b, R.drawable.img_edit_tab_rotate_a));
+        mCropTabView.setImageDrawable(DrawableUtils.newSelectStateDrawable(mContext, R.drawable.img_edit_tab_clip_b, R.drawable.img_edit_tab_clip_a));
+        mRotateTabView.setImageDrawable(DrawableUtils.newSelectStateDrawable(mContext, R.drawable.img_edit_tab_rotate_b, R.drawable.img_edit_tab_rotate_a));
         mCropTabView.setSelected(true);
 
         mEnsureColor = ContextCompat.getColor(mContext, R.color.ensureColor);
         mUnsureColor = ContextCompat.getColor(mContext, R.color.unsureColor);
 
-        ViewUtils.setBackground(mConfirmTv, ShapeUtils.getShape(mContext, mEnsureColor, 20));
-        ViewUtils.setBackground(mResetTv, ShapeUtils.getShape(mContext, mUnsureColor, 20));
+        ViewUtils.setBackground(mConfirmTv, DrawableUtils.newRoundRectDrawable(mContext, mEnsureColor, 20));
+        ViewUtils.setBackground(mResetTv, DrawableUtils.newRoundRectDrawable(mContext, mUnsureColor, 20));
 
         initCropAndRotateShow(mOriginPicturePath);
 
@@ -258,11 +257,11 @@ public class CropRotateActivity extends BaseActivity {
     // 创建旋转菜单 list
     private void createRotateModeAdapter() {
         List<RotateMode> list = new ArrayList<>();
-        list.add(new RotateMode(RotateMode.RESET, ShapeUtils.getShape(mContext, mUnsureColor, 20)));
-        list.add(new RotateMode(RotateMode.LEFT, Util.newPressedDrawable(mContext, R.drawable.edit_rotate_left_pressed, R.drawable.edit_rotate_left_released)));
-        list.add(new RotateMode(RotateMode.RIGHT, Util.newPressedDrawable(mContext, R.drawable.edit_rotate_right_pressed, R.drawable.edit_rotate_right_released)));
-        list.add(new RotateMode(RotateMode.FLIPX, Util.newPressedDrawable(mContext, R.drawable.edit_rotate_flipx_pressed, R.drawable.edit_rotate_flipx_released)));
-        list.add(new RotateMode(RotateMode.FLIPY, Util.newPressedDrawable(mContext, R.drawable.edit_rotate_flipy_pressed, R.drawable.edit_rotate_flipy_released)));
+        list.add(new RotateMode(RotateMode.RESET, DrawableUtils.newRoundRectDrawable(mContext, mUnsureColor, 20)));
+        list.add(new RotateMode(RotateMode.LEFT, DrawableUtils.newPressedDrawable(mContext, R.drawable.edit_rotate_left_pressed, R.drawable.edit_rotate_left_released)));
+        list.add(new RotateMode(RotateMode.RIGHT, DrawableUtils.newPressedDrawable(mContext, R.drawable.edit_rotate_right_pressed, R.drawable.edit_rotate_right_released)));
+        list.add(new RotateMode(RotateMode.FLIPX, DrawableUtils.newPressedDrawable(mContext, R.drawable.edit_rotate_flipx_pressed, R.drawable.edit_rotate_flipx_released)));
+        list.add(new RotateMode(RotateMode.FLIPY, DrawableUtils.newPressedDrawable(mContext, R.drawable.edit_rotate_flipy_pressed, R.drawable.edit_rotate_flipy_released)));
         LightAdapter<RotateMode> lightAdapter = new LightAdapter<RotateMode>(mContext, list, R.layout.eidt_rotate_mode_item) {
             @Override
             public void onBindView(ViewHolder<RotateMode> holder, RotateMode data, int pos, int type) {
@@ -319,14 +318,14 @@ public class CropRotateActivity extends BaseActivity {
     // 裁剪模式列表
     private void createCropModeAdapter() {
         List<CropMode> list = new ArrayList<>();
-        list.add(new CropMode(CropOverlay.NO_ASPECT_RATIO, "free", Util.newSelectedDrawable(mContext, R.drawable.edit_cut_crop_freedom_b, R.drawable.edit_cut_crop_freedom_a)));
-        list.add(new CropMode(1f, "1:1", Util.newSelectedDrawable(mContext, R.drawable.edit_cut_crop_1_1_b, R.drawable.edit_cut_crop_1_1_a)));
-        list.add(new CropMode(2f / 3, "2:3", Util.newSelectedDrawable(mContext, R.drawable.edit_cut_crop_2_3_b, R.drawable.edit_cut_crop_2_3_a)));
-        list.add(new CropMode(3f / 2, "3:2", Util.newSelectedDrawable(mContext, R.drawable.edit_cut_crop_3_2_b, R.drawable.edit_cut_crop_3_2_a)));
-        list.add(new CropMode(3f / 4, "3:4", Util.newSelectedDrawable(mContext, R.drawable.edit_cut_crop_3_4_b, R.drawable.edit_cut_crop_3_4_a)));
-        list.add(new CropMode(4f / 3, "4:3", Util.newSelectedDrawable(mContext, R.drawable.edit_cut_crop_4_3_b, R.drawable.edit_cut_crop_4_3_a)));
-        list.add(new CropMode(9f / 16, "9:16", Util.newSelectedDrawable(mContext, R.drawable.edit_cut_crop_9_16_b, R.drawable.edit_cut_crop_9_16_a)));
-        list.add(new CropMode(16f / 9, "16:9", Util.newSelectedDrawable(mContext, R.drawable.edit_cut_crop_16_9_b, R.drawable.edit_cut_crop_16_9_a)));
+        list.add(new CropMode(CropOverlay.NO_ASPECT_RATIO, "free", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_freedom_b, R.drawable.edit_cut_crop_freedom_a)));
+        list.add(new CropMode(1f, "1:1", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_1_1_b, R.drawable.edit_cut_crop_1_1_a)));
+        list.add(new CropMode(2f / 3, "2:3", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_2_3_b, R.drawable.edit_cut_crop_2_3_a)));
+        list.add(new CropMode(3f / 2, "3:2", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_3_2_b, R.drawable.edit_cut_crop_3_2_a)));
+        list.add(new CropMode(3f / 4, "3:4", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_3_4_b, R.drawable.edit_cut_crop_3_4_a)));
+        list.add(new CropMode(4f / 3, "4:3", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_4_3_b, R.drawable.edit_cut_crop_4_3_a)));
+        list.add(new CropMode(9f / 16, "9:16", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_9_16_b, R.drawable.edit_cut_crop_9_16_a)));
+        list.add(new CropMode(16f / 9, "16:9", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_16_9_b, R.drawable.edit_cut_crop_16_9_a)));
 
         mCropModeAdapter = new LightAdapter<CropMode>(mContext, list, R.layout.edit_crop_mode_item) {
             @Override
