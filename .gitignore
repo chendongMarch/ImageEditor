@@ -62,12 +62,12 @@ captures/
 *.properties
 
 #freeline
-freeline.py
-freeline.zip
-freeline/
-freeline.zip.tmp
+#freeline.py
+#freeline.zip
+#freeline/
+#freeline.zip.tmp
 freeline_project_description.json
-
+*.zip
 .flowconfig
 
 node_modules/
