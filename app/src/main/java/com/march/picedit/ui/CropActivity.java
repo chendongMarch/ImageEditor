@@ -3,6 +3,10 @@ package com.march.picedit.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapRegionDecoder;
+import android.graphics.Matrix;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -47,6 +51,7 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -136,26 +141,27 @@ public class CropActivity extends BaseActivity {
     public void clickView(View view) {
         switch (view.getId()) {
             case R.id.tv_confirm:
-                Observable.create(new ObservableOnSubscribe<Bitmap>() {
-                    @Override
-                    public void subscribe(@NonNull ObservableEmitter<Bitmap> e) throws Exception {
-                        e.onNext(mCropOverlay.crop(mCurrentPicturePath, Bitmap.Config.RGB_565));
-                    }
-                }).subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Consumer<Bitmap>() {
-                            @Override
-                            public void accept(@NonNull Bitmap bitmap) throws Exception {
-                                String absolutePath = FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath();
-                                BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
-                                initCropShow(absolutePath);
-                            }
-                        }, new Consumer<Throwable>() {
-                            @Override
-                            public void accept(@NonNull Throwable throwable) throws Exception {
-                                ToastUtils.show("失败");
-                            }
-                        });
+                saveImage();
+//                Observable.create(new ObservableOnSubscribe<Bitmap>() {
+//                    @Override
+//                    public void subscribe(@NonNull ObservableEmitter<Bitmap> e) throws Exception {
+//                        e.onNext(mCropOverlay.crop(mCurrentPicturePath, Bitmap.Config.RGB_565));
+//                    }
+//                }).subscribeOn(Schedulers.io())
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .subscribe(new Consumer<Bitmap>() {
+//                            @Override
+//                            public void accept(@NonNull Bitmap bitmap) throws Exception {
+//                                String absolutePath = FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath();
+//                                BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
+//                                initCropShow(absolutePath);
+//                            }
+//                        }, new Consumer<Throwable>() {
+//                            @Override
+//                            public void accept(@NonNull Throwable throwable) throws Exception {
+//                                ToastUtils.show("失败");
+//                            }
+//                        });
                 break;
             case R.id.tv_reset:
                 mRotateFrameLayout.resetWithAnimation();
@@ -166,7 +172,7 @@ public class CropActivity extends BaseActivity {
                         mCropOverlay.setVisibility(View.VISIBLE);
                         initCropShow(mOriginPicturePath);
                     }
-                },300);
+                }, 300);
                 break;
             case R.id.iv_tab_crop:
                 mRotateTabView.setSelected(false);
@@ -179,7 +185,7 @@ public class CropActivity extends BaseActivity {
                         if (mRotateFrameLayout.getRotate() % 180 == 0) {
                             ViewUtils.setLayoutParam(mImageView.getMeasuredWidth(), mImageView.getMeasuredHeight(), mCropOverlay);
                         } else {
-                            ViewUtils.setLayoutParam(mImageView.getMeasuredHeight(),mImageView.getMeasuredWidth(), mCropOverlay);
+                            ViewUtils.setLayoutParam(mImageView.getMeasuredHeight(), mImageView.getMeasuredWidth(), mCropOverlay);
                         }
                         mCropOverlay.reset();
                         mCropOverlay.setVisibility(View.VISIBLE);
@@ -318,6 +324,63 @@ public class CropActivity extends BaseActivity {
         mCropModeRv.setAdapter(mCropModeAdapter);
     }
 
+    private void saveImage() {
+        Observable.create(new ObservableOnSubscribe<Bitmap>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<Bitmap> e) throws Exception {
+                Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPicturePath);
+                Matrix matrix = new Matrix();
+                matrix.postScale(mRotateFrameLayout.getScaleX(), mRotateFrameLayout.getScaleY());
+                matrix.postRotate(mRotateFrameLayout.getRotation());
+                Bitmap newBitmap = Bitmap.createBitmap(bitmap, 0, 0,
+                        bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+                BitmapUtils.recycleBitmaps(bitmap);
+                e.onNext(newBitmap);
+            }
+        }).map(new Function<Bitmap, String>() {
+            @Override
+            public String apply(@NonNull Bitmap bitmap) throws Exception {
+                String absolutePath = FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath();
+                BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
+                return absolutePath;
+            }
+        }).map(new Function<String, Bitmap>() {
+            @Override
+            public Bitmap apply(@NonNull String path) throws Exception {
+                // 生成decoder对象
+                BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(path, true);
+                final int imgWidth = decoder.getWidth();
+                final int imgHeight = decoder.getHeight();
+                Rect rect = mCropOverlay.getCropRect(imgWidth, imgHeight);
+                BitmapFactory.Options opts = new BitmapFactory.Options();
+                // 为了内存考虑，将图片格式转化为RGB_565
+                opts.inPreferredConfig = Bitmap.Config.RGB_565;
+                // 将矩形区域解码生成要加载的Bitmap对象
+                return decoder.decodeRegion(rect, opts);
+            }
+        }).map(new Function<Bitmap, String>() {
+            @Override
+            public String apply(@NonNull Bitmap bitmap) throws Exception {
+                String absolutePath = FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath();
+                BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
+                return absolutePath;
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
+                    @Override
+                    public void accept(@NonNull String s) throws Exception {
+                        initCropShow(s);
+                        ToastUtils.show("成功");
+                    }
+                }, new Consumer<Throwable>() {
+                    @Override
+                    public void accept(@NonNull Throwable throwable) throws Exception {
+                        throwable.printStackTrace();
+                    }
+                });
+    }
+
     @Override
     protected String[] getPermission2Check() {
         return new String[]{PermissionUtils.PER_READ_EXTERNAL_STORAGE,
@@ -340,5 +403,6 @@ public class CropActivity extends BaseActivity {
         super.finish();
         ActivityAnimUtils.translateFinish(mActivity);
     }
+
 }
 
