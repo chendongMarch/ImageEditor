@@ -1,12 +1,8 @@
-package com.march.picedit.ui;
+package com.march.picedit.edit;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapRegionDecoder;
-import android.graphics.Matrix;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -51,7 +47,6 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -60,7 +55,7 @@ import io.reactivex.schedulers.Schedulers;
  *
  * @author chendong
  */
-public class CropActivity extends BaseActivity {
+public class CropRotateActivity extends BaseActivity {
 
     public static final String KEY_PATH = "KEY_PATH";
     public static final String TAG      = MainActivity.class.getSimpleName();
@@ -72,7 +67,7 @@ public class CropActivity extends BaseActivity {
     private int                    mUnsureColor;
 
     public static void start(Activity activity, String path) {
-        Intent intent = new Intent(activity, CropActivity.class);
+        Intent intent = new Intent(activity, CropRotateActivity.class);
         intent.putExtra(KEY_PATH, path);
         activity.startActivity(intent);
 
@@ -120,14 +115,15 @@ public class CropActivity extends BaseActivity {
         ViewUtils.setBackground(mConfirmTv, ShapeUtils.getShape(mContext, mEnsureColor, 20));
         ViewUtils.setBackground(mResetTv, ShapeUtils.getShape(mContext, mUnsureColor, 20));
 
-        initCropShow(mOriginPicturePath);
+        initCropAndRotateShow(mOriginPicturePath);
 
         createCropModeAdapter();
         createRotateModeAdapter();
     }
 
 
-    private void initCropShow(final String path) {
+    // 初始化裁剪旋转显示
+    private void initCropAndRotateShow(final String path) {
         mCurrentPicturePath = path;
         mParentFl.post(new Runnable() {
             @Override
@@ -147,7 +143,6 @@ public class CropActivity extends BaseActivity {
     public void clickView(View view) {
         switch (view.getId()) {
             case R.id.tv_crop_confirm:
-                saveImage();
                 // 裁剪生成新图，保存
                 Observable.create(new ObservableOnSubscribe<Bitmap>() {
                     @Override
@@ -162,7 +157,7 @@ public class CropActivity extends BaseActivity {
                                 ToastUtils.show("裁剪成功");
                                 String absolutePath = FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath();
                                 BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
-                                initCropShow(absolutePath);
+                                initCropAndRotateShow(absolutePath);
                             }
                         }, new Consumer<Throwable>() {
                             @Override
@@ -174,7 +169,7 @@ public class CropActivity extends BaseActivity {
             case R.id.tv_crop_reset:
                 mRotateFrameLayout.setVisibility(View.GONE);
                 mRotateFrameLayout.reset();
-                initCropShow(mOriginPicturePath);
+                initCropAndRotateShow(mOriginPicturePath);
                 break;
             case R.id.iv_tab_crop:
                 // 保存旋转新图
@@ -203,7 +198,7 @@ public class CropActivity extends BaseActivity {
                                 ToastUtils.show("旋转成功");
                                 String absolutePath = FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath();
                                 BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
-                                initCropShow(absolutePath);
+                                initCropAndRotateShow(absolutePath);
 
                                 mRotateTabView.setSelected(false);
                                 mCropTabView.setSelected(true);
@@ -242,6 +237,7 @@ public class CropActivity extends BaseActivity {
     }
 
 
+    // 旋转模式
     private class RotateMode {
         public static final int RESET = 0;
         public static final int LEFT  = 1;
@@ -258,6 +254,8 @@ public class CropActivity extends BaseActivity {
         }
     }
 
+
+    // 创建旋转菜单 list
     private void createRotateModeAdapter() {
         List<RotateMode> list = new ArrayList<>();
         list.add(new RotateMode(RotateMode.RESET, ShapeUtils.getShape(mContext, mUnsureColor, 20)));
@@ -265,7 +263,7 @@ public class CropActivity extends BaseActivity {
         list.add(new RotateMode(RotateMode.RIGHT, Util.newPressedDrawable(mContext, R.drawable.edit_rotate_right_pressed, R.drawable.edit_rotate_right_released)));
         list.add(new RotateMode(RotateMode.FLIPX, Util.newPressedDrawable(mContext, R.drawable.edit_rotate_flipx_pressed, R.drawable.edit_rotate_flipx_released)));
         list.add(new RotateMode(RotateMode.FLIPY, Util.newPressedDrawable(mContext, R.drawable.edit_rotate_flipy_pressed, R.drawable.edit_rotate_flipy_released)));
-        LightAdapter<RotateMode> lightAdapter = new LightAdapter<RotateMode>(mContext, list, R.layout.rotate_item) {
+        LightAdapter<RotateMode> lightAdapter = new LightAdapter<RotateMode>(mContext, list, R.layout.eidt_rotate_mode_item) {
             @Override
             public void onBindView(ViewHolder<RotateMode> holder, RotateMode data, int pos, int type) {
                 holder.layoutParams(DimensUtils.getScreenWidth(mContext) / 5, ViewHolder.UNSET);
@@ -318,6 +316,7 @@ public class CropActivity extends BaseActivity {
         }
     }
 
+    // 裁剪模式列表
     private void createCropModeAdapter() {
         List<CropMode> list = new ArrayList<>();
         list.add(new CropMode(CropOverlay.NO_ASPECT_RATIO, "free", Util.newSelectedDrawable(mContext, R.drawable.edit_cut_crop_freedom_b, R.drawable.edit_cut_crop_freedom_a)));
@@ -329,7 +328,7 @@ public class CropActivity extends BaseActivity {
         list.add(new CropMode(9f / 16, "9:16", Util.newSelectedDrawable(mContext, R.drawable.edit_cut_crop_9_16_b, R.drawable.edit_cut_crop_9_16_a)));
         list.add(new CropMode(16f / 9, "16:9", Util.newSelectedDrawable(mContext, R.drawable.edit_cut_crop_16_9_b, R.drawable.edit_cut_crop_16_9_a)));
 
-        mCropModeAdapter = new LightAdapter<CropMode>(mContext, list, R.layout.crop_mode_item) {
+        mCropModeAdapter = new LightAdapter<CropMode>(mContext, list, R.layout.edit_crop_mode_item) {
             @Override
             public void onBindView(ViewHolder<CropMode> holder, CropMode data, int pos, int type) {
                 ImageView iv = holder.getView(R.id.iv_icon);
@@ -357,63 +356,6 @@ public class CropActivity extends BaseActivity {
         mCropModeRv.setAdapter(mCropModeAdapter);
     }
 
-    private void saveImage() {
-        Observable.create(new ObservableOnSubscribe<Bitmap>() {
-            @Override
-            public void subscribe(@NonNull ObservableEmitter<Bitmap> e) throws Exception {
-                Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPicturePath);
-                Matrix matrix = new Matrix();
-                matrix.postScale(mRotateFrameLayout.getScaleX(), mRotateFrameLayout.getScaleY());
-                matrix.postRotate(mRotateFrameLayout.getRotation());
-                Bitmap newBitmap = Bitmap.createBitmap(bitmap, 0, 0,
-                        bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-                BitmapUtils.recycleBitmaps(bitmap);
-                e.onNext(newBitmap);
-            }
-        }).map(new Function<Bitmap, String>() {
-            @Override
-            public String apply(@NonNull Bitmap bitmap) throws Exception {
-                String absolutePath = FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath();
-                BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
-                return absolutePath;
-            }
-        }).map(new Function<String, Bitmap>() {
-            @Override
-            public Bitmap apply(@NonNull String path) throws Exception {
-                // 生成decoder对象
-                BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(path, true);
-                final int imgWidth = decoder.getWidth();
-                final int imgHeight = decoder.getHeight();
-                Rect rect = mCropOverlay.getCropRect(imgWidth, imgHeight);
-                BitmapFactory.Options opts = new BitmapFactory.Options();
-                // 为了内存考虑，将图片格式转化为RGB_565
-                opts.inPreferredConfig = Bitmap.Config.RGB_565;
-                // 将矩形区域解码生成要加载的Bitmap对象
-                return decoder.decodeRegion(rect, opts);
-            }
-        }).map(new Function<Bitmap, String>() {
-            @Override
-            public String apply(@NonNull Bitmap bitmap) throws Exception {
-                String absolutePath = FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath();
-                BitmapUtils.compressImage(bitmap, new File(absolutePath), Bitmap.CompressFormat.JPEG, 100, true);
-                return absolutePath;
-            }
-        }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<String>() {
-                    @Override
-                    public void accept(@NonNull String s) throws Exception {
-                        initCropShow(s);
-                        ToastUtils.show("成功");
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@NonNull Throwable throwable) throws Exception {
-                        throwable.printStackTrace();
-                    }
-                });
-    }
-
     @Override
     protected String[] getPermission2Check() {
         return new String[]{PermissionUtils.PER_READ_EXTERNAL_STORAGE,
@@ -428,7 +370,7 @@ public class CropActivity extends BaseActivity {
 
     @Override
     protected int getLayoutId() {
-        return R.layout.crop_activity;
+        return R.layout.edit_activity;
     }
 
     @Override
