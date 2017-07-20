@@ -2,6 +2,7 @@ package com.march.picedit.test;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -14,6 +15,8 @@ import com.march.dev.utils.GlideUtils;
 import com.march.dev.utils.PermissionUtils;
 import com.march.dev.utils.ToastUtils;
 import com.march.picedit.R;
+import com.march.piceditor.mosaic.DrawMosaicView;
+import com.march.piceditor.mosaic.MosaicUtil;
 import com.march.turbojpeg.TurboJpegUtils;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -48,9 +51,15 @@ public class TestCompressImageActivity extends BaseActivity {
     private String mPath;
     private String mPath2;
 
-    @BindView(R.id.iv_image)  ImageView mImageView;
-    @BindView(R.id.iv_image2) ImageView mImageView2;
+    @BindView(R.id.iv_image)  ImageView      mImageView;
+    @BindView(R.id.iv_image2) ImageView      mImageView2;
+    @BindView(R.id.dmv)       DrawMosaicView mDrawMosaicView;
 
+
+    @Override
+    public void onInitViews(View view, Bundle saveData) {
+        super.onInitViews(view, saveData);
+    }
 
     @OnClick({R.id.btn_action, R.id.btn_choose_pic})
     public void clickView(View view) {
@@ -109,9 +118,14 @@ public class TestCompressImageActivity extends BaseActivity {
         switch (event.getMessage()) {
             case SelectImageActivity.SelectImageEvent.ON_SUCCESS:
                 ImageInfo imageInfo = event.mImageInfos.get(0);
-                mPath = mPath2 = imageInfo.getPath();
-                GlideUtils.with(mContext, mPath).into(mImageView);
-                GlideUtils.with(mContext, mPath2).into(mImageView2);
+//                mPath = mPath2 = imageInfo.getPath();
+//                GlideUtils.with(mContext, mPath).into(mImageView);
+//                GlideUtils.with(mContext, mPath2).into(mImageView2);
+
+                mDrawMosaicView.setMosaicBackgroundResource(imageInfo.getPath());
+                mDrawMosaicView.setMosaicResource(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
+                mDrawMosaicView.setMosaicBrushWidth(10);
+                mDrawMosaicView.setMosaicType(MosaicUtil.MosaicType.MOSAIC);
                 break;
         }
     }

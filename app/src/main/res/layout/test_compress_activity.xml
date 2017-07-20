@@ -17,6 +17,10 @@
         android:layout_height="wrap_content"
         android:text="选图"/>
 
+    <com.march.piceditor.mosaic.DrawMosaicView
+        android:id="@+id/dmv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

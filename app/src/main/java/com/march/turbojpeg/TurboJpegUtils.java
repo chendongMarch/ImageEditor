@@ -19,14 +19,14 @@ public class TurboJpegUtils {
 
     private static boolean isSupportArmeabi = true;
 
-    static {
-        try {
-            System.loadLibrary("compress");
-        } catch (Exception e) {
-            e.printStackTrace();
-            isSupportArmeabi = false;
-        }
-    }
+//    static {
+//        try {
+//            System.loadLibrary("compress");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            isSupportArmeabi = false;
+//        }
+//    }
 
 
     public static boolean isSupportLibJpeg() {
