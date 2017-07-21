@@ -3,7 +3,7 @@ package com.march.piceditor.crop.handler.impl;
 import android.graphics.RectF;
 import android.view.MotionEvent;
 
-import com.march.piceditor.crop.handler.AbsTouchRegionHandler;
+import com.march.piceditor.crop.handler.CropBaseHandler;
 
 /**
  * CreateAt : 7/18/17
@@ -12,7 +12,7 @@ import com.march.piceditor.crop.handler.AbsTouchRegionHandler;
  * @author chendong
  */
 //  触摸处理器的实现
-public class MoveHandler extends AbsTouchRegionHandler {
+public class MoveHandler extends CropBaseHandler {
 
     private float mLastX, mLastY;
 

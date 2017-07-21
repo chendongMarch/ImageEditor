@@ -9,7 +9,7 @@ import android.view.MotionEvent;
  *
  * @author chendong
  */
-public abstract class AbsTouchRegionHandler {
+public abstract class CropBaseHandler {
 
     public static final int LEFT   = 0;
     public static final int TOP    = 1;
@@ -30,7 +30,7 @@ public abstract class AbsTouchRegionHandler {
     protected RectF mCenterRectF;
     protected float mAspectRatio;
 
-    public AbsTouchRegionHandler() {
+    public CropBaseHandler() {
     }
 
     public void init(int touchRegion, RectF centerRectF,

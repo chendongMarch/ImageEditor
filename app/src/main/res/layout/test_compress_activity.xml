@@ -17,26 +17,32 @@
         android:layout_height="wrap_content"
         android:text="选图"/>
 
+    <com.march.piceditor.sticker.StickerDrawOverlay
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
     <com.march.piceditor.mosaic.DrawMosaicView
         android:id="@+id/dmv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <ImageView
-            android:src="@drawable/ic_launcher"
             android:id="@+id/iv_image"
             android:layout_width="300dp"
-            android:layout_height="300dp"/>
+            android:layout_height="300dp"
+            android:src="@drawable/ic_launcher"/>
 
         <ImageView
-            android:src="@drawable/ic_launcher"
             android:id="@+id/iv_image2"
             android:layout_width="300dp"
-            android:layout_height="300dp"/>
+            android:layout_height="300dp"
+            android:src="@drawable/ic_launcher"/>
     </LinearLayout>
 
 

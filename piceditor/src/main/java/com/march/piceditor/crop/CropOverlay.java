@@ -22,7 +22,7 @@ import com.march.dev.utils.BitmapUtils;
 import com.march.dev.utils.DrawUtils;
 import com.march.dev.utils.LogUtils;
 import com.march.dev.utils.ViewUtils;
-import com.march.piceditor.crop.handler.AbsTouchRegionHandler;
+import com.march.piceditor.crop.handler.CropBaseHandler;
 import com.march.piceditor.crop.handler.impl.AspectRatioHandler;
 import com.march.piceditor.crop.handler.impl.MoveHandler;
 import com.march.piceditor.crop.handler.impl.NoAspectRatioHandler;
@@ -82,8 +82,8 @@ public class CropOverlay extends View {
 
     private float mAspectRatio = NO_ASPECT_RATIO; // 确定的比例 ,w/h
 
-    private SparseArrayCompat<AbsTouchRegionHandler> mHandlerMap; // 触摸处理类的管理，避免多次初始化
-    private AbsTouchRegionHandler                    mTouchRegionHandler; // 触摸处理
+    private SparseArrayCompat<CropBaseHandler> mHandlerMap; // 触摸处理类的管理，避免多次初始化
+    private CropBaseHandler                    mTouchRegionHandler; // 触摸处理
 
 
     private void init() {
@@ -249,67 +249,67 @@ public class CropOverlay extends View {
     }
 
 
-    private AbsTouchRegionHandler findTouchHandlerOnTouchDown(MotionEvent event) {
+    private CropBaseHandler findTouchHandlerOnTouchDown(MotionEvent event) {
 
         float initX = event.getX();
         float initY = event.getY();
-        AbsTouchRegionHandler handler = null;
+        CropBaseHandler handler = null;
         // 双指缩放
         if (event.getPointerCount() == 2) {
-            handler = getTouchRegionHandler(AbsTouchRegionHandler.TWO_FINGER);
+            handler = getTouchRegionHandler(CropBaseHandler.TWO_FINGER);
             // left center
         } else if (hasNoAspectRatio() && createRectF(mCenterRectF.left - mTouchEnlargeCheckRegion / 2,
                 mCenterRectF.top + (mCenterRectF.height() - mTriggerLength) / 2,
                 mTouchEnlargeCheckRegion,
                 mTriggerLength).contains(initX, initY)) {
-            handler = getTouchRegionHandler(AbsTouchRegionHandler.LEFT);
+            handler = getTouchRegionHandler(CropBaseHandler.LEFT);
             // bottom center
         } else if (hasNoAspectRatio() && createRectF(mCenterRectF.left + (mCenterRectF.width() - mTriggerLength) / 2,
                 mCenterRectF.bottom - mTouchEnlargeCheckRegion / 2,
                 mTriggerLength,
                 mTouchEnlargeCheckRegion).contains(initX, initY)) {
-            handler = getTouchRegionHandler(AbsTouchRegionHandler.BOTTOM);
+            handler = getTouchRegionHandler(CropBaseHandler.BOTTOM);
             // right center
         } else if (hasNoAspectRatio() && createRectF(mCenterRectF.left + mCenterRectF.width() - mTouchEnlargeCheckRegion / 2,
                 mCenterRectF.top + (mCenterRectF.height() - mTriggerLength) / 2,
                 mTouchEnlargeCheckRegion,
                 mTriggerLength).contains(initX, initY)) {
-            handler = getTouchRegionHandler(AbsTouchRegionHandler.RIGHT);
+            handler = getTouchRegionHandler(CropBaseHandler.RIGHT);
             // top center
         } else if (hasNoAspectRatio() && createRectF(mCenterRectF.left + (mCenterRectF.width() - mTriggerLength) / 2,
                 mCenterRectF.top - mTouchEnlargeCheckRegion / 2,
                 mTriggerLength,
                 mTouchEnlargeCheckRegion).contains(initX, initY)) {
-            handler = getTouchRegionHandler(AbsTouchRegionHandler.TOP);
+            handler = getTouchRegionHandler(CropBaseHandler.TOP);
             // left top corner
         } else if (createRectF(mCenterRectF.left - mTouchEnlargeCheckRegion / 2,
                 mCenterRectF.top - mTouchEnlargeCheckRegion / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2).contains(initX, initY)) {
-            handler = getTouchRegionHandler(AbsTouchRegionHandler.LEFT_TOP);
+            handler = getTouchRegionHandler(CropBaseHandler.LEFT_TOP);
             // left bottom
         } else if (createRectF(mCenterRectF.left - mTouchEnlargeCheckRegion / 2,
                 mCenterRectF.bottom - mTriggerLength / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2).contains(initX, initY)) {
-            handler = getTouchRegionHandler(AbsTouchRegionHandler.LEFT_BOTTOM);
+            handler = getTouchRegionHandler(CropBaseHandler.LEFT_BOTTOM);
             // right bottom
         } else if (createRectF(mCenterRectF.left + mCenterRectF.width() - mTriggerLength / 2,
                 mCenterRectF.bottom - mTriggerLength / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2).contains(initX, initY)) {
-            handler = getTouchRegionHandler(AbsTouchRegionHandler.RIGHT_BOTTOM);
+            handler = getTouchRegionHandler(CropBaseHandler.RIGHT_BOTTOM);
             // right top
         } else if (createRectF(mCenterRectF.left + mCenterRectF.width() - mTriggerLength / 2,
                 mCenterRectF.top - mTouchEnlargeCheckRegion / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2,
                 mTriggerLength / 2 + mTouchEnlargeCheckRegion / 2).contains(initX, initY)) {
-            handler = getTouchRegionHandler(AbsTouchRegionHandler.RIGHT_TOP);
+            handler = getTouchRegionHandler(CropBaseHandler.RIGHT_TOP);
         } else if (createRectF(mCenterRectF.left + mTouchEnlargeCheckRegion / 2,
                 mCenterRectF.top + mTouchEnlargeCheckRegion / 2,
                 mCenterRectF.width() - mTouchEnlargeCheckRegion,
                 mCenterRectF.height() - mTouchEnlargeCheckRegion).contains(initX, initY)) {
-            handler = getTouchRegionHandler(AbsTouchRegionHandler.CENTER);
+            handler = getTouchRegionHandler(CropBaseHandler.CENTER);
         }
         if (handler != null) {
             handler.onTouchDown(event);
@@ -322,15 +322,15 @@ public class CropOverlay extends View {
     }
 
     // 获取触摸处理器
-    private AbsTouchRegionHandler getTouchRegionHandler(int touchRegion) {
+    private CropBaseHandler getTouchRegionHandler(int touchRegion) {
         if (mHandlerMap == null) {
             mHandlerMap = new SparseArrayCompat<>();
         }
-        AbsTouchRegionHandler handler = mHandlerMap.get(touchRegion);
+        CropBaseHandler handler = mHandlerMap.get(touchRegion);
         if (handler == null) {
-            if (touchRegion == AbsTouchRegionHandler.TWO_FINGER) {
+            if (touchRegion == CropBaseHandler.TWO_FINGER) {
                 handler = new TwoFingerHandler();
-            } else if (touchRegion == AbsTouchRegionHandler.CENTER) {
+            } else if (touchRegion == CropBaseHandler.CENTER) {
                 handler = new MoveHandler();
             } else if (hasNoAspectRatio()) {
                 handler = new NoAspectRatioHandler();

@@ -2,7 +2,8 @@ package com.march.piceditor.crop.handler.impl;
 
 import android.view.MotionEvent;
 
-import com.march.piceditor.crop.handler.AbsTouchRegionHandler;
+import com.march.piceditor.crop.handler.CropBaseHandler;
+import com.march.piceditor.utils.CalculateUtils;
 
 /**
  * CreateAt : 7/18/17
@@ -10,23 +11,24 @@ import com.march.piceditor.crop.handler.AbsTouchRegionHandler;
  *
  * @author chendong
  */
-public class TwoFingerHandler extends AbsTouchRegionHandler {
+public class TwoFingerHandler extends CropBaseHandler {
 
     private float mLastFingersDistance;
 
     @Override
     public void onTouchDown(MotionEvent event) {
         if (event.getPointerCount() == 2) {
-            mLastFingersDistance = calculateFingersDistance(event);
+            mLastFingersDistance = CalculateUtils.calculateFingersDistance(event);
         }
     }
 
     @Override
     public void onTouchMove(MotionEvent event) {
-        if (event.getPointerCount() == 2) {
-            float distance = calculateFingersDistance(event);
+        if (event.getPointerCount() == 2 && mLastFingersDistance > 0) {
+            float distance = CalculateUtils.calculateFingersDistance(event);
             if (mLastFingersDistance != 0) {
-                scaleRect((distance * 1f / mLastFingersDistance));
+                float scale = distance * 1f / mLastFingersDistance;
+                scaleRect(scale);
             }
             mLastFingersDistance = distance;
         }
@@ -50,12 +52,6 @@ public class TwoFingerHandler extends AbsTouchRegionHandler {
                 mCenterRectF.set(left, top, left + newWidth, top + newHeight);
             }
         }
-    }
-
-    private float calculateFingersDistance(MotionEvent event) {
-        float disX = Math.abs(event.getX(0) - event.getX(1));
-        float disY = Math.abs(event.getY(0) - event.getY(1));
-        return (float) Math.sqrt(disX * disX + disY * disY);
     }
 
 }
