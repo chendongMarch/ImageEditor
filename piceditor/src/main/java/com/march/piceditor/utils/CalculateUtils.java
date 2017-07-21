@@ -53,4 +53,11 @@ public class CalculateUtils {
         return 0 < h && h < 1 && 0 < k && k < 1;
 
     }
+
+    public static void swapPoint(Point p1, Point p2) {
+        float x = p1.x;
+        float y = p1.y;
+        p1.set(p2.x, p2.y);
+        p2.set(x, y);
+    }
 }

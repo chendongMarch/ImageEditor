@@ -25,6 +25,7 @@ public class Sticker implements Comparable<Sticker> {
     private Matrix  mMatrix;
     private RectF   mRectF;
     private boolean mIsActive;
+    private boolean mDelete;
     private long    mPriority;
 
     private SparseArray<Point>       mPointMap;
@@ -52,9 +53,11 @@ public class Sticker implements Comparable<Sticker> {
         return mMatrix;
     }
 
-    public void addStickerMenu(StickerMenu stickerMenu) {
-        stickerMenu.attachSticker(this);
-        mMenuMap.put(stickerMenu.getPositionType(), stickerMenu);
+    public void addStickerMenu(StickerMenu... stickerMenu) {
+        for (StickerMenu menu : stickerMenu) {
+            menu.attachSticker(this);
+            mMenuMap.put(menu.getPositionType(), menu);
+        }
     }
 
     public StickerMenu[] getStickerMenus() {
@@ -75,6 +78,13 @@ public class Sticker implements Comparable<Sticker> {
         };
     }
 
+    public boolean isDelete() {
+        return mDelete;
+    }
+
+    public void setDelete(boolean delete) {
+        mDelete = delete;
+    }
 
     private void init() {
         mMatrix = new Matrix();
@@ -88,6 +98,10 @@ public class Sticker implements Comparable<Sticker> {
         mPointMap.put(Position.TOP_RIGHT, new Point());
         mPointMap.put(Position.BOTTOM_RIGHT, new Point());
         mPointMap.put(Position.BOTTOM_LEFT, new Point());
+    }
+
+    public void setBitmap(Bitmap bitmap) {
+        mBitmap = bitmap;
     }
 
     public void updatePriority() {
@@ -117,7 +131,6 @@ public class Sticker implements Comparable<Sticker> {
         mPointMap.get(Position.BOTTOM_RIGHT).set(dst[6], dst[7]);
     }
 
-
     public SparseArray<Point> getPointMap() {
         return mPointMap;
     }
@@ -142,5 +155,22 @@ public class Sticker implements Comparable<Sticker> {
         } else {
             return 0;
         }
+    }
+
+
+    // matrix 辅助
+    public void postMatrixScale(float sx, float sy) {
+        RectF rectF = getRectF();
+        float cy = rectF.centerY();
+        float cx = rectF.centerX();
+        getMatrix().postScale(sx, sy, cx, cy);
+    }
+
+    public void postMatrixRotate(int rotation) {
+        RectF rectF = getRectF();
+        float cy = rectF.centerY();
+        float cx = rectF.centerX();
+        getMatrix().postRotate(rotation, cx, cy);
+
     }
 }

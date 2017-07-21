@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v4.util.SparseArrayCompat;
 import android.util.AttributeSet;
@@ -18,7 +19,7 @@ import com.march.piceditor.sticker.handler.impl.BottomRightCornerHandler;
 import com.march.piceditor.sticker.handler.impl.MoveHandler;
 import com.march.piceditor.sticker.handler.impl.TwoFingersHandler;
 import com.march.piceditor.sticker.listener.OnStickerEventListener;
-import com.march.piceditor.sticker.listener.OnStickerMenuClickListener;
+import com.march.piceditor.sticker.listener.StickerMenuHandler;
 import com.march.piceditor.sticker.model.Position;
 import com.march.piceditor.sticker.model.Sticker;
 import com.march.piceditor.sticker.model.StickerMenu;
@@ -34,8 +35,8 @@ import java.util.List;
  * @author chendong
  */
 public class StickerDrawOverlay extends View {
-    public static final String TAG = StickerDrawOverlay.class.getSimpleName();
 
+    public static final String TAG = StickerDrawOverlay.class.getSimpleName();
 
     public StickerDrawOverlay(Context context) {
         this(context, null);
@@ -50,18 +51,6 @@ public class StickerDrawOverlay extends View {
         init();
     }
 
-    private void init() {
-        mStickerPaint = new Paint();
-        DrawUtils.initAntiAliasPaint(mStickerPaint);
-        mPaintLine = DrawUtils.newPaint(Color.WHITE, 2, Paint.Style.STROKE);
-        mTouchHandlerMap = new SparseArrayCompat<>();
-        mStickers = new ArrayList<>();
-
-    }
-
-    public void addSticker(Sticker sticker) {
-        mStickers.add(sticker);
-    }
 
     private int mWidth, mHeight;
     private Paint mStickerPaint;
@@ -69,10 +58,30 @@ public class StickerDrawOverlay extends View {
 
     private SparseArrayCompat<StickerBaseTouchHandler> mTouchHandlerMap;
     private StickerBaseTouchHandler                    mCurrentHandler;
-
-    private List<Sticker> mStickers;
+    private SparseArrayCompat<Drawable>                mMenuIconMap;
+    private List<Sticker>                              mStickers;
 
     private Sticker mActiveSticker;
+
+
+    private void init() {
+        mStickerPaint = new Paint();
+        DrawUtils.initAntiAliasPaint(mStickerPaint);
+        mPaintLine = DrawUtils.newPaint(Color.WHITE, 2, Paint.Style.STROKE);
+        mTouchHandlerMap = new SparseArrayCompat<>();
+        mStickers = new ArrayList<>();
+        mMenuIconMap = new SparseArrayCompat<>();
+    }
+
+    /**
+     * 添加贴纸
+     *
+     * @param sticker 贴纸
+     */
+    public void addSticker(Sticker sticker) {
+        mStickers.add(sticker);
+    }
+
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -82,6 +91,7 @@ public class StickerDrawOverlay extends View {
             mHeight = getMeasuredHeight();
         }
     }
+
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -94,8 +104,13 @@ public class StickerDrawOverlay extends View {
                 DrawUtils.drawVLine(canvas, mPaintLine, mWidth / 10 * i, 0, mHeight);
             }
 
+            // 绘制贴纸
             for (Sticker sticker : mStickers) {
-                canvas.drawBitmap(sticker.getBitmap(), sticker.getMatrix(), mStickerPaint);
+                if (sticker.isDelete())
+                    continue;
+                if (sticker.getBitmap() != null && !sticker.getBitmap().isRecycled()) {
+                    canvas.drawBitmap(sticker.getBitmap(), sticker.getMatrix(), mStickerPaint);
+                }
                 if (mActiveSticker != null && mActiveSticker.equals(sticker)) {
                     Point[] points = sticker.getPoints();
                     for (int j = 0, i; j < points.length; j++) {
@@ -189,6 +204,8 @@ public class StickerDrawOverlay extends View {
         Sticker tempSticker;
         for (int i = mStickers.size() - 1; i >= 0; i--) {
             tempSticker = mStickers.get(i);
+            if (tempSticker.isDelete())
+                continue;
             if (tempSticker.isTouchIn(event.getX(), event.getY())) {
                 mActiveSticker = tempSticker;
                 mActiveSticker.updatePriority();
@@ -207,11 +224,11 @@ public class StickerDrawOverlay extends View {
         }
     }
 
-    private OnStickerMenuClickListener mOnStickerMenuClickListener;
-    private OnStickerEventListener     mOnStickerEventListener;
+    private StickerMenuHandler     mStickerMenuHandler;
+    private OnStickerEventListener mOnStickerEventListener;
 
-    public void setOnStickerMenuClickListener(OnStickerMenuClickListener onStickerMenuClickListener) {
-        mOnStickerMenuClickListener = onStickerMenuClickListener;
+    public void setStickerMenuHandler(StickerMenuHandler stickerMenuHandler) {
+        mStickerMenuHandler = stickerMenuHandler;
     }
 
     public void setOnStickerEventListener(OnStickerEventListener onStickerEventListener) {
@@ -221,10 +238,11 @@ public class StickerDrawOverlay extends View {
     private boolean dispatchMenuClick(MotionEvent event) {
         if (mActiveSticker != null && isClick(event)) {
             for (StickerMenu menu : mActiveSticker.getStickerMenus()) {
-                if (menu != null && menu.getPositionType() != Position.BOTTOM_RIGHT
-                        && menu.isTouchIn(event.getX(), event.getY())
-                        && mOnStickerMenuClickListener != null) {
-                    mOnStickerMenuClickListener.onMenuClick(mActiveSticker, menu);
+                if (menu != null && menu.isTouchIn(event.getX(), event.getY())) {
+                    if (menu.getStickerMenuHandler() != null)
+                        menu.getStickerMenuHandler().onMenuClick(mActiveSticker, menu);
+                    else if (mStickerMenuHandler != null)
+                        mStickerMenuHandler.onMenuClick(mActiveSticker, menu);
                     return true;
                 }
             }

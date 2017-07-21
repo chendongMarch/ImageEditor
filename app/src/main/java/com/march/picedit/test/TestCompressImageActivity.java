@@ -15,11 +15,13 @@ import com.march.dev.utils.GlideUtils;
 import com.march.dev.utils.PermissionUtils;
 import com.march.dev.utils.ToastUtils;
 import com.march.picedit.R;
+import com.march.picedit.sticker.ResourceFactory;
 import com.march.piceditor.mosaic.DrawMosaicView;
 import com.march.piceditor.mosaic.MosaicUtil;
+import com.march.piceditor.sticker.EasyMenuHandler;
 import com.march.piceditor.sticker.StickerDrawOverlay;
 import com.march.piceditor.sticker.listener.OnStickerEventListener;
-import com.march.piceditor.sticker.listener.OnStickerMenuClickListener;
+import com.march.piceditor.sticker.listener.StickerMenuHandler;
 import com.march.piceditor.sticker.model.Position;
 import com.march.piceditor.sticker.model.Sticker;
 import com.march.piceditor.sticker.model.StickerMenu;
@@ -63,27 +65,36 @@ public class TestCompressImageActivity extends BaseActivity {
     @BindView(R.id.sdo)       StickerDrawOverlay mStickerDrawOverlay;
 
 
+    private ResourceFactory mResourceFactory;
+
     @Override
-    public void onInitViews(View view, Bundle saveData) {
+    public void onInitViews(View view, final Bundle saveData) {
         super.onInitViews(view, saveData);
+        mResourceFactory = new ResourceFactory(mContext);
 
         for (int i = 0; i < 5; i++) {
             Sticker sticker = new Sticker(mContext);
-            StickerMenu topLeftMenu = new StickerMenu(Position.TOP_LEFT, mContext, R.drawable.sticker_edit_del);
-            StickerMenu topRightMenu = new StickerMenu(Position.TOP_RIGHT, mContext, R.drawable.sticker_edit_symmetry);
-            StickerMenu bottomLeftMenu = new StickerMenu(Position.BOTTOM_LEFT, mContext, R.drawable.sticker_edit_color_white);
-            StickerMenu bottomRightMenu = new StickerMenu(Position.BOTTOM_RIGHT, mContext, R.drawable.sticker_edit_control);
-            sticker.addStickerMenu(topLeftMenu);
-            sticker.addStickerMenu(topRightMenu);
-            sticker.addStickerMenu(bottomLeftMenu);
-            sticker.addStickerMenu(bottomRightMenu);
+
+             StickerMenu topLeftMenu = new StickerMenu(Position.TOP_LEFT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_del));
+            topLeftMenu.setTag(100);
+            topLeftMenu.setStickerMenuHandler(EasyMenuHandler.DELETE_MENU);
+
+            StickerMenu topRightMenu = new StickerMenu(Position.TOP_RIGHT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_symmetry));
+            topRightMenu.setStickerMenuHandler(EasyMenuHandler.FLIP_VERTICAL);
+
+            StickerMenu bottomLeftMenu = new StickerMenu(Position.BOTTOM_LEFT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_color_white));
+            StickerMenu bottomRightMenu = new StickerMenu(Position.BOTTOM_RIGHT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_control));
+            sticker.addStickerMenu(topLeftMenu, topRightMenu, bottomLeftMenu, bottomRightMenu);
             mStickerDrawOverlay.addSticker(sticker);
         }
 
-        mStickerDrawOverlay.setOnStickerMenuClickListener(new OnStickerMenuClickListener() {
+        mStickerDrawOverlay.setStickerMenuHandler(new StickerMenuHandler() {
             @Override
             public void onMenuClick(Sticker sticker, StickerMenu menu) {
                 ToastUtils.show("click menu " + menu.getPositionType());
+                if (menu.getPositionType() == Position.TOP_LEFT) {
+                    sticker.setDelete(true);
+                }
             }
         });
         mStickerDrawOverlay.setOnStickerEventListener(new OnStickerEventListener() {

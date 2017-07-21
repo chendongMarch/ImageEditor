@@ -9,6 +9,6 @@ import com.march.piceditor.sticker.model.StickerMenu;
  *
  * @author chendong
  */
-public interface OnStickerMenuClickListener {
+public interface StickerMenuHandler {
     void onMenuClick(Sticker sticker, StickerMenu menu);
 }
