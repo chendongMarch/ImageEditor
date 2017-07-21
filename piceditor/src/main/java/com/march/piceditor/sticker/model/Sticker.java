@@ -6,10 +6,13 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.support.annotation.NonNull;
+import android.util.SparseArray;
 
 import com.march.piceditor.common.model.Point;
 import com.march.piceditor.utils.CalculateUtils;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -31,6 +34,15 @@ public class Sticker implements Comparable<Sticker> {
     private Point mBottomLeftPoint;
     private Point mBottomRightPoint;
 
+    private StickerMenu mTopLeftMenu;
+    private StickerMenu mTopRightMenu;
+    private StickerMenu mBottomLeftMenu;
+    private StickerMenu mBottomRightMenu;
+
+    private Map<Integer, Point>      mPointMap;
+    private SparseArray<StickerMenu> mMenuMap;
+
+
     public boolean isActive() {
         return mIsActive;
     }
@@ -45,6 +57,38 @@ public class Sticker implements Comparable<Sticker> {
 
     public Matrix getMatrix() {
         return mMatrix;
+    }
+
+
+    public void addStickerMenu(StickerMenu stickerMenu) {
+        stickerMenu.attachSticker(this);
+        mMenuMap.put(stickerMenu.getPositionType(), stickerMenu);
+        switch (stickerMenu.getPositionType()) {
+            case Position.TOP_LEFT:
+                mTopLeftMenu = stickerMenu;
+                break;
+            case Position.TOP_RIGHT:
+                mTopRightMenu = stickerMenu;
+                break;
+            case Position.BOTTOM_RIGHT:
+                mBottomRightMenu = stickerMenu;
+                break;
+            case Position.BOTTOM_LEFT:
+                mBottomLeftMenu = stickerMenu;
+                break;
+        }
+    }
+
+    public StickerMenu[] getStickerMenus() {
+        StickerMenu[] stickerMenus = new StickerMenu[mMenuMap.size()];
+        for (int i = 0; i < mMenuMap.size(); i++) {
+            stickerMenus[i] = mMenuMap.valueAt(i);
+        }
+        return stickerMenus;
+    }
+
+    public Point[] getPoints() {
+        return new Point[]{mTopLeftPoint, mTopRightPoint, mBottomRightPoint, mBottomLeftPoint};
     }
 
     public Sticker(Context context) {
@@ -63,6 +107,8 @@ public class Sticker implements Comparable<Sticker> {
         mTopRightPoint = new Point();
         mBottomLeftPoint = new Point();
         mBottomRightPoint = new Point();
+        mPointMap = new HashMap<>();
+        mMenuMap = new SparseArray<>();
     }
 
     public void updatePriority() {
@@ -102,6 +148,10 @@ public class Sticker implements Comparable<Sticker> {
 
     public Point getBottomRightPoint() {
         return mBottomRightPoint;
+    }
+
+    public StickerMenu getBottomRightMenu() {
+        return mBottomRightMenu;
     }
 
     public boolean isTouchIn(float x, float y) {

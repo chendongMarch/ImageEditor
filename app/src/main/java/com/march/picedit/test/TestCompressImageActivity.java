@@ -17,6 +17,11 @@ import com.march.dev.utils.ToastUtils;
 import com.march.picedit.R;
 import com.march.piceditor.mosaic.DrawMosaicView;
 import com.march.piceditor.mosaic.MosaicUtil;
+import com.march.piceditor.sticker.StickerDrawOverlay;
+import com.march.piceditor.sticker.listener.OnStickerMenuClickListener;
+import com.march.piceditor.sticker.model.Position;
+import com.march.piceditor.sticker.model.Sticker;
+import com.march.piceditor.sticker.model.StickerMenu;
 import com.march.turbojpeg.TurboJpegUtils;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -51,14 +56,35 @@ public class TestCompressImageActivity extends BaseActivity {
     private String mPath;
     private String mPath2;
 
-    @BindView(R.id.iv_image)  ImageView      mImageView;
-    @BindView(R.id.iv_image2) ImageView      mImageView2;
-    @BindView(R.id.dmv)       DrawMosaicView mDrawMosaicView;
+    @BindView(R.id.iv_image)  ImageView          mImageView;
+    @BindView(R.id.iv_image2) ImageView          mImageView2;
+    @BindView(R.id.dmv)       DrawMosaicView     mDrawMosaicView;
+    @BindView(R.id.sdo)       StickerDrawOverlay mStickerDrawOverlay;
 
 
     @Override
     public void onInitViews(View view, Bundle saveData) {
         super.onInitViews(view, saveData);
+
+        for (int i = 0; i < 5; i++) {
+            Sticker sticker = new Sticker(mContext);
+            StickerMenu topLeftMenu = new StickerMenu(Position.TOP_LEFT, mContext, R.drawable.sticker_edit_del);
+            StickerMenu topRightMenu = new StickerMenu(Position.TOP_RIGHT, mContext, R.drawable.sticker_edit_symmetry);
+            StickerMenu bottomLeftMenu = new StickerMenu(Position.BOTTOM_LEFT, mContext, R.drawable.sticker_edit_color_white);
+            StickerMenu bottomRightMenu = new StickerMenu(Position.BOTTOM_RIGHT, mContext, R.drawable.sticker_edit_control);
+            sticker.addStickerMenu(topLeftMenu);
+            sticker.addStickerMenu(topRightMenu);
+            sticker.addStickerMenu(bottomLeftMenu);
+            sticker.addStickerMenu(bottomRightMenu);
+            mStickerDrawOverlay.addSticker(sticker);
+        }
+
+        mStickerDrawOverlay.setOnStickerMenuClickListener(new OnStickerMenuClickListener() {
+            @Override
+            public void onMenuClick(Sticker sticker, StickerMenu menu) {
+                ToastUtils.show("click menu " + menu.getPositionType());
+            }
+        });
     }
 
     @OnClick({R.id.btn_action, R.id.btn_choose_pic})

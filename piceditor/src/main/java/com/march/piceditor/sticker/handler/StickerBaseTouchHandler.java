@@ -11,9 +11,9 @@ import com.march.piceditor.sticker.model.Sticker;
  */
 public abstract class StickerBaseTouchHandler implements TouchHandler {
 
-    public static final int MOVE         = 0;
-    public static final int TWO_FINGER   = 1;
-    public static final int RIGHT_ANCHOR = 2;
+    public static final int MOVE                = 0;
+    public static final int TWO_FINGER          = 1;
+    public static final int BOTTOM_RIGHT_CORNER = 2;
 
 
     protected Sticker mActiveSticker;

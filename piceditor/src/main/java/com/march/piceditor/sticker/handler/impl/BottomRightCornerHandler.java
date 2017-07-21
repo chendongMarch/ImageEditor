@@ -30,8 +30,7 @@ public class BottomRightCornerHandler extends StickerBaseTouchHandler {
     public void onTouchMove(MotionEvent event) {
         if (event.getPointerCount() == 1
                 && isHadStickerActive()
-                && mLastDistance>0
-                && mLastRotation >0) {
+                && mLastDistance>0) {
 
             RectF rectF = mActiveSticker.getRectF();
 
