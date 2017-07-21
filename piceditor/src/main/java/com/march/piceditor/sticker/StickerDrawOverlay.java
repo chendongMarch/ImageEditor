@@ -17,6 +17,7 @@ import com.march.piceditor.sticker.handler.StickerBaseTouchHandler;
 import com.march.piceditor.sticker.handler.impl.BottomRightCornerHandler;
 import com.march.piceditor.sticker.handler.impl.MoveHandler;
 import com.march.piceditor.sticker.handler.impl.TwoFingersHandler;
+import com.march.piceditor.sticker.listener.OnStickerEventListener;
 import com.march.piceditor.sticker.listener.OnStickerMenuClickListener;
 import com.march.piceditor.sticker.model.Position;
 import com.march.piceditor.sticker.model.Sticker;
@@ -86,11 +87,16 @@ public class StickerDrawOverlay extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         try {
+            for (int i = 0; i < mHeight / 10; i++) {
+                DrawUtils.drawHLine(canvas, mPaintLine, mHeight / 10 * i, 0, mWidth);
+            }
+            for (int i = 0; i < mWidth / 10; i++) {
+                DrawUtils.drawVLine(canvas, mPaintLine, mWidth / 10 * i, 0, mHeight);
+            }
+
             for (Sticker sticker : mStickers) {
                 canvas.drawBitmap(sticker.getBitmap(), sticker.getMatrix(), mStickerPaint);
-
                 if (mActiveSticker != null && mActiveSticker.equals(sticker)) {
-                    sticker.mapPoints();
                     Point[] points = sticker.getPoints();
                     for (int j = 0, i; j < points.length; j++) {
                         i = j;
@@ -106,16 +112,6 @@ public class StickerDrawOverlay extends View {
                     }
                 }
             }
-
-
-//
-//        for (int i = 0; i < mHeight / 10; i++) {
-//            DrawUtils.drawHLine(canvas, mPaintLine, mHeight / 10 * i, 0, mWidth);
-//        }
-//
-//        for (int i = 0; i < mWidth / 10; i++) {
-//            DrawUtils.drawVLine(canvas, mPaintLine, mWidth / 10 * i, 0, mHeight);
-//        }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -145,7 +141,6 @@ public class StickerDrawOverlay extends View {
                     if (mCurrentHandler != null) {
                         mCurrentHandler.onTouchMove(event);
                     }
-                    // LogUtils.e(TAG, "action_move - " + (mCurrentHandler == null ? "没有处理者" : mCurrentHandler.getClass().getSimpleName()));
                     postInvalidate();
                     break;
                 case MotionEvent.ACTION_POINTER_DOWN:
@@ -161,10 +156,8 @@ public class StickerDrawOverlay extends View {
                     if (isClick(event)) {
                         // 分发菜单点击事件
                         if (!dispatchMenuClick(event)) {
-                            // 不是菜单点击的话，如果当前没有事件处理器
-                            if (mCurrentHandler == null) {
-                                findActiveSticker(event);
-                            }
+                            // 不是菜单点击的话， 查看是不是选择了新的贴纸
+                            findActiveSticker(event);
                         }
                     }
                     mCurrentHandler = null;
@@ -188,27 +181,41 @@ public class StickerDrawOverlay extends View {
 
     // 便利查找应该激活的贴纸
     private void findActiveSticker(MotionEvent event) {
-        if (mActiveSticker != null) {
-            mActiveSticker.setActive(false);
-            mActiveSticker = null;
-        }
-        Sticker sticker;
+        // 将当前贴纸置空
+        Sticker preSticker = mActiveSticker;
+        if (preSticker != null)
+            preSticker.setActive(false);
+        mActiveSticker = null;
+        Sticker tempSticker;
         for (int i = mStickers.size() - 1; i >= 0; i--) {
-            sticker = mStickers.get(i);
-            if (sticker.isTouchIn(event.getX(), event.getY())) {
-                mActiveSticker = sticker;
-                mActiveSticker.setActive(true);
+            tempSticker = mStickers.get(i);
+            if (tempSticker.isTouchIn(event.getX(), event.getY())) {
+                mActiveSticker = tempSticker;
                 mActiveSticker.updatePriority();
+                mActiveSticker.setActive(true);
                 Collections.sort(mStickers);
+                if (mOnStickerEventListener != null) {
+                    mOnStickerEventListener.OnStickerSelect(preSticker, mActiveSticker);
+                }
                 break;
+            }
+        }
+        if (mActiveSticker == null) {
+            if (mOnStickerEventListener != null) {
+                mOnStickerEventListener.OnEmptyAreaClick();
             }
         }
     }
 
     private OnStickerMenuClickListener mOnStickerMenuClickListener;
+    private OnStickerEventListener     mOnStickerEventListener;
 
     public void setOnStickerMenuClickListener(OnStickerMenuClickListener onStickerMenuClickListener) {
         mOnStickerMenuClickListener = onStickerMenuClickListener;
+    }
+
+    public void setOnStickerEventListener(OnStickerEventListener onStickerEventListener) {
+        mOnStickerEventListener = onStickerEventListener;
     }
 
     private boolean dispatchMenuClick(MotionEvent event) {
@@ -245,7 +252,7 @@ public class StickerDrawOverlay extends View {
                 // 双指缩放
                 touchType = StickerBaseTouchHandler.TWO_FINGER;
             } else {
-                StickerMenu menu = mActiveSticker.getBottomRightMenu();
+                StickerMenu menu = mActiveSticker.getMenuMap().get(Position.BOTTOM_RIGHT);
                 if (menu != null && menu.isTouchIn(event.getX(), event.getY())) {
                     touchType = StickerBaseTouchHandler.BOTTOM_RIGHT_CORNER;
                 } else {

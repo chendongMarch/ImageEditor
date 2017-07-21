@@ -27,11 +27,12 @@ public class StickerMenu {
         init(type, drawable);
     }
 
-
     public void init(int type, Drawable menuIcon) {
         mMenuIcon = menuIcon;
         mPositionType = type;
         mScale = 2;
+        mBoundRect = new Rect();
+
     }
 
     public void attachSticker(Sticker sticker) {
@@ -63,31 +64,15 @@ public class StickerMenu {
     }
 
     public Rect getBounds() {
-        Point p;
-        switch (mPositionType) {
-            case Position.TOP_LEFT:
-                p = mAttachSticker.getTopLeftPoint();
-                break;
-            case Position.TOP_RIGHT:
-                p = mAttachSticker.getTopRightPoint();
-                break;
-            case Position.BOTTOM_LEFT:
-                p = mAttachSticker.getBottomLeftPoint();
-                break;
-            case Position.BOTTOM_RIGHT:
-                p = mAttachSticker.getBottomRightPoint();
-                break;
-            default:
-                p = mAttachSticker.getTopLeftPoint();
-                break;
-        }
 
-        return mBoundRect = new Rect(
-                (int) (p.x - getMenuWidth() / mScale / 2),
+        Point p = mAttachSticker.getPointMap().get(mPositionType);
+
+        mBoundRect.set((int) (p.x - getMenuWidth() / mScale / 2),
                 (int) (p.y - getMenuHeight() / mScale / 2),
                 (int) (p.x - getMenuWidth() / mScale / 2 + getMenuWidth() / mScale),
                 (int) (p.y - getMenuHeight() / mScale / 2 + getMenuHeight() / mScale));
 
+        return mBoundRect;
     }
 
 

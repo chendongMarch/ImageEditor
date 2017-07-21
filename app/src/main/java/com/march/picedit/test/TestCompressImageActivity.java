@@ -18,6 +18,7 @@ import com.march.picedit.R;
 import com.march.piceditor.mosaic.DrawMosaicView;
 import com.march.piceditor.mosaic.MosaicUtil;
 import com.march.piceditor.sticker.StickerDrawOverlay;
+import com.march.piceditor.sticker.listener.OnStickerEventListener;
 import com.march.piceditor.sticker.listener.OnStickerMenuClickListener;
 import com.march.piceditor.sticker.model.Position;
 import com.march.piceditor.sticker.model.Sticker;
@@ -83,6 +84,29 @@ public class TestCompressImageActivity extends BaseActivity {
             @Override
             public void onMenuClick(Sticker sticker, StickerMenu menu) {
                 ToastUtils.show("click menu " + menu.getPositionType());
+            }
+        });
+        mStickerDrawOverlay.setOnStickerEventListener(new OnStickerEventListener() {
+            @Override
+            public void OnStickerSelect(Sticker preSticker, Sticker currentSticker) {
+                String msg = "上一个贴纸-";
+                if (preSticker != null) {
+                    msg += preSticker.hashCode();
+                } else {
+                    msg += "null";
+                }
+                msg += "-下一个贴纸-";
+                if (currentSticker != null) {
+                    msg += currentSticker.hashCode();
+                } else {
+                    msg += "null";
+                }
+                ToastUtils.show(msg);
+            }
+
+            @Override
+            public void OnEmptyAreaClick() {
+                ToastUtils.show("empty click");
             }
         });
     }
