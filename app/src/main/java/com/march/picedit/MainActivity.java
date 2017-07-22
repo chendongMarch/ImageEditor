@@ -1,12 +1,13 @@
 package com.march.picedit;
 
 import android.view.View;
+import android.widget.SimpleAdapter;
 
 import com.march.dev.app.activity.BaseActivity;
 import com.march.dev.model.ImageInfo;
 import com.march.dev.uikit.selectimg.SelectImageActivity;
 import com.march.picedit.edit.EditCropRotateActivity;
-import com.march.picedit.sticker.StickerActivity;
+import com.march.picedit.sticker.StickerImageActivity;
 import com.march.picedit.test.TestCompressImageActivity;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -22,29 +23,31 @@ public class MainActivity extends BaseActivity {
         return R.layout.home_activity;
     }
 
-    @OnClick({R.id.btn_choose_pic, R.id.btn_test, R.id.btn_sticker_source})
+    @OnClick({R.id.btn_choose_pic, R.id.btn_test, R.id.btn_sticker_test})
     public void clickView(View view) {
         switch (view.getId()) {
             case R.id.btn_choose_pic:
-                SelectImageActivity.start(mActivity, 1, hashCode());
+                SelectImageActivity.start(mActivity, 1, 1);
                 break;
             case R.id.btn_test:
                 startActivity(TestCompressImageActivity.class);
                 break;
-            case R.id.btn_sticker_source:
-                startActivity(StickerActivity.class);
+            case R.id.btn_sticker_test:
+                SelectImageActivity.start(mActivity, 1, 2);
                 break;
         }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEvent(SelectImageActivity.SelectImageEvent event) {
-        if (hashCode() != event.getTag())
-            return;
         switch (event.getMessage()) {
             case SelectImageActivity.SelectImageEvent.ON_SUCCESS:
                 ImageInfo imageInfo = event.mImageInfos.get(0);
-                EditCropRotateActivity.start(mActivity, imageInfo.getPath());
+                if(event.getTag() == 1){
+                    EditCropRotateActivity.start(mActivity, imageInfo.getPath());
+                }else if(event.getTag() ==2 ){
+                    StickerImageActivity.start(mActivity,imageInfo.getPath());
+                }
                 break;
         }
     }

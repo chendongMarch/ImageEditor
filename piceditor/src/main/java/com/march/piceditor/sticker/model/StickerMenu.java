@@ -30,7 +30,7 @@ public class StickerMenu {
 //        DELETE_MENU() {
 //            @Override
 //            public void onMenuClick(Sticker sticker, StickerMenu menu) {
-//                sticker.setDelete(true);
+//                sticker.setHidden(true);
 //            }
 //        },
 //        // 垂直翻转

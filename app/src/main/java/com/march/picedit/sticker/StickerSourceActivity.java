@@ -1,5 +1,7 @@
 package com.march.picedit.sticker;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -10,6 +12,8 @@ import android.widget.ImageView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.march.dev.app.activity.BaseActivity;
+import com.march.dev.extensions.eventbus.BaseEvent;
+import com.march.dev.utils.ActivityAnimUtils;
 import com.march.dev.utils.DimensUtils;
 import com.march.dev.utils.GlideUtils;
 import com.march.dev.utils.LogUtils;
@@ -38,17 +42,31 @@ import io.reactivex.schedulers.Schedulers;
  *
  * @author chendong
  */
-public class StickerActivity extends BaseActivity {
+public class StickerSourceActivity extends BaseActivity {
 
-    public static final String TAG = StickerActivity.class.getSimpleName();
+    public static final String TAG = StickerSourceActivity.class.getSimpleName();
 
     @Override
     protected int getLayoutId() {
-        return R.layout.sticker_activity;
+        return R.layout.sticker_source_activity;
     }
 
     @BindView(R.id.rv_sticker) RecyclerView mStickerRv;
 
+    public static void start(Activity activity) {
+        Intent intent = new Intent(activity, StickerSourceActivity.class);
+        activity.startActivity(intent);
+        ActivityAnimUtils.translateStart(activity);
+    }
+
+
+    public static class StickerSourceEvent extends BaseEvent {
+        public StickerSource mStickerSource;
+
+        public StickerSourceEvent(StickerSource stickerSource) {
+            mStickerSource = stickerSource;
+        }
+    }
 
     @Override
     public void onInitViews(View view, Bundle saveData) {
@@ -81,7 +99,6 @@ public class StickerActivity extends BaseActivity {
     }
 
 
-
     private void createAdapter(List<StickerSource> list) {
         LogUtils.e(TAG, Thread.currentThread().getName());
         LightAdapter<StickerSource> adapter = new LightAdapter<StickerSource>(mContext, list, R.layout.sticker_item) {
@@ -99,7 +116,8 @@ public class StickerActivity extends BaseActivity {
         adapter.setOnItemListener(new SimpleItemListener<StickerSource>() {
             @Override
             public void onClick(int pos, ViewHolder holder, StickerSource data) {
-
+                new StickerSourceEvent(data).post();
+                onBackPressed();
             }
         });
         mStickerRv.setLayoutManager(new GridLayoutManager(mContext, 3, LinearLayoutManager.VERTICAL, false));

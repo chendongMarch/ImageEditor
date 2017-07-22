@@ -37,7 +37,7 @@ public class TwoFingersHandler extends StickerBaseTouchHandler {
             // 缩放
             float distance = CalculateUtils.calculateDistance(event);
             float scale = distance * 1f / mLastFingersDistance;
-            LogUtils.e(TAG, scale + "");
+
             if (mActiveSticker.isCanScale(scale)) {
                 mActiveSticker.postMatrixScale(scale, scale);
             }

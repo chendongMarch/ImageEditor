@@ -65,7 +65,6 @@ public class TestCompressImageActivity extends BaseActivity {
     @BindView(R.id.dmv)       DrawMosaicView     mDrawMosaicView;
     @BindView(R.id.sdo)       StickerDrawOverlay mStickerDrawOverlay;
 
-
     private ResourceFactory mResourceFactory;
 
     @Override
@@ -79,7 +78,7 @@ public class TestCompressImageActivity extends BaseActivity {
             // delete handler & tag
             StickerMenu topLeftMenu = new StickerMenu(Position.TOP_LEFT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_del));
             topLeftMenu.setTag(100);
-            // topLeftMenu.setStickerMenuHandler(EasyMenuHandler.DELETE_MENU);
+            topLeftMenu.setStickerMenuHandler(EasyMenuHandler.HIDE_STICKER);
 
             // flip vertical handler
             StickerMenu topRightMenu = new StickerMenu(Position.TOP_RIGHT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_symmetry));
@@ -107,10 +106,10 @@ public class TestCompressImageActivity extends BaseActivity {
 
         mStickerDrawOverlay.setStickerMenuHandler(new StickerMenuHandler() {
             @Override
-            public void onMenuClick(Sticker sticker, StickerMenu menu) {
+            public void onMenuClick(StickerDrawOverlay overlay, Sticker sticker, StickerMenu menu) {
                 ToastUtils.show("click menu " + menu.getPositionType());
                 if (menu.getPositionType() == Position.TOP_LEFT) {
-                   mStickerDrawOverlay.removeSticker(sticker);
+                    mStickerDrawOverlay.removeSticker(sticker);
                 }
             }
         });

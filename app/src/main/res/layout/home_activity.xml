@@ -9,7 +9,7 @@
         android:id="@+id/btn_choose_pic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="选择图片"/>
+        android:text="裁剪旋转"/>
 
     <Button
         android:id="@+id/btn_test"
@@ -18,8 +18,9 @@
         android:text="测试"/>
 
     <Button
-        android:id="@+id/btn_sticker_source"
+        android:id="@+id/btn_sticker_test"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="贴纸资源预览"/>
+        android:text="贴纸"/>
+
 </LinearLayout>

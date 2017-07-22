@@ -28,7 +28,10 @@
             android:name=".test.TestCompressImageActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
         <activity
-            android:name=".sticker.StickerActivity"
+            android:name=".sticker.StickerSourceActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"/>
+        <activity
+            android:name=".sticker.StickerImageActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
     </application>
 

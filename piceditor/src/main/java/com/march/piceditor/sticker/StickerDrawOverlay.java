@@ -54,7 +54,7 @@ public class StickerDrawOverlay extends View {
 
     private int mWidth, mHeight;
     private Paint mStickerPaint;
-    private Paint mPaintLine;
+    private Paint mLinePaint;
 
     private ClickChecker                               mClickChecker;
     private SparseArrayCompat<StickerBaseTouchHandler> mTouchHandlerMap;
@@ -70,7 +70,7 @@ public class StickerDrawOverlay extends View {
     private void init() {
         mStickerPaint = new Paint();
         DrawUtils.initAntiAliasPaint(mStickerPaint);
-        mPaintLine = DrawUtils.newPaint(Color.WHITE, 2, Paint.Style.STROKE);
+        mLinePaint = DrawUtils.newPaint(Color.WHITE, 4, Paint.Style.STROKE);
         mTouchHandlerMap = new SparseArrayCompat<>();
         mStickers = new ArrayList<>();
         mClickChecker = new ClickChecker();
@@ -84,10 +84,13 @@ public class StickerDrawOverlay extends View {
      */
     public void addSticker(Sticker sticker) {
         mStickers.add(sticker);
+        activeOneSticker(mActiveSticker, sticker);
+        postInvalidate();
     }
 
     /**
      * 真的删除贴纸
+     *
      * @param sticker 贴纸
      */
     public void removeSticker(Sticker sticker) {
@@ -98,6 +101,7 @@ public class StickerDrawOverlay extends View {
                 iterator.remove();
             }
         }
+        postInvalidate();
     }
 
     @Override
@@ -114,16 +118,16 @@ public class StickerDrawOverlay extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         try {
-            for (int i = 0; i < mHeight / 10; i++) {
-                DrawUtils.drawHLine(canvas, mPaintLine, mHeight / 10 * i, 0, mWidth);
-            }
-            for (int i = 0; i < mWidth / 10; i++) {
-                DrawUtils.drawVLine(canvas, mPaintLine, mWidth / 10 * i, 0, mHeight);
-            }
+//            for (int i = 0; i < mHeight / 10; i++) {
+//                DrawUtils.drawHLine(canvas, mLinePaint, mHeight / 10 * i, 0, mWidth);
+//            }
+//            for (int i = 0; i < mWidth / 10; i++) {
+//                DrawUtils.drawVLine(canvas, mLinePaint, mWidth / 10 * i, 0, mHeight);
+//            }
 
             // 绘制贴纸
             for (Sticker sticker : mStickers) {
-                if (sticker.isDelete())
+                if (sticker.isHidden())
                     continue;
                 if (sticker.getStickerImage() != null && !sticker.getStickerImage().isRecycled()) {
                     mStickerPaint.setColorFilter(sticker.getColorFilter());
@@ -135,7 +139,7 @@ public class StickerDrawOverlay extends View {
                         i = j;
                         if (i == points.length - 1)
                             i = -1;
-                        canvas.drawLine(points[j].x, points[j].y, points[i + 1].x, points[i + 1].y, mPaintLine);
+                        canvas.drawLine(points[j].x, points[j].y, points[i + 1].x, points[i + 1].y, mLinePaint);
                     }
                     for (StickerMenu stickerMenu : sticker.getStickerMenus()) {
                         if (stickerMenu != null) {
@@ -205,7 +209,7 @@ public class StickerDrawOverlay extends View {
         Sticker tempSticker;
         for (int i = mStickers.size() - 1; i >= 0; i--) {
             tempSticker = mStickers.get(i);
-            if (tempSticker.isDelete())
+            if (tempSticker.isHidden())
                 continue;
             boolean isCheckIn;
             if (isAutoLifting) {
@@ -247,6 +251,9 @@ public class StickerDrawOverlay extends View {
      * @param sticker
      */
     private void activeOneSticker(Sticker preSticker, Sticker sticker) {
+        if(preSticker!=null){
+            preSticker.setActive(false);
+        }
         mActiveSticker = sticker;
         mActiveSticker.bringTopLayer();
         mActiveSticker.setActive(true);
@@ -270,9 +277,9 @@ public class StickerDrawOverlay extends View {
             for (StickerMenu menu : mActiveSticker.getStickerMenus()) {
                 if (menu != null && menu.isTouchIn(event.getX(), event.getY())) {
                     if (menu.getStickerMenuHandler() != null)
-                        menu.getStickerMenuHandler().onMenuClick(mActiveSticker, menu);
+                        menu.getStickerMenuHandler().onMenuClick(this, mActiveSticker, menu);
                     else if (mStickerMenuHandler != null)
-                        mStickerMenuHandler.onMenuClick(mActiveSticker, menu);
+                        mStickerMenuHandler.onMenuClick(this, mActiveSticker, menu);
                     return true;
                 }
             }

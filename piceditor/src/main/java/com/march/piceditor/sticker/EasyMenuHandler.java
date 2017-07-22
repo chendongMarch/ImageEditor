@@ -15,31 +15,38 @@ import com.march.piceditor.sticker.model.StickerMenu;
  * @author chendong
  */
 public enum EasyMenuHandler implements StickerMenuHandler {
-    // 删除贴纸
-    DELETE_MENU() {
+    // 隐藏贴纸
+    HIDE_STICKER() {
         @Override
-        public void onMenuClick(Sticker sticker, StickerMenu menu) {
-            sticker.setDelete(true);
+        public void onMenuClick(StickerDrawOverlay overlay, Sticker sticker, StickerMenu menu) {
+            sticker.setHidden(true);
+        }
+    },
+    // 删除贴纸
+    DELETE_STICKER() {
+        @Override
+        public void onMenuClick(StickerDrawOverlay overlay, Sticker sticker, StickerMenu menu) {
+            overlay.removeSticker(sticker);
         }
     },
     // 垂直翻转
     FLIP_VERTICAL() {
         @Override
-        public void onMenuClick(Sticker sticker, StickerMenu menu) {
+        public void onMenuClick(StickerDrawOverlay overlay, Sticker sticker, StickerMenu menu) {
             flip(1, -1, sticker);
         }
     },
     // 水平翻转
     FLIP_HORIZONTAL() {
         @Override
-        public void onMenuClick(Sticker sticker, StickerMenu menu) {
+        public void onMenuClick(StickerDrawOverlay overlay, Sticker sticker, StickerMenu menu) {
             flip(-1, 1, sticker);
         }
     },
     // 双向翻转
     FLIP_SKEW() {
         @Override
-        public void onMenuClick(Sticker sticker, StickerMenu menu) {
+        public void onMenuClick(StickerDrawOverlay overlay, Sticker sticker, StickerMenu menu) {
             flip(-1, -1, sticker);
         }
     };

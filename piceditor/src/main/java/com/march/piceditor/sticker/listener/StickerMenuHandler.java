@@ -1,5 +1,6 @@
 package com.march.piceditor.sticker.listener;
 
+import com.march.piceditor.sticker.StickerDrawOverlay;
 import com.march.piceditor.sticker.model.Sticker;
 import com.march.piceditor.sticker.model.StickerMenu;
 
@@ -10,5 +11,5 @@ import com.march.piceditor.sticker.model.StickerMenu;
  * @author chendong
  */
 public interface StickerMenuHandler {
-    void onMenuClick(Sticker sticker, StickerMenu menu);
+    void onMenuClick(StickerDrawOverlay overlay, Sticker sticker, StickerMenu menu);
 }

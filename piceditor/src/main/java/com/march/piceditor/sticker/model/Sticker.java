@@ -30,7 +30,7 @@ public class Sticker implements Comparable<Sticker> {
     // 当前贴纸是否删除，
     // 标记为删除的贴纸为假删，只是不尽兴绘制了而已，
     // 如果希望真的删除，使用 StickerDrawOverlay 删除贴纸的方法
-    private boolean mIsDelete;
+    private boolean mIsHidden;
     // 自动提升，如果允许自动提升，
     // 点击时会将当前贴纸下面的贴纸提升上来，
     // 避免因为遮挡无法点击下层贴纸
@@ -44,20 +44,29 @@ public class Sticker implements Comparable<Sticker> {
     private SparseArray<Point>       mCornerPointMap; // 四角点的位置，可倾斜矩形
     private SparseArray<StickerMenu> mMenuMap; // 四个菜单键的存储
 
-    public void destroy() {
-        System.gc();
-        mIsActive = false;
-        mIsDelete = true;
-        mColorFilter = null;
-        mCornerPointMap.clear();
-        mMenuMap.clear();
-        BitmapUtils.recycleBitmaps(mStickerImage);
-    }
-
 
     public Sticker(Context context) {
         mStickerImage = BitmapFactory.decodeResource(context.getResources(), android.R.mipmap.sym_def_app_icon);
         init();
+    }
+
+    public Sticker(Bitmap source) {
+        mStickerImage = source;
+        init();
+    }
+
+
+    private void init() {
+        mId = System.currentTimeMillis();
+        mMatrix = new Matrix();
+        mRectF = new RectF();
+        mPriority = System.currentTimeMillis();
+        mCornerPointMap = new SparseArray<>();
+        mMenuMap = new SparseArray<>();
+        mCornerPointMap.put(Position.TOP_LEFT, new Point());
+        mCornerPointMap.put(Position.TOP_RIGHT, new Point());
+        mCornerPointMap.put(Position.BOTTOM_RIGHT, new Point());
+        mCornerPointMap.put(Position.BOTTOM_LEFT, new Point());
     }
 
     public boolean isActive() {
@@ -101,26 +110,14 @@ public class Sticker implements Comparable<Sticker> {
         };
     }
 
-    public boolean isDelete() {
-        return mIsDelete;
+    public boolean isHidden() {
+        return mIsHidden;
     }
 
-    public void setDelete(boolean delete) {
-        mIsDelete = delete;
+    public void setHidden(boolean hidden) {
+        mIsHidden = hidden;
     }
 
-    private void init() {
-        mId = System.currentTimeMillis();
-        mMatrix = new Matrix();
-        mRectF = new RectF();
-        mPriority = System.currentTimeMillis();
-        mCornerPointMap = new SparseArray<>();
-        mMenuMap = new SparseArray<>();
-        mCornerPointMap.put(Position.TOP_LEFT, new Point());
-        mCornerPointMap.put(Position.TOP_RIGHT, new Point());
-        mCornerPointMap.put(Position.BOTTOM_RIGHT, new Point());
-        mCornerPointMap.put(Position.BOTTOM_LEFT, new Point());
-    }
 
     public void setStickerImage(Bitmap stickerImage) {
         mStickerImage = stickerImage;
@@ -247,8 +244,19 @@ public class Sticker implements Comparable<Sticker> {
             return mMaxSize <= 0 || Math.max(length1, length2) < mMaxSize;
         } else if (scale < 1) {
             // 缩小时，没设置限制 || 没到达最小值
-            return mMaxSize <= 0 || Math.min(length1, length2) > mMinSize;
+            return mMinSize <= 0 || Math.min(length1, length2) > mMinSize;
         } else return true;
+    }
+
+
+    public void destroy() {
+        System.gc();
+        mIsActive = false;
+        mIsHidden = true;
+        mColorFilter = null;
+        mCornerPointMap.clear();
+        mMenuMap.clear();
+        BitmapUtils.recycleBitmaps(mStickerImage);
     }
 
 
