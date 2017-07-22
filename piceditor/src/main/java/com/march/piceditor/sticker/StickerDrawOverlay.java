@@ -187,13 +187,13 @@ public class StickerDrawOverlay extends View {
 
 
     // 遍历查找应该激活的贴纸
-    // 怎么能让重叠的贴纸自动切换，检测时不检测当前贴纸，如果最后还是找到了，则将当前贴纸置于底层
+    // isAutoLifting 怎么能让重叠的贴纸自动切换，检测时不检测当前贴纸，如果最后还是找到了，则将当前贴纸置于底层
     private void findActiveSticker(MotionEvent event) {
         // 将当前贴纸置空
         Sticker preSticker = mActiveSticker;
         if (preSticker != null)
             preSticker.setActive(false);
-        boolean autoLifting = preSticker != null && preSticker.isAutoLifting();
+        boolean isAutoLifting = preSticker != null && preSticker.isAutoLifting();
         mActiveSticker = null;
         Sticker tempSticker;
         for (int i = mStickers.size() - 1; i >= 0; i--) {
@@ -201,27 +201,30 @@ public class StickerDrawOverlay extends View {
             if (tempSticker.isDelete())
                 continue;
             boolean isCheckIn;
-            if (autoLifting) {
+            if (isAutoLifting) {
                 isCheckIn = !tempSticker.equals(preSticker) && tempSticker.isTouchIn(event.getX(), event.getY());
             } else {
                 isCheckIn = tempSticker.isTouchIn(event.getX(), event.getY());
             }
             if (isCheckIn) {
-                mActiveSticker = tempSticker;
-                mActiveSticker.bringTopLayer();
-                mActiveSticker.setActive(true);
-                Collections.sort(mStickers);
-                if (mOnStickerEventListener != null) {
-                    mOnStickerEventListener.OnStickerSelect(preSticker, mActiveSticker);
-                }
+                activeOneSticker(preSticker, tempSticker);
                 break;
             }
         }
-        // 自动提升时,找到了新的，将上一个置于底层
-        if (autoLifting && mActiveSticker != null) {
-            preSticker.bringBottomLayer();
-            Collections.sort(mStickers);
+        // 自动提升时
+        if (isAutoLifting) {
+            // 找到了新的，将上一个置于底层
+            if (mActiveSticker != null) {
+                preSticker.bringBottomLayer();
+                Collections.sort(mStickers);
+            } else {
+                // 如果没找到，检测是不是仍旧点击了当前，是的话重新激活当前
+                if (preSticker.isTouchIn(event.getX(), event.getY())) {
+                    activeOneSticker(preSticker, preSticker);
+                }
+            }
         }
+        // 还是找不到，表示点击了空白位置
         if (mActiveSticker == null) {
             if (mOnStickerEventListener != null) {
                 mOnStickerEventListener.OnEmptyAreaClick();
@@ -229,6 +232,22 @@ public class StickerDrawOverlay extends View {
         }
     }
 
+
+    /**
+     * 激活一张贴纸
+     *
+     * @param preSticker
+     * @param sticker
+     */
+    private void activeOneSticker(Sticker preSticker, Sticker sticker) {
+        mActiveSticker = sticker;
+        mActiveSticker.bringTopLayer();
+        mActiveSticker.setActive(true);
+        Collections.sort(mStickers);
+        if (mOnStickerEventListener != null) {
+            mOnStickerEventListener.OnStickerSelect(preSticker, mActiveSticker);
+        }
+    }
 
 
     public void setStickerMenuHandler(StickerMenuHandler stickerMenuHandler) {

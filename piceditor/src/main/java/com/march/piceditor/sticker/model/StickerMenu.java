@@ -1,11 +1,8 @@
 package com.march.piceditor.sticker.model;
 
-import android.graphics.Bitmap;
-import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 
-import com.march.dev.utils.BitmapUtils;
 import com.march.piceditor.common.model.Point;
 import com.march.piceditor.sticker.listener.StickerMenuHandler;
 
@@ -117,7 +114,7 @@ public class StickerMenu {
 
     public Rect getBounds() {
 
-        Point p = mAttachSticker.getPointMap().get(mPositionType);
+        Point p = mAttachSticker.getCornerPointMap().get(mPositionType);
 
         mBoundRect.set((int) (p.x - getMenuWidth() / mScale / 2),
                 (int) (p.y - getMenuHeight() / mScale / 2),

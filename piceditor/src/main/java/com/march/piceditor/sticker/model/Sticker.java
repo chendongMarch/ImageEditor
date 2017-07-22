@@ -21,20 +21,27 @@ import com.march.piceditor.utils.Utils;
  */
 public class Sticker implements Comparable<Sticker> {
 
-    private Bitmap mStickerImage;
-    private Matrix mMatrix;
-    private RectF  mRectF;
+    private Bitmap mStickerImage; // 贴纸资源
+    private Matrix mMatrix; // 贴纸变换
+    private RectF  mRectF; // 贴纸对应区域，注意，这里是水平矩形，不会旋转
 
-    private boolean mIsActive;
-    private boolean mDelete;
-    private long    mPriority;
+    private boolean mIsActive; // 当前贴纸是否激活
+    // 当前贴纸是否删除，
+    // 标记为删除的贴纸为假删，只是不尽兴绘制了而已，
+    // 如果希望真的删除，使用 StickerDrawOverlay 删除贴纸的方法
+    private boolean mIsDelete;
+    // 自动提升，如果允许自动提升，
+    // 点击时会将当前贴纸下面的贴纸提升上来，
+    // 避免因为遮挡无法点击下层贴纸
+    private boolean mIsAutoLifting;
+    private long    mId;
+    private long    mPriority; // 当前贴纸绘制优先级别
+    private int     mMinSize; // 最小限制，不设置时表示不限制
+    private int     mMaxSize; // 最大限制，不设置时表示不限制
 
-    private int mMinSize, mMaxSize;
-    private boolean                mIsAutoLifting;
-    private ColorMatrixColorFilter mColorFilter;
-
-    private SparseArray<Point>       mPointMap;
-    private SparseArray<StickerMenu> mMenuMap;
+    private ColorMatrixColorFilter   mColorFilter; // 颜色过滤器，将贴纸过滤成纯色
+    private SparseArray<Point>       mCornerPointMap; // 四角点的位置，可倾斜矩形
+    private SparseArray<StickerMenu> mMenuMap; // 四个菜单键的存储
 
     public Sticker(Context context) {
         mStickerImage = BitmapFactory.decodeResource(context.getResources(), android.R.mipmap.sym_def_app_icon);
@@ -75,31 +82,31 @@ public class Sticker implements Comparable<Sticker> {
     public Point[] getCornerPoints() {
         mapPoints();
         return new Point[]{
-                mPointMap.get(Position.TOP_LEFT),
-                mPointMap.get(Position.TOP_RIGHT),
-                mPointMap.get(Position.BOTTOM_RIGHT),
-                mPointMap.get(Position.BOTTOM_LEFT)
+                mCornerPointMap.get(Position.TOP_LEFT),
+                mCornerPointMap.get(Position.TOP_RIGHT),
+                mCornerPointMap.get(Position.BOTTOM_RIGHT),
+                mCornerPointMap.get(Position.BOTTOM_LEFT)
         };
     }
 
     public boolean isDelete() {
-        return mDelete;
+        return mIsDelete;
     }
 
     public void setDelete(boolean delete) {
-        mDelete = delete;
+        mIsDelete = delete;
     }
 
     private void init() {
         mMatrix = new Matrix();
         mRectF = new RectF();
         mPriority = System.currentTimeMillis();
-        mPointMap = new SparseArray<>();
+        mCornerPointMap = new SparseArray<>();
         mMenuMap = new SparseArray<>();
-        mPointMap.put(Position.TOP_LEFT, new Point());
-        mPointMap.put(Position.TOP_RIGHT, new Point());
-        mPointMap.put(Position.BOTTOM_RIGHT, new Point());
-        mPointMap.put(Position.BOTTOM_LEFT, new Point());
+        mCornerPointMap.put(Position.TOP_LEFT, new Point());
+        mCornerPointMap.put(Position.TOP_RIGHT, new Point());
+        mCornerPointMap.put(Position.BOTTOM_RIGHT, new Point());
+        mCornerPointMap.put(Position.BOTTOM_LEFT, new Point());
     }
 
     public void setStickerImage(Bitmap stickerImage) {
@@ -131,14 +138,14 @@ public class Sticker implements Comparable<Sticker> {
 
         mMatrix.mapPoints(dst, src);
 
-        mPointMap.get(Position.TOP_LEFT).set(dst[0], dst[1]);
-        mPointMap.get(Position.TOP_RIGHT).set(dst[2], dst[3]);
-        mPointMap.get(Position.BOTTOM_LEFT).set(dst[4], dst[5]);
-        mPointMap.get(Position.BOTTOM_RIGHT).set(dst[6], dst[7]);
+        mCornerPointMap.get(Position.TOP_LEFT).set(dst[0], dst[1]);
+        mCornerPointMap.get(Position.TOP_RIGHT).set(dst[2], dst[3]);
+        mCornerPointMap.get(Position.BOTTOM_LEFT).set(dst[4], dst[5]);
+        mCornerPointMap.get(Position.BOTTOM_RIGHT).set(dst[6], dst[7]);
     }
 
-    public SparseArray<Point> getPointMap() {
-        return mPointMap;
+    public SparseArray<Point> getCornerPointMap() {
+        return mCornerPointMap;
     }
 
     public SparseArray<StickerMenu> getMenuMap() {
@@ -220,8 +227,8 @@ public class Sticker implements Comparable<Sticker> {
 
     // 两边中的较大值小于最大值，两边中最小值大于最小值
     public boolean isCanScale(float scale) {
-        float length1 = CalculateUtils.calculateDistance(mPointMap.get(Position.TOP_LEFT), mPointMap.get(Position.TOP_RIGHT));
-        float length2 = CalculateUtils.calculateDistance(mPointMap.get(Position.TOP_RIGHT), mPointMap.get(Position.BOTTOM_RIGHT));
+        float length1 = CalculateUtils.calculateDistance(mCornerPointMap.get(Position.TOP_LEFT), mCornerPointMap.get(Position.TOP_RIGHT));
+        float length2 = CalculateUtils.calculateDistance(mCornerPointMap.get(Position.TOP_RIGHT), mCornerPointMap.get(Position.BOTTOM_RIGHT));
         if (scale > 1) {
             // 放大时，没设置限制 || 没到达最大值
             return mMaxSize <= 0 || Math.max(length1, length2) < mMaxSize;
