@@ -76,21 +76,30 @@ public class TestCompressImageActivity extends BaseActivity {
         for (int i = 0; i < 5; i++) {
             Sticker sticker = new Sticker(mContext);
 
+            // delete handler & tag
             StickerMenu topLeftMenu = new StickerMenu(Position.TOP_LEFT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_del));
             topLeftMenu.setTag(100);
             topLeftMenu.setStickerMenuHandler(EasyMenuHandler.DELETE_MENU);
 
+            // flip vertical handler
             StickerMenu topRightMenu = new StickerMenu(Position.TOP_RIGHT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_symmetry));
             topRightMenu.setStickerMenuHandler(EasyMenuHandler.FLIP_VERTICAL);
 
             StickerMenu bottomLeftMenu = new StickerMenu(Position.BOTTOM_LEFT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_color_white));
             StickerMenu bottomRightMenu = new StickerMenu(Position.BOTTOM_RIGHT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_control));
+
+            // add menu
             sticker.addStickerMenu(topLeftMenu, topRightMenu, bottomLeftMenu, bottomRightMenu);
+
+            // sticker color filter
             sticker.setColorFilter(new Random().nextInt(225), new Random().nextInt(225), new Random().nextInt(225));
+            // init position & init scale
             sticker.setInitTranslate(new Random().nextInt(450), new Random().nextInt(450));
             sticker.setInitScale(1.5f);
+            // min size & max size
             sticker.setMinSize(200);
             sticker.setMaxSize(1000);
+
             mStickerDrawOverlay.addSticker(sticker);
         }
 
