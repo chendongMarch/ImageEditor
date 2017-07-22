@@ -86,7 +86,11 @@ public class TestCompressImageActivity extends BaseActivity {
             StickerMenu bottomLeftMenu = new StickerMenu(Position.BOTTOM_LEFT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_color_white));
             StickerMenu bottomRightMenu = new StickerMenu(Position.BOTTOM_RIGHT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_control));
             sticker.addStickerMenu(topLeftMenu, topRightMenu, bottomLeftMenu, bottomRightMenu);
-            sticker.setColorFilter(new Random().nextInt(225),new Random().nextInt(225),new Random().nextInt(225));
+            sticker.setColorFilter(new Random().nextInt(225), new Random().nextInt(225), new Random().nextInt(225));
+            sticker.setInitTranslate(new Random().nextInt(450), new Random().nextInt(450));
+            sticker.setInitScale(1.5f);
+            sticker.setMinSize(200);
+            sticker.setMaxSize(1000);
             mStickerDrawOverlay.addSticker(sticker);
         }
 

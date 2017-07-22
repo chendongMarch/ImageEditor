@@ -13,8 +13,6 @@ import com.march.piceditor.common.model.Point;
 import com.march.piceditor.utils.CalculateUtils;
 import com.march.piceditor.utils.Utils;
 
-import java.util.Random;
-
 /**
  * CreateAt : 7/20/17
  * Describe : 贴纸类
@@ -23,20 +21,23 @@ import java.util.Random;
  */
 public class Sticker implements Comparable<Sticker> {
 
-    private Bitmap                 mBitmap;
-    private Matrix                 mMatrix;
-    private RectF                  mRectF;
-    private boolean                mIsActive;
-    private boolean                mDelete;
-    private long                   mPriority;
+    private Bitmap mStickerImage;
+    private Matrix mMatrix;
+    private RectF  mRectF;
+
+    private boolean mIsActive;
+    private boolean mDelete;
+    private long    mPriority;
+
+    private int mMinSize, mMaxSize;
+
     private ColorMatrixColorFilter mColorFilter;
 
     private SparseArray<Point>       mPointMap;
     private SparseArray<StickerMenu> mMenuMap;
 
-
     public Sticker(Context context) {
-        mBitmap = BitmapFactory.decodeResource(context.getResources(), android.R.mipmap.sym_def_app_icon);
+        mStickerImage = BitmapFactory.decodeResource(context.getResources(), android.R.mipmap.sym_def_app_icon);
         init();
     }
 
@@ -48,8 +49,8 @@ public class Sticker implements Comparable<Sticker> {
         mIsActive = active;
     }
 
-    public Bitmap getBitmap() {
-        return mBitmap;
+    public Bitmap getStickerImage() {
+        return mStickerImage;
     }
 
     public Matrix getMatrix() {
@@ -71,7 +72,7 @@ public class Sticker implements Comparable<Sticker> {
         return stickerMenus;
     }
 
-    public Point[] getPoints() {
+    public Point[] getCornerPoints() {
         mapPoints();
         return new Point[]{
                 mPointMap.get(Position.TOP_LEFT),
@@ -91,8 +92,6 @@ public class Sticker implements Comparable<Sticker> {
 
     private void init() {
         mMatrix = new Matrix();
-        mMatrix.postTranslate(new Random().nextInt(450), new Random().nextInt(450));
-        mMatrix.postScale(1.5f, 1.5f);
         mRectF = new RectF();
         mPriority = System.currentTimeMillis();
         mPointMap = new SparseArray<>();
@@ -103,8 +102,8 @@ public class Sticker implements Comparable<Sticker> {
         mPointMap.put(Position.BOTTOM_LEFT, new Point());
     }
 
-    public void setBitmap(Bitmap bitmap) {
-        mBitmap = bitmap;
+    public void setStickerImage(Bitmap stickerImage) {
+        mStickerImage = stickerImage;
     }
 
     public void updatePriority() {
@@ -112,7 +111,7 @@ public class Sticker implements Comparable<Sticker> {
     }
 
     public RectF getRectF() {
-        mRectF.set(0, 0, mBitmap.getWidth(), mBitmap.getHeight());
+        mRectF.set(0, 0, mStickerImage.getWidth(), mStickerImage.getHeight());
         mMatrix.mapRect(mRectF);
         return mRectF;
     }
@@ -122,9 +121,9 @@ public class Sticker implements Comparable<Sticker> {
         float[] dst = new float[8];
 
         float[] src = new float[]{
-                0, 0, mBitmap.getWidth(),
-                0, 0, mBitmap.getHeight(),
-                mBitmap.getWidth(), mBitmap.getHeight()};
+                0, 0, mStickerImage.getWidth(),
+                0, 0, mStickerImage.getHeight(),
+                mStickerImage.getWidth(), mStickerImage.getHeight()};
 
         mMatrix.mapPoints(dst, src);
 
@@ -143,7 +142,7 @@ public class Sticker implements Comparable<Sticker> {
     }
 
     public boolean isTouchIn(float x, float y) {
-        Point[] points = getPoints();
+        Point[] points = getCornerPoints();
         return CalculateUtils.isRectContainsPoint(points[0],
                 points[1], points[2],
                 points[3], new Point(x, y));
@@ -175,6 +174,23 @@ public class Sticker implements Comparable<Sticker> {
         return mColorFilter;
     }
 
+    public void setInitScale(float initScale) {
+        getMatrix().postScale(initScale, initScale);
+    }
+
+    public void setInitTranslate(float tx, float ty) {
+
+        getMatrix().postTranslate(tx, ty);
+    }
+
+    public void setMinSize(int minSize) {
+        mMinSize = minSize;
+    }
+
+    public void setMaxSize(int maxSize) {
+        mMaxSize = maxSize;
+    }
+
     // matrix 辅助
     public void postMatrixScale(float sx, float sy) {
         RectF rectF = getRectF();
@@ -183,11 +199,23 @@ public class Sticker implements Comparable<Sticker> {
         getMatrix().postScale(sx, sy, cx, cy);
     }
 
-    public void postMatrixRotate(int rotation) {
+    public void postMatrixRotate(float rotation) {
         RectF rectF = getRectF();
         float cy = rectF.centerY();
         float cx = rectF.centerX();
         getMatrix().postRotate(rotation, cx, cy);
+    }
 
+    // 两边中的较大值小于最大值，两边中最小值大于最小值
+    public boolean isCanScale(float scale) {
+        float length1 = CalculateUtils.calculateDistance(mPointMap.get(Position.TOP_LEFT), mPointMap.get(Position.TOP_RIGHT));
+        float length2 = CalculateUtils.calculateDistance(mPointMap.get(Position.TOP_RIGHT), mPointMap.get(Position.BOTTOM_RIGHT));
+        if (scale > 1) {
+            // 放大时，没设置限制 || 没到达最大值
+            return mMaxSize <= 0 || Math.max(length1, length2) < mMaxSize;
+        } else if (scale < 1) {
+            // 缩小时，没设置限制 || 没到达最小值
+            return mMaxSize <= 0 || Math.min(length1, length2) > mMinSize;
+        } else return true;
     }
 }

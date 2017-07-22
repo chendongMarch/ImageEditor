@@ -109,12 +109,12 @@ public class StickerDrawOverlay extends View {
             for (Sticker sticker : mStickers) {
                 if (sticker.isDelete())
                     continue;
-                if (sticker.getBitmap() != null && !sticker.getBitmap().isRecycled()) {
+                if (sticker.getStickerImage() != null && !sticker.getStickerImage().isRecycled()) {
                     mStickerPaint.setColorFilter(sticker.getColorFilter());
-                    canvas.drawBitmap(sticker.getBitmap(), sticker.getMatrix(), mStickerPaint);
+                    canvas.drawBitmap(sticker.getStickerImage(), sticker.getMatrix(), mStickerPaint);
                 }
                 if (mActiveSticker != null && mActiveSticker.equals(sticker)) {
-                    Point[] points = sticker.getPoints();
+                    Point[] points = sticker.getCornerPoints();
                     for (int j = 0, i; j < points.length; j++) {
                         i = j;
                         if (i == points.length - 1)

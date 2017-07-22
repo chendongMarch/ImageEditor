@@ -59,11 +59,11 @@ public class StickerMenu {
 //        };
 //
 //        private static void flip(int sx, int sy, Sticker sticker) {
-//            Bitmap bitmap = sticker.getBitmap();
+//            Bitmap bitmap = sticker.getStickerImage();
 //            Matrix matrix = new Matrix();
 //            matrix.postScale(sx, sy);
 //            Bitmap bitmap1 = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-//            sticker.setBitmap(bitmap1);
+//            sticker.setStickerImage(bitmap1);
 //            BitmapUtils.recycleBitmaps(bitmap);
 //        }
 //    }

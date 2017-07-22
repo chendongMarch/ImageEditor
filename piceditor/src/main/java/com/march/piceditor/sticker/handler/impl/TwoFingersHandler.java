@@ -1,6 +1,5 @@
 package com.march.piceditor.sticker.handler.impl;
 
-import android.graphics.RectF;
 import android.view.MotionEvent;
 
 import com.march.dev.utils.LogUtils;
@@ -31,24 +30,22 @@ public class TwoFingersHandler extends StickerBaseTouchHandler {
     @Override
     public void onTouchMove(MotionEvent event) {
 
-        LogUtils.e(TAG,isHadStickerActive()+ " " +event.getPointerCount() + " "+mLastFingersDistance + " "+mLastRotation );
         if (isHadStickerActive()
                 && event.getPointerCount() == 2
                 && mLastFingersDistance > 0) {
 
-            RectF rectF = mActiveSticker.getRectF();
-
             // 缩放
             float distance = CalculateUtils.calculateDistance(event);
             float scale = distance * 1f / mLastFingersDistance;
-            float cy = rectF.centerY();
-            float cx = rectF.centerX();
-            mActiveSticker.getMatrix().postScale(scale, scale, cx, cy);
+            LogUtils.e(TAG, scale + "");
+            if (mActiveSticker.isCanScale(scale)) {
+                mActiveSticker.postMatrixScale(scale, scale);
+            }
             mLastFingersDistance = distance;
 
             // 旋转
             float rotation = CalculateUtils.calculateRotation(event);
-            mActiveSticker.getMatrix().postRotate(rotation - mLastRotation, cx, cy);
+            mActiveSticker.postMatrixRotate(rotation - mLastRotation);
             mLastRotation = rotation;
         }
     }

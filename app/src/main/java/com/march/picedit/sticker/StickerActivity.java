@@ -40,7 +40,7 @@ import io.reactivex.schedulers.Schedulers;
  */
 public class StickerActivity extends BaseActivity {
 
-    private LightAdapter<StickerSource> mAdapter;
+    public static final String TAG = StickerActivity.class.getSimpleName();
 
     @Override
     protected int getLayoutId() {
@@ -49,7 +49,6 @@ public class StickerActivity extends BaseActivity {
 
     @BindView(R.id.rv_sticker) RecyclerView mStickerRv;
 
-    private List<StickerSource> mStickerSources;
 
     @Override
     public void onInitViews(View view, Bundle saveData) {
@@ -59,7 +58,7 @@ public class StickerActivity extends BaseActivity {
         Observable.create(new ObservableOnSubscribe<List<StickerSource>>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<List<StickerSource>> e) throws Exception {
-                mStickerSources = new Gson().fromJson(
+                List<StickerSource> mStickerSources = new Gson().fromJson(
                         new BufferedReader(new InputStreamReader(
                                 getAssets().open("sticker.json"))),
                         new TypeToken<List<StickerSource>>() {
@@ -82,11 +81,10 @@ public class StickerActivity extends BaseActivity {
     }
 
 
-    public static final String TAG = StickerActivity.class.getSimpleName();
 
     private void createAdapter(List<StickerSource> list) {
         LogUtils.e(TAG, Thread.currentThread().getName());
-        mAdapter = new LightAdapter<StickerSource>(mContext, list, R.layout.sticker_item) {
+        LightAdapter<StickerSource> adapter = new LightAdapter<StickerSource>(mContext, list, R.layout.sticker_item) {
             int spanCount = 3;
             int size = (int) (DimensUtils.getScreenWidth(mContext) * 1f / spanCount);
 
@@ -98,13 +96,13 @@ public class StickerActivity extends BaseActivity {
                         .into((ImageView) holder.getView(R.id.iv_image));
             }
         };
-        mAdapter.setOnItemListener(new SimpleItemListener<StickerSource>() {
+        adapter.setOnItemListener(new SimpleItemListener<StickerSource>() {
             @Override
             public void onClick(int pos, ViewHolder holder, StickerSource data) {
 
             }
         });
         mStickerRv.setLayoutManager(new GridLayoutManager(mContext, 3, LinearLayoutManager.VERTICAL, false));
-        mStickerRv.setAdapter(mAdapter);
+        mStickerRv.setAdapter(adapter);
     }
 }
