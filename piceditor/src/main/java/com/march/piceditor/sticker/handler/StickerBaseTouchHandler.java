@@ -1,6 +1,6 @@
 package com.march.piceditor.sticker.handler;
 
-import com.march.piceditor.base.TouchHandler;
+import com.march.piceditor.common.TouchHandler;
 import com.march.piceditor.sticker.model.Sticker;
 
 /**

@@ -1,4 +1,4 @@
-package com.march.piceditor.base;
+package com.march.piceditor.common;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;

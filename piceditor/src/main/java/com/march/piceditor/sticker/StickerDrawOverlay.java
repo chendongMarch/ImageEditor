@@ -13,6 +13,7 @@ import android.view.View;
 
 import com.march.dev.utils.DrawUtils;
 import com.march.dev.utils.LogUtils;
+import com.march.piceditor.common.model.ClickChecker;
 import com.march.piceditor.common.model.Point;
 import com.march.piceditor.sticker.handler.StickerBaseTouchHandler;
 import com.march.piceditor.sticker.handler.impl.BottomRightCornerHandler;
@@ -56,6 +57,7 @@ public class StickerDrawOverlay extends View {
     private Paint mStickerPaint;
     private Paint mPaintLine;
 
+    private ClickChecker mClickChecker;
     private SparseArrayCompat<StickerBaseTouchHandler> mTouchHandlerMap;
     private StickerBaseTouchHandler                    mCurrentHandler;
     private SparseArrayCompat<Drawable>                mMenuIconMap;
@@ -71,6 +73,7 @@ public class StickerDrawOverlay extends View {
         mTouchHandlerMap = new SparseArrayCompat<>();
         mStickers = new ArrayList<>();
         mMenuIconMap = new SparseArrayCompat<>();
+        mClickChecker = new ClickChecker();
     }
 
 
@@ -134,10 +137,6 @@ public class StickerDrawOverlay extends View {
         }
     }
 
-    // 时间小于<400 移动距离<
-
-    private long  mLastDownTime;
-    private Point mLastDownPoint;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -148,10 +147,8 @@ public class StickerDrawOverlay extends View {
 
             switch (actionMasked) {
                 case MotionEvent.ACTION_DOWN:
-                    mLastDownTime = System.currentTimeMillis();
-                    mLastDownPoint = new Point(event.getX(), event.getY());
+                    mClickChecker.onTouchDown(event);
                     mCurrentHandler = findTouchHandlerOnTouchDown(event);
-                    LogUtils.e(TAG, "action_down - " + (mCurrentHandler == null ? "没有处理者" : mCurrentHandler.getClass().getSimpleName()));
                     postInvalidate();
                     break;
                 case MotionEvent.ACTION_MOVE:
@@ -162,15 +159,13 @@ public class StickerDrawOverlay extends View {
                     break;
                 case MotionEvent.ACTION_POINTER_DOWN:
                     mCurrentHandler = findTouchHandlerOnTouchDown(event);
-                    LogUtils.e(TAG, "action_pointer_down - " + (mCurrentHandler == null ? "没有处理者" : mCurrentHandler.getClass().getSimpleName()));
                     postInvalidate();
                     break;
                 case MotionEvent.ACTION_UP:
-                    // case MotionEvent.ACTION_POINTER_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    LogUtils.e(TAG, "action_up - " + (mCurrentHandler == null ? "没有处理者" : mCurrentHandler.getClass().getSimpleName()));
+                // case MotionEvent.ACTION_POINTER_UP:
+                // case MotionEvent.ACTION_CANCEL:
                     // 如果是点击事件
-                    if (isClick(event)) {
+                    if (mClickChecker.isClick(event)) {
                         // 分发菜单点击事件
                         if (!dispatchMenuClick(event)) {
                             // 不是菜单点击的话， 查看是不是选择了新的贴纸
@@ -188,13 +183,6 @@ public class StickerDrawOverlay extends View {
         return true;
     }
 
-    private boolean isClick(MotionEvent event) {
-        long diffTime = System.currentTimeMillis() - mLastDownTime;
-        float diffX = event.getX() - mLastDownPoint.x;
-        float diffY = event.getY() - mLastDownPoint.y;
-        LogUtils.e(TAG, diffTime + " " + diffX + " " + diffY);
-        return diffTime < 400 && Math.abs(diffX) < 50 && Math.abs(diffY) < 50;
-    }
 
     // 便利查找应该激活的贴纸
     private void findActiveSticker(MotionEvent event) {
@@ -238,7 +226,7 @@ public class StickerDrawOverlay extends View {
     }
 
     private boolean dispatchMenuClick(MotionEvent event) {
-        if (mActiveSticker != null && isClick(event)) {
+        if (mActiveSticker != null && mClickChecker.isClick(event)) {
             for (StickerMenu menu : mActiveSticker.getStickerMenus()) {
                 if (menu != null && menu.isTouchIn(event.getX(), event.getY())) {
                     if (menu.getStickerMenuHandler() != null)
