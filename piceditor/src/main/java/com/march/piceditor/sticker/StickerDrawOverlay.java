@@ -12,7 +12,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.march.dev.utils.DrawUtils;
-import com.march.dev.utils.LogUtils;
 import com.march.piceditor.common.model.ClickChecker;
 import com.march.piceditor.common.model.Point;
 import com.march.piceditor.sticker.handler.StickerBaseTouchHandler;
@@ -57,13 +56,16 @@ public class StickerDrawOverlay extends View {
     private Paint mStickerPaint;
     private Paint mPaintLine;
 
-    private ClickChecker mClickChecker;
+    private ClickChecker                               mClickChecker;
     private SparseArrayCompat<StickerBaseTouchHandler> mTouchHandlerMap;
     private StickerBaseTouchHandler                    mCurrentHandler;
     private SparseArrayCompat<Drawable>                mMenuIconMap;
     private List<Sticker>                              mStickers;
 
     private Sticker mActiveSticker;
+
+    private StickerMenuHandler     mStickerMenuHandler;
+    private OnStickerEventListener mOnStickerEventListener;
 
 
     private void init() {
@@ -162,8 +164,8 @@ public class StickerDrawOverlay extends View {
                     postInvalidate();
                     break;
                 case MotionEvent.ACTION_UP:
-                // case MotionEvent.ACTION_POINTER_UP:
-                // case MotionEvent.ACTION_CANCEL:
+                    // case MotionEvent.ACTION_POINTER_UP:
+                    // case MotionEvent.ACTION_CANCEL:
                     // 如果是点击事件
                     if (mClickChecker.isClick(event)) {
                         // 分发菜单点击事件
@@ -184,21 +186,29 @@ public class StickerDrawOverlay extends View {
     }
 
 
-    // 便利查找应该激活的贴纸
+    // 遍历查找应该激活的贴纸
+    // 怎么能让重叠的贴纸自动切换，检测时不检测当前贴纸，如果最后还是找到了，则将当前贴纸置于底层
     private void findActiveSticker(MotionEvent event) {
         // 将当前贴纸置空
         Sticker preSticker = mActiveSticker;
         if (preSticker != null)
             preSticker.setActive(false);
+        boolean autoLifting = preSticker != null && preSticker.isAutoLifting();
         mActiveSticker = null;
         Sticker tempSticker;
         for (int i = mStickers.size() - 1; i >= 0; i--) {
             tempSticker = mStickers.get(i);
             if (tempSticker.isDelete())
                 continue;
-            if (tempSticker.isTouchIn(event.getX(), event.getY())) {
+            boolean isCheckIn;
+            if (autoLifting) {
+                isCheckIn = !tempSticker.equals(preSticker) && tempSticker.isTouchIn(event.getX(), event.getY());
+            } else {
+                isCheckIn = tempSticker.isTouchIn(event.getX(), event.getY());
+            }
+            if (isCheckIn) {
                 mActiveSticker = tempSticker;
-                mActiveSticker.updatePriority();
+                mActiveSticker.bringTopLayer();
                 mActiveSticker.setActive(true);
                 Collections.sort(mStickers);
                 if (mOnStickerEventListener != null) {
@@ -207,6 +217,11 @@ public class StickerDrawOverlay extends View {
                 break;
             }
         }
+        // 自动提升时,找到了新的，将上一个置于底层
+        if (autoLifting && mActiveSticker != null) {
+            preSticker.bringBottomLayer();
+            Collections.sort(mStickers);
+        }
         if (mActiveSticker == null) {
             if (mOnStickerEventListener != null) {
                 mOnStickerEventListener.OnEmptyAreaClick();
@@ -214,8 +229,7 @@ public class StickerDrawOverlay extends View {
         }
     }
 
-    private StickerMenuHandler     mStickerMenuHandler;
-    private OnStickerEventListener mOnStickerEventListener;
+
 
     public void setStickerMenuHandler(StickerMenuHandler stickerMenuHandler) {
         mStickerMenuHandler = stickerMenuHandler;

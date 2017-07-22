@@ -30,7 +30,7 @@ public class Sticker implements Comparable<Sticker> {
     private long    mPriority;
 
     private int mMinSize, mMaxSize;
-
+    private boolean                mIsAutoLifting;
     private ColorMatrixColorFilter mColorFilter;
 
     private SparseArray<Point>       mPointMap;
@@ -106,8 +106,12 @@ public class Sticker implements Comparable<Sticker> {
         mStickerImage = stickerImage;
     }
 
-    public void updatePriority() {
+    public void bringTopLayer() {
         mPriority = System.currentTimeMillis();
+    }
+
+    public void bringBottomLayer() {
+        mPriority = -System.currentTimeMillis();
     }
 
     public RectF getRectF() {
@@ -189,6 +193,14 @@ public class Sticker implements Comparable<Sticker> {
 
     public void setMaxSize(int maxSize) {
         mMaxSize = maxSize;
+    }
+
+    public boolean isAutoLifting() {
+        return mIsAutoLifting;
+    }
+
+    public void setAutoLifting(boolean autoLifting) {
+        mIsAutoLifting = autoLifting;
     }
 
     // matrix 辅助

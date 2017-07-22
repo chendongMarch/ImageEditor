@@ -100,6 +100,8 @@ public class TestCompressImageActivity extends BaseActivity {
             sticker.setMinSize(200);
             sticker.setMaxSize(1000);
 
+            sticker.setAutoLifting(i % 2 == 0);
+
             mStickerDrawOverlay.addSticker(sticker);
         }
 
