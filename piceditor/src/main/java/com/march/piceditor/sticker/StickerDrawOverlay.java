@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v4.util.SparseArrayCompat;
 import android.util.AttributeSet;
@@ -26,6 +25,7 @@ import com.march.piceditor.sticker.model.StickerMenu;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -59,7 +59,6 @@ public class StickerDrawOverlay extends View {
     private ClickChecker                               mClickChecker;
     private SparseArrayCompat<StickerBaseTouchHandler> mTouchHandlerMap;
     private StickerBaseTouchHandler                    mCurrentHandler;
-    private SparseArrayCompat<Drawable>                mMenuIconMap;
     private List<Sticker>                              mStickers;
 
     private Sticker mActiveSticker;
@@ -74,7 +73,6 @@ public class StickerDrawOverlay extends View {
         mPaintLine = DrawUtils.newPaint(Color.WHITE, 2, Paint.Style.STROKE);
         mTouchHandlerMap = new SparseArrayCompat<>();
         mStickers = new ArrayList<>();
-        mMenuIconMap = new SparseArrayCompat<>();
         mClickChecker = new ClickChecker();
     }
 
@@ -88,6 +86,19 @@ public class StickerDrawOverlay extends View {
         mStickers.add(sticker);
     }
 
+    /**
+     * 真的删除贴纸
+     * @param sticker 贴纸
+     */
+    public void removeSticker(Sticker sticker) {
+        sticker.destroy();
+        Iterator<Sticker> iterator = mStickers.iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().equals(sticker)) {
+                iterator.remove();
+            }
+        }
+    }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -142,11 +153,8 @@ public class StickerDrawOverlay extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
         try {
-
             int actionMasked = event.getActionMasked();
-
             switch (actionMasked) {
                 case MotionEvent.ACTION_DOWN:
                     mClickChecker.onTouchDown(event);
@@ -178,7 +186,6 @@ public class StickerDrawOverlay extends View {
                     postInvalidate();
                     break;
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

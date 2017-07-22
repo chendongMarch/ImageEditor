@@ -9,6 +9,7 @@ import android.graphics.RectF;
 import android.support.annotation.NonNull;
 import android.util.SparseArray;
 
+import com.march.dev.utils.BitmapUtils;
 import com.march.piceditor.common.model.Point;
 import com.march.piceditor.utils.CalculateUtils;
 import com.march.piceditor.utils.Utils;
@@ -42,6 +43,17 @@ public class Sticker implements Comparable<Sticker> {
     private ColorMatrixColorFilter   mColorFilter; // 颜色过滤器，将贴纸过滤成纯色
     private SparseArray<Point>       mCornerPointMap; // 四角点的位置，可倾斜矩形
     private SparseArray<StickerMenu> mMenuMap; // 四个菜单键的存储
+
+    public void destroy() {
+        System.gc();
+        mIsActive = false;
+        mIsDelete = true;
+        mColorFilter = null;
+        mCornerPointMap.clear();
+        mMenuMap.clear();
+        BitmapUtils.recycleBitmaps(mStickerImage);
+    }
+
 
     public Sticker(Context context) {
         mStickerImage = BitmapFactory.decodeResource(context.getResources(), android.R.mipmap.sym_def_app_icon);
@@ -98,6 +110,7 @@ public class Sticker implements Comparable<Sticker> {
     }
 
     private void init() {
+        mId = System.currentTimeMillis();
         mMatrix = new Matrix();
         mRectF = new RectF();
         mPriority = System.currentTimeMillis();
@@ -236,5 +249,21 @@ public class Sticker implements Comparable<Sticker> {
             // 缩小时，没设置限制 || 没到达最小值
             return mMaxSize <= 0 || Math.min(length1, length2) > mMinSize;
         } else return true;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Sticker sticker = (Sticker) o;
+        return mId == sticker.mId;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31;
     }
 }

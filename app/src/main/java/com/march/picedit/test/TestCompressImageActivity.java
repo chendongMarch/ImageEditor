@@ -79,7 +79,7 @@ public class TestCompressImageActivity extends BaseActivity {
             // delete handler & tag
             StickerMenu topLeftMenu = new StickerMenu(Position.TOP_LEFT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_del));
             topLeftMenu.setTag(100);
-            topLeftMenu.setStickerMenuHandler(EasyMenuHandler.DELETE_MENU);
+            // topLeftMenu.setStickerMenuHandler(EasyMenuHandler.DELETE_MENU);
 
             // flip vertical handler
             StickerMenu topRightMenu = new StickerMenu(Position.TOP_RIGHT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_symmetry));
@@ -110,7 +110,7 @@ public class TestCompressImageActivity extends BaseActivity {
             public void onMenuClick(Sticker sticker, StickerMenu menu) {
                 ToastUtils.show("click menu " + menu.getPositionType());
                 if (menu.getPositionType() == Position.TOP_LEFT) {
-                    sticker.setDelete(true);
+                   mStickerDrawOverlay.removeSticker(sticker);
                 }
             }
         });
