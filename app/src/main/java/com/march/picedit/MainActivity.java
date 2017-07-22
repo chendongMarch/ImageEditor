@@ -6,6 +6,7 @@ import com.march.dev.app.activity.BaseActivity;
 import com.march.dev.model.ImageInfo;
 import com.march.dev.uikit.selectimg.SelectImageActivity;
 import com.march.picedit.edit.EditCropRotateActivity;
+import com.march.picedit.sticker.StickerActivity;
 import com.march.picedit.test.TestCompressImageActivity;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -21,7 +22,7 @@ public class MainActivity extends BaseActivity {
         return R.layout.home_activity;
     }
 
-    @OnClick({R.id.btn_choose_pic, R.id.btn_test})
+    @OnClick({R.id.btn_choose_pic, R.id.btn_test, R.id.btn_sticker_source})
     public void clickView(View view) {
         switch (view.getId()) {
             case R.id.btn_choose_pic:
@@ -29,6 +30,9 @@ public class MainActivity extends BaseActivity {
                 break;
             case R.id.btn_test:
                 startActivity(TestCompressImageActivity.class);
+                break;
+            case R.id.btn_sticker_source:
+                startActivity(StickerActivity.class);
                 break;
         }
     }

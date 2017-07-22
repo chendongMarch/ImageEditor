@@ -21,7 +21,7 @@ public class BottomRightCornerHandler extends StickerBaseTouchHandler {
     public void onTouchDown(MotionEvent event) {
         if (event.getPointerCount() == 1 && isHadStickerActive()) {
             RectF rectF = mActiveSticker.getRectF();
-            mLastDistance = CalculateUtils.calculateFingersDistance(rectF.centerX(), rectF.centerY(), event.getX(), event.getY());
+            mLastDistance = CalculateUtils.calculateDistance(rectF.centerX(), rectF.centerY(), event.getX(), event.getY());
             mLastRotation = CalculateUtils.calculateRotation(rectF.centerX(), rectF.centerY(), event.getX(), event.getY());
         }
     }
@@ -34,7 +34,7 @@ public class BottomRightCornerHandler extends StickerBaseTouchHandler {
 
             RectF rectF = mActiveSticker.getRectF();
 
-            float distance = CalculateUtils.calculateFingersDistance(rectF.centerX(), rectF.centerY(), event.getX(), event.getY());
+            float distance = CalculateUtils.calculateDistance(rectF.centerX(), rectF.centerY(), event.getX(), event.getY());
             float cy = rectF.centerY();
             float cx = rectF.centerX();
             float scale = distance * 1f / mLastDistance;

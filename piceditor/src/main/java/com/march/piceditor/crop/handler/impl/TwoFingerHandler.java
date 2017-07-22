@@ -18,14 +18,14 @@ public class TwoFingerHandler extends CropBaseHandler {
     @Override
     public void onTouchDown(MotionEvent event) {
         if (event.getPointerCount() == 2) {
-            mLastFingersDistance = CalculateUtils.calculateFingersDistance(event);
+            mLastFingersDistance = CalculateUtils.calculateDistance(event);
         }
     }
 
     @Override
     public void onTouchMove(MotionEvent event) {
         if (event.getPointerCount() == 2 && mLastFingersDistance > 0) {
-            float distance = CalculateUtils.calculateFingersDistance(event);
+            float distance = CalculateUtils.calculateDistance(event);
             if (mLastFingersDistance != 0) {
                 float scale = distance * 1f / mLastFingersDistance;
                 scaleRect(scale);

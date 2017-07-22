@@ -32,6 +32,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.util.Map;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -75,7 +76,7 @@ public class TestCompressImageActivity extends BaseActivity {
         for (int i = 0; i < 5; i++) {
             Sticker sticker = new Sticker(mContext);
 
-             StickerMenu topLeftMenu = new StickerMenu(Position.TOP_LEFT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_del));
+            StickerMenu topLeftMenu = new StickerMenu(Position.TOP_LEFT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_del));
             topLeftMenu.setTag(100);
             topLeftMenu.setStickerMenuHandler(EasyMenuHandler.DELETE_MENU);
 
@@ -85,6 +86,7 @@ public class TestCompressImageActivity extends BaseActivity {
             StickerMenu bottomLeftMenu = new StickerMenu(Position.BOTTOM_LEFT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_color_white));
             StickerMenu bottomRightMenu = new StickerMenu(Position.BOTTOM_RIGHT, mResourceFactory.decodeDrawable(R.drawable.sticker_edit_control));
             sticker.addStickerMenu(topLeftMenu, topRightMenu, bottomLeftMenu, bottomRightMenu);
+            sticker.setColorFilter(new Random().nextInt(225),new Random().nextInt(225),new Random().nextInt(225));
             mStickerDrawOverlay.addSticker(sticker);
         }
 

@@ -10,7 +10,7 @@ import com.march.piceditor.sticker.model.StickerMenu;
 
 /**
  * CreateAt : 7/22/17
- * Describe :
+ * Describe : 内置简单版本 menu
  *
  * @author chendong
  */
@@ -36,7 +36,7 @@ public enum EasyMenuHandler implements StickerMenuHandler {
             flip(-1, 1, sticker);
         }
     },
-    // 水平翻转
+    // 双向翻转
     FLIP_SKEW() {
         @Override
         public void onMenuClick(Sticker sticker, StickerMenu menu) {

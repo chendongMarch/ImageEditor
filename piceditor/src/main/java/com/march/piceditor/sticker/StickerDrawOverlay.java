@@ -73,6 +73,7 @@ public class StickerDrawOverlay extends View {
         mMenuIconMap = new SparseArrayCompat<>();
     }
 
+
     /**
      * 添加贴纸
      *
@@ -109,6 +110,7 @@ public class StickerDrawOverlay extends View {
                 if (sticker.isDelete())
                     continue;
                 if (sticker.getBitmap() != null && !sticker.getBitmap().isRecycled()) {
+                    mStickerPaint.setColorFilter(sticker.getColorFilter());
                     canvas.drawBitmap(sticker.getBitmap(), sticker.getMatrix(), mStickerPaint);
                 }
                 if (mActiveSticker != null && mActiveSticker.equals(sticker)) {

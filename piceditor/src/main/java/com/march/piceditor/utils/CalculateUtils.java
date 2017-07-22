@@ -12,12 +12,16 @@ import com.march.piceditor.common.model.Point;
  */
 public class CalculateUtils {
 
-    public static float calculateFingersDistance(float x1, float y1, float x2, float y2) {
+    public static float calculateDistance(Point p1, Point p2){
+        return (float) Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+    }
+
+    public static float calculateDistance(float x1, float y1, float x2, float y2) {
         return (float) Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
     }
 
-    public static float calculateFingersDistance(MotionEvent event) {
-        return calculateFingersDistance(event.getX(0), event.getY(0), event.getX(1), event.getY(1));
+    public static float calculateDistance(MotionEvent event) {
+        return calculateDistance(event.getX(0), event.getY(0), event.getX(1), event.getY(1));
     }
 
 
@@ -53,6 +57,7 @@ public class CalculateUtils {
         return 0 < h && h < 1 && 0 < k && k < 1;
 
     }
+
 
     public static void swapPoint(Point p1, Point p2) {
         float x = p1.x;

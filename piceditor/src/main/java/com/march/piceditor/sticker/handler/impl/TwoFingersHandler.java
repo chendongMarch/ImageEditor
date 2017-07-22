@@ -23,7 +23,7 @@ public class TwoFingersHandler extends StickerBaseTouchHandler {
     @Override
     public void onTouchDown(MotionEvent event) {
         if (isHadStickerActive() && event.getPointerCount() == 2) {
-            mLastFingersDistance = CalculateUtils.calculateFingersDistance(event);
+            mLastFingersDistance = CalculateUtils.calculateDistance(event);
             mLastRotation = CalculateUtils.calculateRotation(event);
         }
     }
@@ -39,7 +39,7 @@ public class TwoFingersHandler extends StickerBaseTouchHandler {
             RectF rectF = mActiveSticker.getRectF();
 
             // 缩放
-            float distance = CalculateUtils.calculateFingersDistance(event);
+            float distance = CalculateUtils.calculateDistance(event);
             float scale = distance * 1f / mLastFingersDistance;
             float cy = rectF.centerY();
             float cx = rectF.centerX();

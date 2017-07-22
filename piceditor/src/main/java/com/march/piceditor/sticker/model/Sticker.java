@@ -3,6 +3,7 @@ package com.march.piceditor.sticker.model;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.support.annotation.NonNull;
@@ -10,6 +11,7 @@ import android.util.SparseArray;
 
 import com.march.piceditor.common.model.Point;
 import com.march.piceditor.utils.CalculateUtils;
+import com.march.piceditor.utils.Utils;
 
 import java.util.Random;
 
@@ -21,12 +23,13 @@ import java.util.Random;
  */
 public class Sticker implements Comparable<Sticker> {
 
-    private Bitmap  mBitmap;
-    private Matrix  mMatrix;
-    private RectF   mRectF;
-    private boolean mIsActive;
-    private boolean mDelete;
-    private long    mPriority;
+    private Bitmap                 mBitmap;
+    private Matrix                 mMatrix;
+    private RectF                  mRectF;
+    private boolean                mIsActive;
+    private boolean                mDelete;
+    private long                   mPriority;
+    private ColorMatrixColorFilter mColorFilter;
 
     private SparseArray<Point>       mPointMap;
     private SparseArray<StickerMenu> mMenuMap;
@@ -157,6 +160,20 @@ public class Sticker implements Comparable<Sticker> {
         }
     }
 
+    public void setColorFilter(int red, int green, int blue) {
+        if (red == -1 || green == -1 || blue == -1) {
+            mColorFilter = null;
+        } else
+            mColorFilter = Utils.buildColorFilter(red, green, blue);
+    }
+
+    public void setNoColorFilter() {
+        mColorFilter = null;
+    }
+
+    public ColorMatrixColorFilter getColorFilter() {
+        return mColorFilter;
+    }
 
     // matrix 辅助
     public void postMatrixScale(float sx, float sy) {
