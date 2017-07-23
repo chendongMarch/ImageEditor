@@ -343,12 +343,7 @@ public class StickerDrawOverlay extends View {
     }
 
 
-    /**
-     * 激活一张贴纸
-     *
-     * @param preSticker
-     * @param sticker
-     */
+    // 激活一张贴纸
     private void activeOneSticker(Sticker preSticker, Sticker sticker) {
         if (preSticker != null) {
             preSticker.setActive(false);
@@ -363,14 +358,8 @@ public class StickerDrawOverlay extends View {
     }
 
 
-    public void setStickerMenuHandler(StickerMenuHandler stickerMenuHandler) {
-        mStickerMenuHandler = stickerMenuHandler;
-    }
 
-    public void setOnStickerEventListener(OnStickerEventListener onStickerEventListener) {
-        mOnStickerEventListener = onStickerEventListener;
-    }
-
+    // 分发菜单点击事件
     private boolean dispatchMenuClick(MotionEvent event) {
         if (mActiveSticker != null && mClickChecker.isClick(event)) {
             for (StickerMenu menu : mActiveSticker.getStickerMenus()) {
@@ -386,11 +375,10 @@ public class StickerDrawOverlay extends View {
         return false;
     }
 
-    // mode1
-    // 单指，中间位置，激活，移动
-    // 双指，缩放激活的哪个
-    // 右下角，旋转缩放
 
+
+
+    // 手指触摸时查找合适的处理者
     // mode2
     // 单指，中间位置，激活
     // 单指任何位置，移动激活那个
@@ -424,6 +412,7 @@ public class StickerDrawOverlay extends View {
     }
 
 
+    // 创建手势处理者
     private StickerBaseTouchHandler getTouchHandler(int touchType) {
         StickerBaseTouchHandler handler = mTouchHandlerMap.get(touchType);
         if (handler == null) {
@@ -445,4 +434,13 @@ public class StickerDrawOverlay extends View {
         return handler;
     }
 
+
+
+    public void setStickerMenuHandler(StickerMenuHandler stickerMenuHandler) {
+        mStickerMenuHandler = stickerMenuHandler;
+    }
+
+    public void setOnStickerEventListener(OnStickerEventListener onStickerEventListener) {
+        mOnStickerEventListener = onStickerEventListener;
+    }
 }
