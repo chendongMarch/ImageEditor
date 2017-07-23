@@ -64,7 +64,11 @@ public class StickerImageActivity extends BaseActivity {
                 .downloadOnly(new SimpleTarget<File>() {
                     @Override
                     public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
-                        addSticker(BitmapFactory.decodeFile(resource.getAbsolutePath()));
+                        Bitmap bitmap = BitmapFactory.decodeFile(resource.getAbsolutePath());
+
+                        addSticker(bitmap);
+                        addSticker(bitmap);
+                        addSticker(bitmap);
                     }
                 });
     }
@@ -76,11 +80,11 @@ public class StickerImageActivity extends BaseActivity {
                 StickerSourceActivity.start(mActivity);
                 break;
             case R.id.tv_sticker_big:
-                mStickerDrawOverlay.getActiveSticker().postMatrixScale(1.1f,1.1f);
+                mStickerDrawOverlay.getActiveSticker().postMatrixScale(1.1f, 1.1f);
                 mStickerDrawOverlay.invalidate();
                 break;
             case R.id.tv_sticker_small:
-                mStickerDrawOverlay.getActiveSticker().postMatrixScale(1f,1f);
+                mStickerDrawOverlay.getActiveSticker().postMatrixScale(1f, 1f);
                 mStickerDrawOverlay.invalidate();
                 break;
         }
@@ -132,7 +136,6 @@ public class StickerImageActivity extends BaseActivity {
         // sticker.setMaxSize(1000);
 
         sticker.setAutoLifting(true);
-
-        mStickerDrawOverlay.addSticker(sticker,true);
+        mStickerDrawOverlay.addSticker(sticker, true);
     }
 }

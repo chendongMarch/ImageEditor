@@ -22,6 +22,8 @@ import com.march.piceditor.utils.Utils;
  */
 public class Sticker implements Comparable<Sticker> {
 
+    private static int sStaticId = 0;
+
     private Bitmap mStickerImage; // 贴纸资源
     private Matrix mMatrix; // 贴纸变换
     private RectF  mRectF; // 贴纸对应区域，注意，这里是水平矩形，不会旋转
@@ -35,7 +37,7 @@ public class Sticker implements Comparable<Sticker> {
     // 点击时会将当前贴纸下面的贴纸提升上来，
     // 避免因为遮挡无法点击下层贴纸
     private boolean mIsAutoLifting;
-    private long    mId;
+    private int    mId;
     private long    mPriority; // 当前贴纸绘制优先级别
     private int     mMinSize; // 最小限制，不设置时表示不限制
     private int     mMaxSize; // 最大限制，不设置时表示不限制\
@@ -60,7 +62,7 @@ public class Sticker implements Comparable<Sticker> {
 
 
     private void init() {
-        mId = System.currentTimeMillis();
+        mId = sStaticId++;
         mMatrix = new Matrix();
         mRectF = new RectF();
         mPriority = System.currentTimeMillis();

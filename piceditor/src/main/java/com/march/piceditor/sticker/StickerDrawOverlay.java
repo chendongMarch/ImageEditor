@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.march.dev.utils.DrawUtils;
-import com.march.dev.utils.LogUtils;
 import com.march.piceditor.common.model.ClickChecker;
 import com.march.piceditor.common.model.Point;
 import com.march.piceditor.sticker.handler.StickerBaseTouchHandler;
@@ -42,6 +41,8 @@ import java.util.List;
 public class StickerDrawOverlay extends View {
 
     public static final String TAG = StickerDrawOverlay.class.getSimpleName();
+
+    private ValueAnimator mScaleAnimator;
 
     public StickerDrawOverlay(Context context) {
         this(context, null);
@@ -71,6 +72,12 @@ public class StickerDrawOverlay extends View {
     private StickerMenuHandler     mStickerMenuHandler;
     private OnStickerEventListener mOnStickerEventListener;
 
+    /*
+        scaleX skewX transX
+        skewY scaleY transY
+        persp0 persp1 persp2
+         */
+    private Matrix mAnimMatrix;
 
     private void init() {
         mStickerPaint = new Paint();
@@ -79,14 +86,9 @@ public class StickerDrawOverlay extends View {
         mTouchHandlerMap = new SparseArrayCompat<>();
         mStickers = new ArrayList<>();
         mClickChecker = new ClickChecker();
+        postInvalidate();
     }
 
-    /*
-    scaleX skewX transX
-    skewY scaleY transY
-    persp0 persp1 persp2
-     */
-    private Matrix mAnimMatrix;
 
     /**
      * 添加贴纸
@@ -94,16 +96,29 @@ public class StickerDrawOverlay extends View {
      * @param sticker 贴纸
      */
     public void addSticker(Sticker sticker, boolean withAnim) {
-        mStickers.add(sticker);
+
         if (withAnim)
             sticker.setInitScale(1);
+
         sticker.getMatrix().postScale(sticker.getInitScale(), sticker.getInitScale());
         if (sticker.getInitTranslateX() != 0 && sticker.getInitTranslateY() != 0)
             sticker.getMatrix().postTranslate(sticker.getInitTranslateX(), sticker.getInitTranslateY());
-        activeOneSticker(mActiveSticker, sticker);
+
+        mStickers.add(sticker);
+        if (mActiveSticker != null) {
+            mActiveSticker.setActive(false);
+        }
+        mActiveSticker = sticker;
+        mActiveSticker.setActive(true);
+        mActiveSticker.bringTopLayer();
+        Collections.sort(mStickers);
+
         postInvalidate();
         // 动画效果
         if (withAnim) {
+            if (mScaleAnimator != null) {
+                mScaleAnimator.cancel();
+            }
             startAddStickerAnimation();
         }
     }
@@ -112,10 +127,10 @@ public class StickerDrawOverlay extends View {
     // 添加贴纸时波动动画，未完成，现在只支持 scale = 1
     private void startAddStickerAnimation() {
         mAnimMatrix = new Matrix(mActiveSticker.getMatrix());
-        final ValueAnimator scaleAnim = ValueAnimator.ofFloat(0, 0.15f, 0);
-        scaleAnim.setDuration(700);
-        scaleAnim.setInterpolator(new AccelerateDecelerateInterpolator());
-        scaleAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        mScaleAnimator = ValueAnimator.ofFloat(0, 0.15f, 0);
+        mScaleAnimator.setDuration(500);
+        mScaleAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+        mScaleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 if (mActiveSticker != null && mAnimMatrix != null) {
@@ -131,7 +146,7 @@ public class StickerDrawOverlay extends View {
                 }
             }
         });
-        scaleAnim.addListener(new Animator.AnimatorListener() {
+        mScaleAnimator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animation) {
 
@@ -140,11 +155,21 @@ public class StickerDrawOverlay extends View {
             @Override
             public void onAnimationEnd(Animator animation) {
                 mAnimMatrix = null;
+                if (mScaleAnimator != null) {
+                    mScaleAnimator.removeAllListeners();
+                    mScaleAnimator.cancel();
+                    mScaleAnimator = null;
+                }
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
                 mAnimMatrix = null;
+                if (mScaleAnimator != null) {
+                    mScaleAnimator.removeAllListeners();
+                    mScaleAnimator.cancel();
+                    mScaleAnimator = null;
+                }
             }
 
             @Override
@@ -152,7 +177,7 @@ public class StickerDrawOverlay extends View {
 
             }
         });
-        scaleAnim.start();
+        mScaleAnimator.start();
     }
 
 
