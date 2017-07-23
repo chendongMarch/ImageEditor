@@ -64,11 +64,7 @@ public class StickerImageActivity extends BaseActivity {
                 .downloadOnly(new SimpleTarget<File>() {
                     @Override
                     public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
-                        Bitmap bitmap = BitmapFactory.decodeFile(resource.getAbsolutePath());
-
-                        addSticker(bitmap);
-                        addSticker(bitmap);
-                        addSticker(bitmap);
+                        addSticker(BitmapFactory.decodeFile(resource.getAbsolutePath()));
                     }
                 });
     }

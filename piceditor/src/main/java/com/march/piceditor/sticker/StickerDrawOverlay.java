@@ -62,21 +62,20 @@ public class StickerDrawOverlay extends View {
     private Paint mStickerPaint;
     private Paint mLinePaint;
 
-    private ClickChecker                               mClickChecker;
+    private ClickChecker  mClickChecker;
+    private List<Sticker> mStickers;
+    private Sticker       mActiveSticker;
+
     private SparseArrayCompat<StickerBaseTouchHandler> mTouchHandlerMap;
     private StickerBaseTouchHandler                    mCurrentHandler;
-    private List<Sticker>                              mStickers;
-
-    private Sticker mActiveSticker;
-
-    private StickerMenuHandler     mStickerMenuHandler;
-    private OnStickerEventListener mOnStickerEventListener;
+    private StickerMenuHandler                         mStickerMenuHandler;
+    private OnStickerEventListener                     mOnStickerEventListener;
 
     /*
-        scaleX skewX transX
-        skewY scaleY transY
-        persp0 persp1 persp2
-         */
+    scaleX skewX transX
+    skewY scaleY transY
+    persp0 persp1 persp2
+    */
     private Matrix mAnimMatrix;
 
     private void init() {
@@ -424,6 +423,7 @@ public class StickerDrawOverlay extends View {
         return null;
     }
 
+
     private StickerBaseTouchHandler getTouchHandler(int touchType) {
         StickerBaseTouchHandler handler = mTouchHandlerMap.get(touchType);
         if (handler == null) {
@@ -437,6 +437,9 @@ public class StickerDrawOverlay extends View {
                 case StickerBaseTouchHandler.TWO_FINGER:
                     handler = new TwoFingersHandler();
                     break;
+            }
+            if (handler != null) {
+                mTouchHandlerMap.put(touchType, handler);
             }
         }
         return handler;
