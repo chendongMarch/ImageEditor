@@ -40,5 +40,25 @@
             android:text="贴纸"
             android:textColor="@color/black"
             android:textSize="18sp"/>
+
+        <TextView
+            android:id="@+id/tv_sticker_small"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="small"
+            android:textColor="@color/black"
+            android:textSize="18sp"/>
+
+        <TextView
+            android:id="@+id/tv_sticker_big"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="big"
+            android:textColor="@color/black"
+            android:textSize="18sp"/>
     </android.support.v7.widget.LinearLayoutCompat>
 </LinearLayout>

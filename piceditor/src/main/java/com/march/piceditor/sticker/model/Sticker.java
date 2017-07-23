@@ -38,7 +38,10 @@ public class Sticker implements Comparable<Sticker> {
     private long    mId;
     private long    mPriority; // 当前贴纸绘制优先级别
     private int     mMinSize; // 最小限制，不设置时表示不限制
-    private int     mMaxSize; // 最大限制，不设置时表示不限制
+    private int     mMaxSize; // 最大限制，不设置时表示不限制\
+
+    private float mInitScale = 1;
+    private float mInitTranslateX, mInitTranslateY;
 
     private ColorMatrixColorFilter   mColorFilter; // 颜色过滤器，将贴纸过滤成纯色
     private SparseArray<Point>       mCornerPointMap; // 四角点的位置，可倾斜矩形
@@ -119,6 +122,18 @@ public class Sticker implements Comparable<Sticker> {
     }
 
 
+    public float getInitScale() {
+        return mInitScale;
+    }
+
+    public float getInitTranslateX() {
+        return mInitTranslateX;
+    }
+
+    public float getInitTranslateY() {
+        return mInitTranslateY;
+    }
+
     public void setStickerImage(Bitmap stickerImage) {
         mStickerImage = stickerImage;
     }
@@ -196,12 +211,12 @@ public class Sticker implements Comparable<Sticker> {
     }
 
     public void setInitScale(float initScale) {
-        getMatrix().postScale(initScale, initScale);
+        mInitScale = initScale;
     }
 
     public void setInitTranslate(float tx, float ty) {
-
-        getMatrix().postTranslate(tx, ty);
+        mInitTranslateX = tx;
+        mInitTranslateY = ty;
     }
 
     public void setMinSize(int minSize) {

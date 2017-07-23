@@ -101,7 +101,7 @@ public class TestCompressImageActivity extends BaseActivity {
 
             sticker.setAutoLifting(i % 2 == 0);
 
-            mStickerDrawOverlay.addSticker(sticker);
+            mStickerDrawOverlay.addSticker(sticker,false);
         }
 
         mStickerDrawOverlay.setStickerMenuHandler(new StickerMenuHandler() {

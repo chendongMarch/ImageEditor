@@ -24,12 +24,15 @@ public class MoveHandler extends StickerBaseTouchHandler {
 
     @Override
     public void onTouchMove(MotionEvent event) {
-        if(event.getPointerCount() == 1 && isHadStickerActive()
+        if(event.getPointerCount() == 1
+                && isHadStickerActive()
                 && mInitX>0&&mInitY>0) {
             float diffX = event.getX() - mInitX;
             float diffY = event.getY() - mInitY;
-            // 位移
-            mActiveSticker.getMatrix().postTranslate(diffX, diffY);
+            if (mActiveSticker!=null && mActiveSticker.getMatrix()!=null) {
+                // 位移
+                mActiveSticker.getMatrix().postTranslate(diffX, diffY);
+            }
             mInitX = event.getX();
             mInitY = event.getY();
         }

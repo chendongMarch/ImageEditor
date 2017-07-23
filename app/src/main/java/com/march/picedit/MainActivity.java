@@ -1,11 +1,13 @@
 package com.march.picedit;
 
+import android.os.Bundle;
 import android.view.View;
 import android.widget.SimpleAdapter;
 
 import com.march.dev.app.activity.BaseActivity;
 import com.march.dev.model.ImageInfo;
 import com.march.dev.uikit.selectimg.SelectImageActivity;
+import com.march.dev.utils.FileUtils;
 import com.march.picedit.edit.EditCropRotateActivity;
 import com.march.picedit.sticker.StickerImageActivity;
 import com.march.picedit.test.TestCompressImageActivity;
@@ -21,6 +23,13 @@ public class MainActivity extends BaseActivity {
     @Override
     protected int getLayoutId() {
         return R.layout.home_activity;
+    }
+
+
+    @Override
+    public void onInitViews(View view, Bundle saveData) {
+        super.onInitViews(view, saveData);
+        StickerImageActivity.start(mActivity, FileUtils.newRootFile("2.jpg").getAbsolutePath());
     }
 
     @OnClick({R.id.btn_choose_pic, R.id.btn_test, R.id.btn_sticker_test})

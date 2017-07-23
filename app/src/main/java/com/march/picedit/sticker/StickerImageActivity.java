@@ -69,11 +69,19 @@ public class StickerImageActivity extends BaseActivity {
                 });
     }
 
-    @OnClick({R.id.tv_sticker})
+    @OnClick({R.id.tv_sticker, R.id.tv_sticker_big, R.id.tv_sticker_small})
     public void clickView(View view) {
         switch (view.getId()) {
             case R.id.tv_sticker:
                 StickerSourceActivity.start(mActivity);
+                break;
+            case R.id.tv_sticker_big:
+                mStickerDrawOverlay.getActiveSticker().postMatrixScale(1.1f,1.1f);
+                mStickerDrawOverlay.invalidate();
+                break;
+            case R.id.tv_sticker_small:
+                mStickerDrawOverlay.getActiveSticker().postMatrixScale(1f,1f);
+                mStickerDrawOverlay.invalidate();
                 break;
         }
     }
@@ -117,14 +125,14 @@ public class StickerImageActivity extends BaseActivity {
         // sticker color filter
         // sticker.setColorFilter(new Random().nextInt(225), new Random().nextInt(225), new Random().nextInt(225));
         // init position & init scale
-        sticker.setInitTranslate(new Random().nextInt(450), new Random().nextInt(450));
-        // sticker.setInitScale(1.5f);
+        sticker.setInitTranslate(250 + new Random().nextInt(350), 250 + new Random().nextInt(350));
+        sticker.setInitScale(1f);
         // min size & max size
         sticker.setMinSize(100);
         // sticker.setMaxSize(1000);
 
         sticker.setAutoLifting(true);
 
-        mStickerDrawOverlay.addSticker(sticker);
+        mStickerDrawOverlay.addSticker(sticker,true);
     }
 }

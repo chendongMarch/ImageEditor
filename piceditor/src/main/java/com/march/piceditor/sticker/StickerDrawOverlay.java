@@ -1,16 +1,21 @@
 package com.march.piceditor.sticker;
 
+import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.support.annotation.Nullable;
 import android.support.v4.util.SparseArrayCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.march.dev.utils.DrawUtils;
+import com.march.dev.utils.LogUtils;
 import com.march.piceditor.common.model.ClickChecker;
 import com.march.piceditor.common.model.Point;
 import com.march.piceditor.sticker.handler.StickerBaseTouchHandler;
@@ -76,17 +81,80 @@ public class StickerDrawOverlay extends View {
         mClickChecker = new ClickChecker();
     }
 
+    /*
+    scaleX skewX transX
+    skewY scaleY transY
+    persp0 persp1 persp2
+     */
+    private Matrix mAnimMatrix;
 
     /**
      * 添加贴纸
      *
      * @param sticker 贴纸
      */
-    public void addSticker(Sticker sticker) {
+    public void addSticker(Sticker sticker, boolean withAnim) {
         mStickers.add(sticker);
+        if (withAnim)
+            sticker.setInitScale(1);
+        sticker.getMatrix().postScale(sticker.getInitScale(), sticker.getInitScale());
+        if (sticker.getInitTranslateX() != 0 && sticker.getInitTranslateY() != 0)
+            sticker.getMatrix().postTranslate(sticker.getInitTranslateX(), sticker.getInitTranslateY());
         activeOneSticker(mActiveSticker, sticker);
         postInvalidate();
+        // 动画效果
+        if (withAnim) {
+            startAddStickerAnimation();
+        }
     }
+
+
+    // 添加贴纸时波动动画，未完成，现在只支持 scale = 1
+    private void startAddStickerAnimation() {
+        mAnimMatrix = new Matrix(mActiveSticker.getMatrix());
+        final ValueAnimator scaleAnim = ValueAnimator.ofFloat(0, 0.15f, 0);
+        scaleAnim.setDuration(700);
+        scaleAnim.setInterpolator(new AccelerateDecelerateInterpolator());
+        scaleAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                if (mActiveSticker != null && mAnimMatrix != null) {
+                    float animatedValue = (float) animation.getAnimatedValue();
+                    mAnimMatrix.reset();
+                    mAnimMatrix.setScale(mActiveSticker.getInitScale() + animatedValue,
+                            mActiveSticker.getInitScale() + animatedValue,
+                            mActiveSticker.getStickerImage().getWidth() / 2,
+                            mActiveSticker.getStickerImage().getHeight() / 2);
+                    mAnimMatrix.postTranslate(mActiveSticker.getInitTranslateX(),
+                            mActiveSticker.getInitTranslateY());
+                    postInvalidate();
+                }
+            }
+        });
+        scaleAnim.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mAnimMatrix = null;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mAnimMatrix = null;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        scaleAnim.start();
+    }
+
 
     /**
      * 真的删除贴纸
@@ -102,6 +170,10 @@ public class StickerDrawOverlay extends View {
             }
         }
         postInvalidate();
+    }
+
+    public Sticker getActiveSticker() {
+        return mActiveSticker;
     }
 
     @Override
@@ -124,14 +196,17 @@ public class StickerDrawOverlay extends View {
 //            for (int i = 0; i < mWidth / 10; i++) {
 //                DrawUtils.drawVLine(canvas, mLinePaint, mWidth / 10 * i, 0, mHeight);
 //            }
-
             // 绘制贴纸
             for (Sticker sticker : mStickers) {
                 if (sticker.isHidden())
                     continue;
                 if (sticker.getStickerImage() != null && !sticker.getStickerImage().isRecycled()) {
                     mStickerPaint.setColorFilter(sticker.getColorFilter());
-                    canvas.drawBitmap(sticker.getStickerImage(), sticker.getMatrix(), mStickerPaint);
+                    if (mAnimMatrix != null && mActiveSticker != null && mActiveSticker.equals(sticker)) {
+                        canvas.drawBitmap(sticker.getStickerImage(), mAnimMatrix, mStickerPaint);
+                    } else {
+                        canvas.drawBitmap(sticker.getStickerImage(), sticker.getMatrix(), mStickerPaint);
+                    }
                 }
                 if (mActiveSticker != null && mActiveSticker.equals(sticker)) {
                     Point[] points = sticker.getCornerPoints();
@@ -251,7 +326,7 @@ public class StickerDrawOverlay extends View {
      * @param sticker
      */
     private void activeOneSticker(Sticker preSticker, Sticker sticker) {
-        if(preSticker!=null){
+        if (preSticker != null) {
             preSticker.setActive(false);
         }
         mActiveSticker = sticker;
