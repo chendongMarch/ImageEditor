@@ -13,13 +13,36 @@ import android.graphics.Rect;
  */
 public class GraffitiUtils {
 
+
+    /**
+     * 创建纯色 bitmap
+     *
+     * @param srcBitmap src
+     * @param color     color
+     * @return 纯色 bitmap
+     */
+    public static Bitmap getColorBitmap(Bitmap srcBitmap, int color) {
+        if (srcBitmap == null || srcBitmap.getWidth() == 0 || srcBitmap.getHeight() == 0)
+            return null;
+        Bitmap bitmap = Bitmap.createBitmap(srcBitmap.getWidth(), srcBitmap.getHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        Rect rect = new Rect(0, 0, srcBitmap.getWidth(), srcBitmap.getHeight());
+        Paint paint = new Paint();
+        paint.setColor(color);
+        canvas.drawRect(rect, paint);
+        canvas.save();
+        return bitmap;
+    }
+
     /**
      * 将图片转换为马赛克图片
+     *
      * @param srcBitmap source srcBitmap
-     * @param radius 马赛克半径
+     * @param radius    马赛克半径
      * @return 马赛克后的图片
      */
-    public static Bitmap getMosaic(Bitmap srcBitmap, int radius) {
+    public static Bitmap getMosaicBitmap(Bitmap srcBitmap, int radius) {
         int width = srcBitmap.getWidth();
         int height = srcBitmap.getHeight();
 
