@@ -34,6 +34,9 @@ import java.util.List;
  */
 public class GraffitiOverlay extends View {
 
+    public static final String TAG = GraffitiOverlay.class.getSimpleName();
+    private PorterDuffXfermode mSrcOverXfermode;
+
     public GraffitiOverlay(Context context) {
         this(context, null);
     }
@@ -79,6 +82,8 @@ public class GraffitiOverlay extends View {
     private List<GraffitiPart> mSmearPaths; // 涂抹路径
     private List<GraffitiPart> mErasePaths; // 擦除路径
 
+    private List<GraffitiPart> mGraffitiPartList;
+
     private TouchMode mTouchMode = TouchMode.RECT;
 
     private void init() {
@@ -99,6 +104,8 @@ public class GraffitiOverlay extends View {
         mErasePaths = new ArrayList<>();
         mSrcInXfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_IN);
         mClearXfermode = new PorterDuffXfermode(PorterDuff.Mode.CLEAR);
+        mSrcOverXfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER);
+        mGraffitiPartList = new ArrayList<>();
     }
 
 //    public void reset() {
@@ -142,13 +149,14 @@ public class GraffitiOverlay extends View {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mIsTouching = true;
-                mTouchGraffitiPart = new GraffitiPart(mTouchMode);
+                mTouchGraffitiPart = new GraffitiPart(mIsErase, mTouchMode);
                 mTouchGraffitiPart.onTouchDown(event, mPathWidth);
                 if (mIsErase) {
                     mErasePaths.add(mTouchGraffitiPart);
                 } else {
                     mSmearPaths.add(mTouchGraffitiPart);
                 }
+                mGraffitiPartList.add(mTouchGraffitiPart);
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (mTouchGraffitiPart != null) {
@@ -176,24 +184,19 @@ public class GraffitiOverlay extends View {
 
             if (mSourceImage == null || mImageRect == null)
                 return;
-            canvas.drawBitmap(mSourceImage, null, mImageRect, null);
 
+            canvas.drawBitmap(mSourceImage, null, mImageRect, null);
 
             if (mSrcInXfermode == null || mClearXfermode == null || mGraffitiImage == null)
                 return;
 
             int mosaicLayerCount = canvas.saveLayer(mImageRect, null, Canvas.ALL_SAVE_FLAG);
             {
-
-                // 绘制涂抹路径
-                for (GraffitiPart smearPath : mSmearPaths) {
-                    smearPath.onDraw(canvas, mGraffitiLayerPaint);
-                }
-
-                //  使用 clear mode 绘制擦除路径
-                mGraffitiLayerPaint.setXfermode(mClearXfermode);
-                for (GraffitiPart erasePath : mErasePaths) {
-                    erasePath.onDraw(canvas, mGraffitiLayerPaint);
+                // Collections.sort(mGraffitiPartList);
+                // 按照时间排序绘制，erase 的用 clear mode，否则用 src over mode
+                for (GraffitiPart graffitiPart : mGraffitiPartList) {
+                    mGraffitiLayerPaint.setXfermode(graffitiPart.isErase() ? mClearXfermode : mSrcOverXfermode);
+                    graffitiPart.onDraw(canvas, mGraffitiLayerPaint);
                 }
 
                 // 使用 src in mode 绘制马赛克涂层
