@@ -9,6 +9,7 @@ import com.march.dev.model.ImageInfo;
 import com.march.dev.uikit.selectimg.SelectImageActivity;
 import com.march.dev.utils.FileUtils;
 import com.march.picedit.edit.EditCropRotateActivity;
+import com.march.picedit.graffiti.GraffitiActivity;
 import com.march.picedit.sticker.StickerImageActivity;
 import com.march.picedit.test.TestCompressImageActivity;
 
@@ -29,7 +30,8 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onInitViews(View view, Bundle saveData) {
         super.onInitViews(view, saveData);
-        StickerImageActivity.start(mActivity, FileUtils.newRootFile("2.jpg").getAbsolutePath());
+        // StickerImageActivity.start(mActivity, FileUtils.newRootFile("2.jpg").getAbsolutePath());
+        GraffitiActivity.start(mActivity);
     }
 
     @OnClick({R.id.btn_choose_pic, R.id.btn_test, R.id.btn_sticker_test})

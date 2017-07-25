@@ -37,9 +37,9 @@ public class BottomRightCornerHandler extends StickerBaseTouchHandler {
             float distance = CalculateUtils.calculateDistance(rectF.centerX(), rectF.centerY(), event.getX(), event.getY());
 
             float scale = distance * 1f / mLastDistance;
-            if (mActiveSticker.isCanScale(scale)) {
+//            if (mActiveSticker.isCanScale(scale)) {
                 mActiveSticker.postMatrixScale(scale, scale);
-            }
+//            }
             mLastDistance = distance;
 
             // 旋转

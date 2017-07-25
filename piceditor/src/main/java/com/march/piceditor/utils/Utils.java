@@ -10,6 +10,14 @@ import android.graphics.ColorMatrixColorFilter;
  */
 public class Utils {
 
+    /**
+     * 转换 rgb 为 ColorMatrixColorFilter
+     *
+     * @param red   r
+     * @param green g
+     * @param blue  b
+     * @return ColorMatrixColorFilter
+     */
     public static ColorMatrixColorFilter buildColorFilter(int red, int green, int blue) {
         float[] src = new float[]{
                 0, 0, 0, 0, red,

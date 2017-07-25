@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.march.piceditor.graffiti.GraffitiOverlay
+        android:id="@+id/graffiti_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/white"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_path"
+            style="@style/TvMenu"
+            android:text="path" />
+
+        <TextView
+            android:id="@+id/tv_rect"
+            style="@style/TvMenu"
+            android:text="rect"/>
+
+
+        <TextView
+            android:id="@+id/tv_erase"
+            android:text="erase"
+            style="@style/TvMenu"/>
+
+        <TextView
+            android:id="@+id/tv_draw"
+            android:text="draw"
+            style="@style/TvMenu"/>
+    </android.support.v7.widget.LinearLayoutCompat>
+</LinearLayout>

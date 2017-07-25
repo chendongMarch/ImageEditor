@@ -1,4 +1,4 @@
-package com.march.piceditor.mosaic;
+package com.march.piceditor.graffiti.refer;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -6,7 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
-public class MosaicUtil {
+public class    MosaicUtil {
 
     public static enum Effect {
         MOSAIC, BLUR,
@@ -23,11 +23,9 @@ public class MosaicUtil {
      * @param bitmap 原图
      * @return 马赛克图片
      */
-    public static Bitmap getMosaic(Bitmap bitmap) {
+    public static Bitmap getMosaic(Bitmap bitmap,int radius) {
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
-        int radius = 10;
-
 
         Bitmap mosaicBitmap = Bitmap.createBitmap(width, height,
                 Config.ARGB_8888);
@@ -169,5 +167,49 @@ public class MosaicUtil {
 
     private static int clamp(int x, int a, int b) {
         return (x < a) ? a : (x > b) ? b : x;
+    }
+
+
+
+
+    public static Bitmap getGridMosaic(Bitmap source,int mGridWidth) {
+        int mImageWidth = source.getWidth();
+        int mImageHeight = source.getHeight();
+        if (mImageWidth <= 0 || mImageHeight <= 0) {
+            return null;
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(mImageWidth, mImageHeight,
+                Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+
+        int horCount = (int) Math.ceil(mImageWidth / (float) mGridWidth);
+        int verCount = (int) Math.ceil(mImageHeight / (float) mGridWidth);
+
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+
+//		for (int horIndex = 0; horIndex < horCount; ++horIndex) {
+//			for (int verIndex = 0; verIndex < verCount; ++verIndex) {
+        for (int horIndex = 0; horIndex < horCount; horIndex += 10) {
+            for (int verIndex = 0; verIndex < verCount; verIndex += 10) {
+                int l = mGridWidth * horIndex;
+                int t = mGridWidth * verIndex;
+                int r = l + mGridWidth;
+                if (r > mImageWidth) {
+                    r = mImageWidth;
+                }
+                int b = t + mGridWidth;
+                if (b > mImageHeight) {
+                    b = mImageHeight;
+                }
+                int color = source.getPixel(l, t);
+                Rect rect = new Rect(l, t, r, b);
+                paint.setColor(color);
+                canvas.drawRect(rect, paint);
+            }
+        }
+        canvas.save();
+        return bitmap;
     }
 }

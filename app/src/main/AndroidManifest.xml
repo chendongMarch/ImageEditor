@@ -33,6 +33,9 @@
         <activity
             android:name=".sticker.StickerImageActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
+        <activity
+            android:name=".graffiti.GraffitiActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"/>
     </application>
 
 </manifest>

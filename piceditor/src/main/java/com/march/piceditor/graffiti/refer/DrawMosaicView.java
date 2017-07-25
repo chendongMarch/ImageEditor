@@ -1,4 +1,4 @@
-package com.march.piceditor.mosaic;
+package com.march.piceditor.graffiti.refer;
 
 import android.content.Context;
 import android.content.res.Resources;

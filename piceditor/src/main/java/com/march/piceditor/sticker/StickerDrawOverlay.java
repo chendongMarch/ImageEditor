@@ -127,7 +127,7 @@ public class StickerDrawOverlay extends View {
     private void startAddStickerAnimation() {
         mAnimMatrix = new Matrix(mActiveSticker.getMatrix());
         mScaleAnimator = ValueAnimator.ofFloat(0, 0.15f, 0);
-        mScaleAnimator.setDuration(500);
+        mScaleAnimator.setDuration(700);
         mScaleAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
         mScaleAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override

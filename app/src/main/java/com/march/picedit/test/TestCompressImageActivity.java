@@ -16,8 +16,8 @@ import com.march.dev.utils.PermissionUtils;
 import com.march.dev.utils.ToastUtils;
 import com.march.picedit.R;
 import com.march.picedit.sticker.ResourceFactory;
-import com.march.piceditor.mosaic.DrawMosaicView;
-import com.march.piceditor.mosaic.MosaicUtil;
+import com.march.piceditor.graffiti.GraffitiOverlay;
+import com.march.piceditor.graffiti.refer.MosaicView;
 import com.march.piceditor.sticker.EasyMenuHandler;
 import com.march.piceditor.sticker.StickerDrawOverlay;
 import com.march.piceditor.sticker.listener.OnStickerEventListener;
@@ -60,10 +60,11 @@ public class TestCompressImageActivity extends BaseActivity {
     private String mPath;
     private String mPath2;
 
-    @BindView(R.id.iv_image)  ImageView          mImageView;
-    @BindView(R.id.iv_image2) ImageView          mImageView2;
-    @BindView(R.id.dmv)       DrawMosaicView     mDrawMosaicView;
-    @BindView(R.id.sdo)       StickerDrawOverlay mStickerDrawOverlay;
+    @BindView(R.id.iv_image)       ImageView          mImageView;
+    @BindView(R.id.iv_image2)      ImageView          mImageView2;
+    @BindView(R.id.dmv)            MosaicView         mDrawMosaicView;
+    @BindView(R.id.mosaic_overlay) GraffitiOverlay    mMosaicOverlay;
+    @BindView(R.id.sdo)            StickerDrawOverlay mStickerDrawOverlay;
 
     private ResourceFactory mResourceFactory;
 
@@ -101,7 +102,7 @@ public class TestCompressImageActivity extends BaseActivity {
 
             sticker.setAutoLifting(i % 2 == 0);
 
-            mStickerDrawOverlay.addSticker(sticker,false);
+            mStickerDrawOverlay.addSticker(sticker, false);
         }
 
         mStickerDrawOverlay.setStickerMenuHandler(new StickerMenuHandler() {
@@ -199,10 +200,12 @@ public class TestCompressImageActivity extends BaseActivity {
 //                GlideUtils.with(mContext, mPath).into(mImageView);
 //                GlideUtils.with(mContext, mPath2).into(mImageView2);
 
-                mDrawMosaicView.setMosaicBackgroundResource(imageInfo.getPath());
-                mDrawMosaicView.setMosaicResource(BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
-                mDrawMosaicView.setMosaicBrushWidth(10);
-                mDrawMosaicView.setMosaicType(MosaicUtil.MosaicType.MOSAIC);
+//                mDrawMosaicView.setMosaicColor(Color.RED);
+//                mDrawMosaicView.setMode(MosaicView.Mode.PATH);
+//                mDrawMosaicView.setSrcPath(imageInfo.getPath());
+//                mDrawMosaicView.setEffect(MosaicView.Effect.GRID);
+//                mDrawMosaicView.setPathWidth(100);
+                mMosaicOverlay.setSrc(imageInfo.getPath());
                 break;
         }
     }
