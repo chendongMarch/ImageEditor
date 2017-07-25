@@ -18,7 +18,6 @@ import android.view.View;
 import com.march.dev.utils.BitmapUtils;
 import com.march.dev.utils.DrawUtils;
 import com.march.piceditor.graffiti.model.GraffitiPart;
-import com.march.piceditor.utils.GraffitiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,6 @@ import java.util.List;
 public class GraffitiOverlay extends View {
 
     public static final String TAG = GraffitiOverlay.class.getSimpleName();
-    private PorterDuffXfermode mSrcOverXfermode;
 
     public GraffitiOverlay(Context context) {
         this(context, null);
@@ -55,21 +53,17 @@ public class GraffitiOverlay extends View {
         RECT, PATH
     }
 
-    //  马赛克效果，纯色，方形马赛克，图片，高斯模糊
-    public enum GraffitiEffect {
-        COLOR, MOSAIC, IMAGE, BLUR
-    }
-
-
-    private GraffitiPart mTouchGraffitiPart;
 
     private PorterDuffXfermode mSrcInXfermode;
     private PorterDuffXfermode mClearXfermode;
+    private PorterDuffXfermode mSrcOverXfermode;
 
-    private RectF mImageRect;
-
-    private float mImageWidth;
-    private float mImageHeight;
+    private RectF   mImageRect;
+    private int     mPathWidth;
+    private float   mImageWidth;
+    private float   mImageHeight;
+    private boolean mIsTouching;
+    private boolean mIsErase;
 
     private Bitmap mSourceImage;
     private Bitmap mGraffitiImage;
@@ -77,73 +71,79 @@ public class GraffitiOverlay extends View {
     private Paint mGraffitiLayerPaint;
     private Paint mTouchGraffitiPaint;
 
-    private int mPathWidth = 50;
-
-    private List<GraffitiPart> mSmearPaths; // 涂抹路径
-    private List<GraffitiPart> mErasePaths; // 擦除路径
-
     private List<GraffitiPart> mGraffitiPartList;
+    private GraffitiPart       mTouchGraffitiPart;
 
     private TouchMode mTouchMode = TouchMode.RECT;
+
+    private int mEraseColor = Color.WHITE;
+    private int mDrawColor  = Color.GRAY;
 
     private void init() {
         // current touch paint
         mTouchGraffitiPaint = DrawUtils.newPaint(Color.WHITE, 10, Paint.Style.STROKE);
         mTouchGraffitiPaint.setPathEffect(new CornerPathEffect(10));
         DrawUtils.initRoundPaint(mTouchGraffitiPaint);
-        setErase(false);
 
-        // mosaic paint
+        // effect paint
         mGraffitiLayerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mGraffitiLayerPaint.setPathEffect(new CornerPathEffect(10));
         DrawUtils.initAntiAliasPaint(mGraffitiLayerPaint);
         DrawUtils.initRoundPaint(mGraffitiLayerPaint);
 
         mImageRect = new RectF();
-        mSmearPaths = new ArrayList<>();
-        mErasePaths = new ArrayList<>();
+        mPathWidth = 50;
         mSrcInXfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_IN);
         mClearXfermode = new PorterDuffXfermode(PorterDuff.Mode.CLEAR);
         mSrcOverXfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER);
         mGraffitiPartList = new ArrayList<>();
+
+        setErase(false);
     }
 
-//    public void reset() {
-//        mSmearPaths.clear();
-//        mErasePaths.clear();
-//    }
+    // 设置 src
+    public void setSrc(String file) {
+        BitmapFactory.Options bitmapSize = BitmapUtils.getBitmapSize(file);
+        mImageWidth = bitmapSize.outWidth;
+        mImageHeight = bitmapSize.outHeight;
+        mSourceImage = BitmapFactory.decodeFile(file);
+        requestLayout();
+        postInvalidate();
+    }
 
+    // 设置涂抹 layer
+    public void setGraffitiLayer(GraffitiLayer graffitiLayer) {
+        if (mSourceImage == null) {
+            throw new IllegalArgumentException("init setSrc() first");
+        }
+        mGraffitiImage = graffitiLayer.buildLayer(getContext(), mSourceImage);
+        postInvalidate();
+    }
 
+    // 设置涂抹的触摸方式
     public void setTouchMode(TouchMode touchMode) {
         mTouchMode = touchMode;
     }
 
+    // 设置是不是擦除状态
     public void setErase(boolean erase) {
         mIsErase = erase;
-        mTouchGraffitiPaint.setColor(erase ? Color.WHITE : Color.GRAY);
+        mTouchGraffitiPaint.setColor(erase ? mEraseColor : mDrawColor);
     }
 
-    public void setSrc(String file) {
-
-        BitmapFactory.Options bitmapSize = BitmapUtils.getBitmapSize(file);
-        mImageWidth = bitmapSize.outWidth;
-        mImageHeight = bitmapSize.outHeight;
-
-        mSourceImage = BitmapFactory.decodeFile(file);
-        mGraffitiImage = GraffitiUtils.getMosaic(mSourceImage, 10);
-
-        requestLayout();
-
-        postInvalidate();
-
+    // 绘制和擦除时的颜色
+    public void setEraseAndDrawColor(int eraseColor, int drawColor) {
+        mEraseColor = eraseColor;
+        mDrawColor = drawColor;
     }
 
-    private boolean mIsTouching;
+    // 重置
+    public void reset() {
+        BitmapUtils.recycleBitmaps(mSourceImage, mGraffitiImage);
+        mGraffitiPartList.clear();
+    }
 
-    private boolean mIsErase;
 
-    // 如何处理涂抹路径？
-    // down 时创建 path，存储，并指定起始位置，move 时移动 path
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getActionMasked()) {
@@ -151,11 +151,6 @@ public class GraffitiOverlay extends View {
                 mIsTouching = true;
                 mTouchGraffitiPart = new GraffitiPart(mIsErase, mTouchMode);
                 mTouchGraffitiPart.onTouchDown(event, mPathWidth);
-                if (mIsErase) {
-                    mErasePaths.add(mTouchGraffitiPart);
-                } else {
-                    mSmearPaths.add(mTouchGraffitiPart);
-                }
                 mGraffitiPartList.add(mTouchGraffitiPart);
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -174,14 +169,18 @@ public class GraffitiOverlay extends View {
 
 
     // 分两层绘制，source image & mosaic image
+    // 1.初始设计(已弃用)：
     // 马赛克层需要结合3部分，擦除路径，涂抹路径，马赛克涂层
     // 先绘制涂抹路径，然后使用 clear 模式绘制擦除路径，清除与涂抹路径重叠的部分，
     // 然后使用 srcIn 模式绘制马赛克涂层，绘制马赛克涂层与清除后的涂抹路径重合地方
+    // 修复设计：
+    // 擦除和涂抹在一个列表中，使用 clear mode 绘制擦除
+    // 使用 src over mode 绘制涂抹
+    // 最后使用 src in mode 绘制绘制涂层
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         try {
-
             if (mSourceImage == null || mImageRect == null)
                 return;
 
@@ -195,7 +194,9 @@ public class GraffitiOverlay extends View {
                 // Collections.sort(mGraffitiPartList);
                 // 按照时间排序绘制，erase 的用 clear mode，否则用 src over mode
                 for (GraffitiPart graffitiPart : mGraffitiPartList) {
-                    mGraffitiLayerPaint.setXfermode(graffitiPart.isErase() ? mClearXfermode : mSrcOverXfermode);
+                    mGraffitiLayerPaint.setXfermode(graffitiPart.isErase()
+                            ? mClearXfermode
+                            : mSrcOverXfermode);
                     graffitiPart.onDraw(canvas, mGraffitiLayerPaint);
                 }
 
@@ -218,18 +219,14 @@ public class GraffitiOverlay extends View {
     }
 
 
-    protected void onLayout(boolean changed, int left, int top, int right,
-                            int bottom) {
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         if (mImageWidth <= 0 || mImageHeight <= 0) {
             return;
         }
-
         int contentWidth = right - left;
         int contentHeight = bottom - top;
-        int viewWidth = contentWidth - 0 * 2;
-        int viewHeight = contentHeight - 0 * 2;
-        float widthRatio = viewWidth / ((float) mImageWidth);
-        float heightRatio = viewHeight / ((float) mImageHeight);
+        float widthRatio = contentWidth / mImageWidth;
+        float heightRatio = contentHeight / mImageHeight;
         float ratio = widthRatio < heightRatio ? widthRatio : heightRatio;
         int realWidth = (int) (mImageWidth * ratio);
         int realHeight = (int) (mImageHeight * ratio);
