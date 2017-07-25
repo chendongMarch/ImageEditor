@@ -31,10 +31,9 @@ public class MainActivity extends BaseActivity {
     public void onInitViews(View view, Bundle saveData) {
         super.onInitViews(view, saveData);
         // StickerImageActivity.start(mActivity, FileUtils.newRootFile("2.jpg").getAbsolutePath());
-        GraffitiActivity.start(mActivity);
     }
 
-    @OnClick({R.id.btn_choose_pic, R.id.btn_test, R.id.btn_sticker_test})
+    @OnClick({R.id.btn_choose_pic, R.id.btn_test, R.id.btn_sticker_test,R.id.btn_graffiti})
     public void clickView(View view) {
         switch (view.getId()) {
             case R.id.btn_choose_pic:
@@ -45,6 +44,9 @@ public class MainActivity extends BaseActivity {
                 break;
             case R.id.btn_sticker_test:
                 SelectImageActivity.start(mActivity, 1, 2);
+                break;
+            case R.id.btn_graffiti:
+                GraffitiActivity.start(mActivity);
                 break;
         }
     }

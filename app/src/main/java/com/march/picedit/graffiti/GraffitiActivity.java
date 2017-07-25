@@ -2,6 +2,8 @@ package com.march.picedit.graffiti;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 
@@ -9,6 +11,7 @@ import com.march.dev.app.activity.BaseActivity;
 import com.march.dev.utils.ActivityAnimUtils;
 import com.march.dev.utils.FileUtils;
 import com.march.picedit.R;
+import com.march.piceditor.graffiti.GraffitiLayer;
 import com.march.piceditor.graffiti.GraffitiOverlay;
 
 import butterknife.BindView;
@@ -34,6 +37,9 @@ public class GraffitiActivity extends BaseActivity {
     public void onInitViews(View view, Bundle saveData) {
         super.onInitViews(view, saveData);
         mGraffitiOverlay.setSrc(FileUtils.newRootFile("2.jpg").getAbsolutePath());
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+        mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newImageLayer(bitmap));
+//        mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newMosaicLayer(10));
     }
 
 
