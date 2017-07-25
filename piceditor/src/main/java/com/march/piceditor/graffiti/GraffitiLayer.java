@@ -90,17 +90,17 @@ public class GraffitiLayer {
             if (mImageBitmap.getWidth() == width && mImageBitmap.getHeight() == height) {
                 return mImageBitmap;
             } else {
-                float scale = Math.min(mImageBitmap.getWidth() / width, mImageBitmap.getHeight() / height);
+                float scale = Math.min(mImageBitmap.getWidth() *1f/ width, mImageBitmap.getHeight() *1f / height);
                 Bitmap finalBitmap;
-                if (scale > 0) {
+                if (scale > 1) {
                     // 截取中间部分
                     finalBitmap = Bitmap.createBitmap(mImageBitmap, (mImageBitmap.getWidth() - width) / 2, (mImageBitmap.getHeight() - height) / 2, width, height);
                     BitmapUtils.recycleBitmaps(mImageBitmap);
                 } else {
                     // 放大到至少和 src 一样大
-                    Bitmap scaledBitmap = Bitmap.createScaledBitmap(mImageBitmap, ((int) (mImageBitmap.getWidth() / scale)), ((int) (mImageBitmap.getHeight() / scale)), true);
+                    Bitmap scaledBitmap = Bitmap.createScaledBitmap(mImageBitmap, ((int) (mImageBitmap.getWidth() / scale)), ((int) (mImageBitmap.getHeight() / scale)), false);
                     // 截取中间部分
-                    finalBitmap = Bitmap.createBitmap(mImageBitmap, (mImageBitmap.getWidth() - width) / 2, (mImageBitmap.getHeight() - height) / 2, width, height);
+                    finalBitmap = Bitmap.createBitmap(scaledBitmap, (scaledBitmap.getWidth() - width) / 2, (scaledBitmap.getHeight() - height) / 2, width, height);
                     BitmapUtils.recycleBitmaps(mImageBitmap, scaledBitmap);
                 }
                 return finalBitmap;
