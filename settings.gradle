@@ -1,1 +1,1 @@
-include ':app', ':piceditor'
+include ':app', ':piceditor', ':lowpoly'

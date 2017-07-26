@@ -17,6 +17,7 @@ import android.view.View;
 
 import com.march.dev.utils.BitmapUtils;
 import com.march.dev.utils.DrawUtils;
+import com.march.piceditor.common.model.Point;
 import com.march.piceditor.graffiti.model.GraffitiPart;
 
 import java.util.ArrayList;
@@ -70,11 +71,13 @@ public class GraffitiOverlay extends View {
 
     private Paint mGraffitiLayerPaint;
     private Paint mTouchGraffitiPaint;
+    private Paint mTouchPointPaint;
 
     private List<GraffitiPart> mGraffitiPartList;
     private GraffitiPart       mTouchGraffitiPart;
+    private Point              mTouchPoint;
 
-    private TouchMode mTouchMode = TouchMode.RECT;
+    private TouchMode mTouchMode = TouchMode.PATH;
 
     private int mEraseColor = Color.WHITE;
     private int mDrawColor  = Color.GRAY;
@@ -85,12 +88,17 @@ public class GraffitiOverlay extends View {
         mTouchGraffitiPaint.setPathEffect(new CornerPathEffect(10));
         DrawUtils.initRoundPaint(mTouchGraffitiPaint);
 
+        // current touch paint
+        mTouchPointPaint = DrawUtils.newPaint(Color.argb(0xdd, 0xff, 0xff, 0xff), 20, Paint.Style.FILL_AND_STROKE);
+
         // effect paint
         mGraffitiLayerPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mGraffitiLayerPaint.setPathEffect(new CornerPathEffect(10));
         DrawUtils.initAntiAliasPaint(mGraffitiLayerPaint);
         DrawUtils.initRoundPaint(mGraffitiLayerPaint);
 
+        mTouchPoint = new Point();
+        mTouchPoint.reset();
         mImageRect = new RectF();
         mPathWidth = 50;
         mSrcInXfermode = new PorterDuffXfermode(PorterDuff.Mode.SRC_IN);
@@ -146,19 +154,25 @@ public class GraffitiOverlay extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (!isEnabled() || event.getPointerCount() > 1) {
+            return super.onTouchEvent(event);
+        }
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
+                mTouchPoint.set(event);
                 mIsTouching = true;
                 mTouchGraffitiPart = new GraffitiPart(mIsErase, mTouchMode);
                 mTouchGraffitiPart.onTouchDown(event, mPathWidth);
                 mGraffitiPartList.add(mTouchGraffitiPart);
                 break;
             case MotionEvent.ACTION_MOVE:
+                mTouchPoint.set(event);
                 if (mTouchGraffitiPart != null) {
                     mTouchGraffitiPart.onTouchMove(event);
                 }
                 break;
             case MotionEvent.ACTION_UP:
+                mTouchPoint.reset();
                 mIsTouching = false;
                 mTouchGraffitiPart = null;
                 break;
@@ -209,8 +223,11 @@ public class GraffitiOverlay extends View {
                 canvas.restoreToCount(mosaicLayerCount);
             }
 
-            if (mTouchGraffitiPart != null) {
-                mTouchGraffitiPart.onDraw(canvas, mTouchGraffitiPaint);
+            if (mTouchGraffitiPart != null && mTouchGraffitiPart.getRectF() != null) {
+                // mTouchGraffitiPart.onDraw(canvas, mTouchGraffitiPaint);
+                canvas.drawRect(mTouchGraffitiPart.getRectF(), mTouchPointPaint);
+            } else if (mTouchPoint.isValid()) {
+                canvas.drawCircle(mTouchPoint.x, mTouchPoint.y, mPathWidth / 2, mTouchPointPaint);
             }
 
         } catch (Exception e) {
