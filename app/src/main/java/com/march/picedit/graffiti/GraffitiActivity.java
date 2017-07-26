@@ -37,7 +37,8 @@ public class GraffitiActivity extends BaseActivity {
     public void onInitViews(View view, Bundle saveData) {
         super.onInitViews(view, saveData);
         mGraffitiOverlay.setSrc(FileUtils.newRootFile("2.jpg").getAbsolutePath());
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+//        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+        Bitmap bitmap = BitmapFactory.decodeFile(FileUtils.newRootFile("bg.jpg").getAbsolutePath());
         mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newImageLayer(bitmap));
 //        mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newMosaicLayer(10));
     }
