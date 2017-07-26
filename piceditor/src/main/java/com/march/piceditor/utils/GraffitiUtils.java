@@ -1,9 +1,12 @@
 package com.march.piceditor.utils;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+
+import com.march.dev.utils.BitmapUtils;
 
 /**
  * CreateAt : 7/25/17
@@ -77,5 +80,53 @@ public class GraffitiUtils {
         canvas.save();
 
         return mosaicBitmap;
+    }
+
+
+    /**
+     * 获取模糊图，模糊算法使用 rs 和 fast blur 兼容
+     *
+     * @param context    ctx
+     * @param srcBitmap  src
+     * @param blurRadius 模糊半径
+     * @return 模糊后的图片
+     */
+    public static Bitmap getBlurBitmap(Context context, Bitmap srcBitmap, int blurRadius) {
+        Blur.BlurFactor factor = new Blur.BlurFactor();
+        factor.width = srcBitmap.getWidth();
+        factor.height = srcBitmap.getHeight();
+        factor.radius = blurRadius;
+        return Blur.blur(context, srcBitmap, factor);
+    }
+
+
+    /**
+     * 将 cropImage 中心裁剪适配 srcBitmap
+     * @param srcBitmap 操作的 bitmap
+     * @param cropImage 作为涂抹涂层的 bitmap
+     * @return 裁剪后的 bitmap
+     */
+    public static Bitmap getCenterCropBitmap(Bitmap srcBitmap, Bitmap cropImage) {
+        int width = srcBitmap.getWidth();
+        int height = srcBitmap.getHeight();
+
+        if (cropImage.getWidth() == width && cropImage.getHeight() == height) {
+            return cropImage;
+        } else {
+            float scale = Math.min(cropImage.getWidth() * 1f / width, cropImage.getHeight() * 1f / height);
+            Bitmap finalBitmap;
+            if (scale > 1) {
+                // 截取中间部分
+                finalBitmap = Bitmap.createBitmap(cropImage, (cropImage.getWidth() - width) / 2, (cropImage.getHeight() - height) / 2, width, height);
+                BitmapUtils.recycleBitmaps(cropImage);
+            } else {
+                // 放大到至少和 src 一样大
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(cropImage, ((int) (cropImage.getWidth() / scale)), ((int) (cropImage.getHeight() / scale)), false);
+                // 截取中间部分
+                finalBitmap = Bitmap.createBitmap(scaledBitmap, (scaledBitmap.getWidth() - width) / 2, (scaledBitmap.getHeight() - height) / 2, width, height);
+                BitmapUtils.recycleBitmaps(cropImage, scaledBitmap);
+            }
+            return finalBitmap;
+        }
     }
 }
