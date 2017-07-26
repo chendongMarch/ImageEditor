@@ -17,6 +17,7 @@ import android.view.View;
 
 import com.march.dev.utils.BitmapUtils;
 import com.march.dev.utils.DrawUtils;
+import com.march.dev.utils.LogUtils;
 import com.march.piceditor.common.model.Point;
 import com.march.piceditor.graffiti.model.GraffitiPart;
 
@@ -124,7 +125,9 @@ public class GraffitiOverlay extends View {
         if (mSourceImage == null) {
             throw new IllegalArgumentException("init setSrc() first");
         }
+        long start = System.currentTimeMillis();
         mGraffitiImage = graffitiLayer.buildLayer(getContext(), mSourceImage);
+        LogUtils.e(TAG, "generate GraffitiLayer cost = " + (System.currentTimeMillis() - start));
         postInvalidate();
     }
 
