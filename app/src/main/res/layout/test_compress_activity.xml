@@ -22,18 +22,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <com.march.piceditor.graffiti.refer.MosaicView
-        android:id="@+id/dmv"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="visible"/>
-
-    <com.march.piceditor.sticker.StickerDrawOverlay
-        android:id="@+id/sdo"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

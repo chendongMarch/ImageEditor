@@ -185,6 +185,13 @@ public class GraffitiOverlay extends View {
     }
 
 
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        drawOnCanvas(canvas, false);
+    }
+
     // 分两层绘制，source image & mosaic image
     // 1.初始设计(已弃用)：
     // 马赛克层需要结合3部分，擦除路径，涂抹路径，马赛克涂层
@@ -194,9 +201,7 @@ public class GraffitiOverlay extends View {
     // 擦除和涂抹在一个列表中，使用 clear mode 绘制擦除
     // 使用 src over mode 绘制涂抹
     // 最后使用 src in mode 绘制绘制涂层
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
+    private void drawOnCanvas(Canvas canvas, boolean isSave) {
         try {
             if (mSourceImage == null || mImageRect == null)
                 return;
@@ -226,19 +231,21 @@ public class GraffitiOverlay extends View {
                 canvas.restoreToCount(mosaicLayerCount);
             }
 
-            if (mTouchGraffitiPart != null && mTouchGraffitiPart.getRectF() != null) {
-                // mTouchGraffitiPart.onDraw(canvas, mTouchGraffitiPaint);
-                canvas.drawRect(mTouchGraffitiPart.getRectF(), mTouchPointPaint);
-            } else if (mTouchPoint.isValid()) {
-                canvas.drawCircle(mTouchPoint.x, mTouchPoint.y, mPathWidth / 2, mTouchPointPaint);
+            if (!isSave) {
+                if (mTouchGraffitiPart != null && mTouchGraffitiPart.getRectF() != null) {
+                    // mTouchGraffitiPart.onDraw(canvas, mTouchGraffitiPaint);
+                    canvas.drawRect(mTouchGraffitiPart.getRectF(), mTouchPointPaint);
+                } else if (mTouchPoint.isValid()) {
+                    canvas.drawCircle(mTouchPoint.x, mTouchPoint.y, mPathWidth / 2, mTouchPointPaint);
+                }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
 
+    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         if (mImageWidth <= 0 || mImageHeight <= 0) {
             return;
@@ -256,5 +263,18 @@ public class GraffitiOverlay extends View {
         int imageRight = imageLeft + realWidth;
         int imageBottom = imageTop + realHeight;
         mImageRect.set(imageLeft, imageTop, imageRight, imageBottom);
+    }
+
+
+    public Bitmap save() {
+        Bitmap bitmap = Bitmap.createBitmap(getMeasuredWidth(), getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+
+        drawOnCanvas(canvas, true);
+
+        canvas.save();
+
+        return Bitmap.createBitmap(bitmap, ((int) mImageRect.left), ((int) mImageRect.top), ((int) mImageRect.width()), ((int) mImageRect.height()));
     }
 }

@@ -38,5 +38,10 @@
             android:id="@+id/tv_draw"
             android:text="draw"
             style="@style/TvMenu"/>
+
+        <TextView
+            android:id="@+id/tv_save"
+            android:text="save"
+            style="@style/TvMenu"/>
     </android.support.v7.widget.LinearLayoutCompat>
 </LinearLayout>

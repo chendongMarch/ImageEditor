@@ -13,6 +13,7 @@ import com.march.dev.utils.FileUtils;
 import com.march.picedit.R;
 import com.march.piceditor.graffiti.GraffitiLayer;
 import com.march.piceditor.graffiti.GraffitiOverlay;
+import com.march.turbojpeg.TurboJpegUtils;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -39,12 +40,11 @@ public class GraffitiActivity extends BaseActivity {
         super.onInitViews(view, saveData);
         mGraffitiOverlay.setSrc(FileUtils.newRootFile("2.jpg").getAbsolutePath());
 //        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-        Bitmap bitmap = BitmapFactory.decodeFile(FileUtils.newRootFile("bg.jpg").getAbsolutePath());
+//        Bitmap bitmap = BitmapFactory.decodeFile(FileUtils.newRootFile("bg.jpg").getAbsolutePath());
 //        mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newImageLayer(bitmap));
-//        mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newMosaicLayer(10));
+//        mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newMosaicLayer(40));
 
         mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newLowPolyLayer(GraffitiLayer.DEF_VALUE));
-
     }
 
 
@@ -54,7 +54,7 @@ public class GraffitiActivity extends BaseActivity {
     }
 
 
-    @OnClick({R.id.tv_path, R.id.tv_rect, R.id.tv_erase, R.id.tv_draw})
+    @OnClick({R.id.tv_path, R.id.tv_rect, R.id.tv_erase, R.id.tv_draw,R.id.tv_save})
     public void clickView(View view) {
         switch (view.getId()) {
             case R.id.tv_path:
@@ -68,6 +68,10 @@ public class GraffitiActivity extends BaseActivity {
                 break;
             case R.id.tv_draw:
                 mGraffitiOverlay.setErase(false);
+                break;
+            case R.id.tv_save:
+                Bitmap save = mGraffitiOverlay.save();
+                TurboJpegUtils.compressBitmap(save,100,FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath(),true);
                 break;
         }
     }

@@ -92,9 +92,9 @@ public class GraffitiLayer {
             // image
             return GraffitiUtils.getCenterCropBitmap(srcBitmap, mImageBitmap);
         } else if (mGraffitiEffect == GraffitiEffect.LOWPOLY) {
+            // low poly
             return LowPoly.generate(srcBitmap, mGradientThresh);
         }
-
         return null;
     }
 

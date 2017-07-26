@@ -17,7 +17,6 @@ import com.march.dev.utils.ToastUtils;
 import com.march.picedit.R;
 import com.march.picedit.sticker.ResourceFactory;
 import com.march.piceditor.graffiti.GraffitiOverlay;
-import com.march.piceditor.graffiti.refer.MosaicView;
 import com.march.piceditor.sticker.EasyMenuHandler;
 import com.march.piceditor.sticker.StickerDrawOverlay;
 import com.march.piceditor.sticker.listener.OnStickerEventListener;
@@ -62,7 +61,6 @@ public class TestCompressImageActivity extends BaseActivity {
 
     @BindView(R.id.iv_image)       ImageView          mImageView;
     @BindView(R.id.iv_image2)      ImageView          mImageView2;
-    @BindView(R.id.dmv)            MosaicView         mDrawMosaicView;
     @BindView(R.id.mosaic_overlay) GraffitiOverlay    mMosaicOverlay;
     @BindView(R.id.sdo)            StickerDrawOverlay mStickerDrawOverlay;
 

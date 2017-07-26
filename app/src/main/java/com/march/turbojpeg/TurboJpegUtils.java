@@ -2,7 +2,6 @@ package com.march.turbojpeg;
 
 import android.graphics.Bitmap;
 import android.os.Build;
-import android.util.Log;
 
 import com.march.dev.utils.BitmapUtils;
 
@@ -19,17 +18,17 @@ public class TurboJpegUtils {
 
     private static boolean isSupportArmeabi = true;
 
-//    static {
-//        try {
-//            System.loadLibrary("compress");
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            isSupportArmeabi = false;
-//        }
-//    }
+    static {
+        try {
+            System.loadLibrary("compress");
+        } catch (Exception e) {
+            e.printStackTrace();
+            isSupportArmeabi = false;
+        }
+    }
 
 
-    public static boolean isSupportLibJpeg() {
+    public static void checkSupportArmeabi() {
         String[] abis;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             abis = Build.SUPPORTED_ABIS;
@@ -40,37 +39,37 @@ public class TurboJpegUtils {
         for (String abi : abis) {
             abiStr.append(abi).append(",");
         }
-        Log.i("LIBJPEG", abiStr.toString());
-        if (abiStr.toString().contains("x86") || abiStr.toString().contains("x86_64") || abiStr.toString().contains
-                ("mips") || abiStr.toString().contains("mips64") || abiStr.toString().contains("arm64-v8a")) {
-            return false;
-        } else {
-            return true;
-        }
+        isSupportArmeabi = abiStr.toString().contains("armeabi") || abiStr.toString().contains("armeabi-v7a");
     }
 
     public static int compressBitmap(Bitmap bit, int quality, String fileName, boolean isRecycle) {
+        checkSupportArmeabi();
         Bitmap result = null;
-        try {
-            File file = new File(fileName);
-            if (!file.getParentFile().exists()) {
-                file.getParentFile().mkdirs();
+        if (isSupportArmeabi) {
+            try {
+                File file = new File(fileName);
+                if (!file.getParentFile().exists()) {
+                    file.getParentFile().mkdirs();
+                }
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
+                result = bit.copy(Bitmap.Config.ARGB_8888, true);
+                return compress(result, quality, fileName, true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                BitmapUtils.compressImage(bit, new File(fileName), Bitmap.CompressFormat.JPEG, 100, isRecycle);
+                return 1;
+            } finally {
+                BitmapUtils.recycleBitmaps(result);
+                if (isRecycle) {
+                    BitmapUtils.recycleBitmaps(bit);
+                }
             }
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            result = bit.copy(Bitmap.Config.ARGB_8888, true);
-            return compress(result, quality, fileName, true);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        } finally {
-            BitmapUtils.recycleBitmaps(result);
-            if (isRecycle) {
-                BitmapUtils.recycleBitmaps(bit);
-            }
+        } else {
+            BitmapUtils.compressImage(bit, new File(fileName), Bitmap.CompressFormat.JPEG, 100, isRecycle);
+            return 1;
         }
-
     }
 
     /**
