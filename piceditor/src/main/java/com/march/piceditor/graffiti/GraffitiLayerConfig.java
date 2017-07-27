@@ -8,11 +8,11 @@ import com.march.piceditor.utils.Blur;
 import com.march.piceditor.utils.GraffitiUtils;
 import com.uniquestudio.lowpoly.LowPoly;
 
-import static com.march.piceditor.graffiti.GraffitiLayer.GraffitiEffect.BLUR;
-import static com.march.piceditor.graffiti.GraffitiLayer.GraffitiEffect.COLOR;
-import static com.march.piceditor.graffiti.GraffitiLayer.GraffitiEffect.IMAGE;
-import static com.march.piceditor.graffiti.GraffitiLayer.GraffitiEffect.LOWPOLY;
-import static com.march.piceditor.graffiti.GraffitiLayer.GraffitiEffect.MOSAIC;
+import static com.march.piceditor.graffiti.GraffitiLayerConfig.GraffitiEffect.BLUR;
+import static com.march.piceditor.graffiti.GraffitiLayerConfig.GraffitiEffect.COLOR;
+import static com.march.piceditor.graffiti.GraffitiLayerConfig.GraffitiEffect.IMAGE;
+import static com.march.piceditor.graffiti.GraffitiLayerConfig.GraffitiEffect.LOW_POLY;
+import static com.march.piceditor.graffiti.GraffitiLayerConfig.GraffitiEffect.MOSAIC;
 
 /**
  * CreateAt : 7/25/17
@@ -24,10 +24,10 @@ import static com.march.piceditor.graffiti.GraffitiLayer.GraffitiEffect.MOSAIC;
  * poly/
  * @author chendong
  */
-public class GraffitiLayer {
+public class GraffitiLayerConfig {
 
     enum GraffitiEffect {
-        COLOR, MOSAIC, IMAGE, BLUR, LOWPOLY
+        COLOR, MOSAIC, IMAGE, BLUR, LOW_POLY
     }
 
     public static final int DEF_VALUE = -1;
@@ -39,36 +39,37 @@ public class GraffitiLayer {
     private Bitmap         mImageBitmap     = null;
     private int            mBlurRadius      = Blur.BlurFactor.DEFAULT_RADIUS;
 
-    private GraffitiLayer(GraffitiEffect graffitiEffect) {
+    private GraffitiLayerConfig(GraffitiEffect graffitiEffect) {
         mGraffitiEffect = graffitiEffect;
     }
 
-    public static GraffitiLayer newColorLayer(int color) {
-        GraffitiLayer graffitiLayer = new GraffitiLayer(COLOR);
+    public static GraffitiLayerConfig newColorLayer(int color) {
+        // 7s cost
+        GraffitiLayerConfig graffitiLayer = new GraffitiLayerConfig(COLOR);
         graffitiLayer.setColor(color);
         return graffitiLayer;
     }
 
-    public static GraffitiLayer newMosaicLayer(int mosaicGridWidth) {
-        GraffitiLayer graffitiLayer = new GraffitiLayer(MOSAIC);
+    public static GraffitiLayerConfig newMosaicLayer(int mosaicGridWidth) {
+        GraffitiLayerConfig graffitiLayer = new GraffitiLayerConfig(MOSAIC);
         graffitiLayer.setMosaicGridWidth(mosaicGridWidth);
         return graffitiLayer;
     }
 
-    public static GraffitiLayer newBlurLayer(int blurRadius) {
-        GraffitiLayer graffitiLayer = new GraffitiLayer(BLUR);
+    public static GraffitiLayerConfig newBlurLayer(int blurRadius) {
+        GraffitiLayerConfig graffitiLayer = new GraffitiLayerConfig(BLUR);
         graffitiLayer.setBlurRadius(blurRadius);
         return graffitiLayer;
     }
 
-    public static GraffitiLayer newImageLayer(Bitmap bitmap) {
-        GraffitiLayer graffitiLayer = new GraffitiLayer(IMAGE);
+    public static GraffitiLayerConfig newImageLayer(Bitmap bitmap) {
+        GraffitiLayerConfig graffitiLayer = new GraffitiLayerConfig(IMAGE);
         graffitiLayer.setImageBitmap(bitmap);
         return graffitiLayer;
     }
 
-    public static GraffitiLayer newLowPolyLayer(int gradientThresh) {
-        GraffitiLayer graffitiLayer = new GraffitiLayer(LOWPOLY);
+    public static GraffitiLayerConfig newLowPolyLayer(int gradientThresh) {
+        GraffitiLayerConfig graffitiLayer = new GraffitiLayerConfig(LOW_POLY);
         graffitiLayer.setMosaicGridWidth(gradientThresh);
         return graffitiLayer;
     }
@@ -80,19 +81,19 @@ public class GraffitiLayer {
             return null;
 
         if (mGraffitiEffect == MOSAIC) {
-            // mosaic
+            // mosaic 15s cost
             return GraffitiUtils.getMosaicBitmap(srcBitmap, mMosaicGridWidth);
         } else if (mGraffitiEffect == GraffitiEffect.BLUR) {
-            // blur
+            // blur 45s cost
             return GraffitiUtils.getBlurBitmap(context, srcBitmap, mBlurRadius);
         } else if (mGraffitiEffect == GraffitiEffect.COLOR) {
             // pure color
             return GraffitiUtils.getColorBitmap(srcBitmap, mColor);
         } else if (mGraffitiEffect == GraffitiEffect.IMAGE) {
-            // image
+            // image 0s cost
             return GraffitiUtils.getCenterCropBitmap(srcBitmap, mImageBitmap);
-        } else if (mGraffitiEffect == GraffitiEffect.LOWPOLY) {
-            // low poly
+        } else if (mGraffitiEffect == GraffitiEffect.LOW_POLY) {
+            // low poly 480s cost
             return LowPoly.generate(srcBitmap, mGradientThresh);
         }
         return null;

@@ -201,7 +201,7 @@ public class TestCompressImageActivity extends BaseActivity {
 //                mDrawMosaicView.setMosaicColor(Color.RED);
 //                mDrawMosaicView.setMode(MosaicView.Mode.PATH);
 //                mDrawMosaicView.setSrcPath(imageInfo.getPath());
-//                mDrawMosaicView.setEffect(MosaicView.Effect.GRID);
+//                mDrawMosaicView.setEffect(MosaicView.GraffitiLayer.GRID);
 //                mDrawMosaicView.setPathWidth(100);
                 mMosaicOverlay.setSrc(imageInfo.getPath());
                 break;

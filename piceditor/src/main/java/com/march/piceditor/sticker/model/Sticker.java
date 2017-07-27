@@ -10,7 +10,7 @@ import android.support.annotation.NonNull;
 import android.util.SparseArray;
 
 import com.march.dev.utils.BitmapUtils;
-import com.march.piceditor.common.model.Point;
+import com.march.piceditor.common.model.PointF;
 import com.march.piceditor.utils.CalculateUtils;
 import com.march.piceditor.utils.Utils;
 
@@ -46,7 +46,7 @@ public class Sticker implements Comparable<Sticker> {
     private float mInitTranslateX, mInitTranslateY;
 
     private ColorMatrixColorFilter   mColorFilter; // 颜色过滤器，将贴纸过滤成纯色
-    private SparseArray<Point>       mCornerPointMap; // 四角点的位置，可倾斜矩形
+    private SparseArray<PointF>      mCornerPointMap; // 四角点的位置，可倾斜矩形
     private SparseArray<StickerMenu> mMenuMap; // 四个菜单键的存储
 
 
@@ -68,10 +68,10 @@ public class Sticker implements Comparable<Sticker> {
         mPriority = System.currentTimeMillis();
         mCornerPointMap = new SparseArray<>();
         mMenuMap = new SparseArray<>();
-        mCornerPointMap.put(Position.TOP_LEFT, new Point());
-        mCornerPointMap.put(Position.TOP_RIGHT, new Point());
-        mCornerPointMap.put(Position.BOTTOM_RIGHT, new Point());
-        mCornerPointMap.put(Position.BOTTOM_LEFT, new Point());
+        mCornerPointMap.put(Position.TOP_LEFT, new PointF());
+        mCornerPointMap.put(Position.TOP_RIGHT, new PointF());
+        mCornerPointMap.put(Position.BOTTOM_RIGHT, new PointF());
+        mCornerPointMap.put(Position.BOTTOM_LEFT, new PointF());
     }
 
     public boolean isActive() {
@@ -105,9 +105,9 @@ public class Sticker implements Comparable<Sticker> {
         return stickerMenus;
     }
 
-    public Point[] getCornerPoints() {
+    public PointF[] getCornerPoints() {
         mapPoints();
-        return new Point[]{
+        return new PointF[]{
                 mCornerPointMap.get(Position.TOP_LEFT),
                 mCornerPointMap.get(Position.TOP_RIGHT),
                 mCornerPointMap.get(Position.BOTTOM_RIGHT),
@@ -171,7 +171,7 @@ public class Sticker implements Comparable<Sticker> {
         mCornerPointMap.get(Position.BOTTOM_RIGHT).set(dst[6], dst[7]);
     }
 
-    public SparseArray<Point> getCornerPointMap() {
+    public SparseArray<PointF> getCornerPointMap() {
         return mCornerPointMap;
     }
 
@@ -180,10 +180,10 @@ public class Sticker implements Comparable<Sticker> {
     }
 
     public boolean isTouchIn(float x, float y) {
-        Point[] points = getCornerPoints();
+        PointF[] points = getCornerPoints();
         return CalculateUtils.isRectContainsPoint(points[0],
                 points[1], points[2],
-                points[3], new Point(x, y));
+                points[3], new PointF(x, y));
     }
 
     @Override

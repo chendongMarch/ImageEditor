@@ -12,14 +12,13 @@ import com.march.piceditor.graffiti.GraffitiOverlay;
 /**
  * CreateAt : 7/25/17
  * Describe :
- * <p>
  * 触摸之后保存触摸的位置，有两种类型
  * 1. 路径绘制(Path + PathWidth)
  * 2. 矩形区域绘制(Rect)
  *
  * @author chendong
  */
-public class GraffitiPart implements Comparable<GraffitiPart> {
+public class TouchPartHolder implements Comparable<TouchPartHolder> {
 
     private Path                      mPath; // 当前绘制的路径
     private int                       mPathWidth; // 路径的宽度
@@ -32,11 +31,11 @@ public class GraffitiPart implements Comparable<GraffitiPart> {
     private float mRectInitX;
     private float mRectInitY;
 
-    public GraffitiPart(GraffitiOverlay.TouchMode touchMode) {
+    public TouchPartHolder(GraffitiOverlay.TouchMode touchMode) {
         mTouchMode = touchMode;
     }
 
-    public GraffitiPart(boolean isErase, GraffitiOverlay.TouchMode touchMode) {
+    public TouchPartHolder(boolean isErase, GraffitiOverlay.TouchMode touchMode) {
         mTouchMode = touchMode;
         mIsErase = isErase;
     }
@@ -133,7 +132,7 @@ public class GraffitiPart implements Comparable<GraffitiPart> {
 
     @Override
     public String toString() {
-        return "GraffitiPart{" +
+        return "TouchPartHolder{" +
                 ", mTouchMode=" + mTouchMode +
                 ", mIsErase=" + mIsErase +
                 ", mCreateTime=" + mCreateTime +
@@ -141,7 +140,7 @@ public class GraffitiPart implements Comparable<GraffitiPart> {
     }
 
     @Override
-    public int compareTo(@NonNull GraffitiPart o) {
+    public int compareTo(@NonNull TouchPartHolder o) {
         if (mCreateTime > o.mCreateTime) {
             return 1;
         } else if (mCreateTime < o.mCreateTime) {

@@ -8,16 +8,16 @@ import android.view.MotionEvent;
  *
  * @author chendong
  */
-public class Point {
+public class PointF {
     public float x;
     public float y;
 
-    public Point(float x, float y) {
+    public PointF(float x, float y) {
         this.x = x;
         this.y = y;
     }
 
-    public Point() {
+    public PointF() {
     }
 
     public void set(float x, float y) {

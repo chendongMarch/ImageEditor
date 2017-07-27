@@ -10,12 +10,12 @@ import android.view.MotionEvent;
  */
 public class ClickChecker {
 
-    private long  mLastDownTime;
-    private Point mLastDownPoint;
+    private long   mLastDownTime;
+    private PointF mLastDownPoint;
 
     public void onTouchDown(MotionEvent event) {
         mLastDownTime = System.currentTimeMillis();
-        mLastDownPoint = new Point(event.getX(), event.getY());
+        mLastDownPoint = new PointF(event.getX(), event.getY());
     }
 
     public boolean isClick(MotionEvent event) {

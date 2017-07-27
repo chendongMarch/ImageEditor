@@ -16,7 +16,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.march.dev.utils.DrawUtils;
 import com.march.piceditor.common.model.ClickChecker;
-import com.march.piceditor.common.model.Point;
+import com.march.piceditor.common.model.PointF;
 import com.march.piceditor.sticker.handler.StickerBaseTouchHandler;
 import com.march.piceditor.sticker.handler.impl.BottomRightCornerHandler;
 import com.march.piceditor.sticker.handler.impl.MoveHandler;
@@ -233,7 +233,7 @@ public class StickerDrawOverlay extends View {
                     }
                 }
                 if (mActiveSticker != null && mActiveSticker.equals(sticker)) {
-                    Point[] points = sticker.getCornerPoints();
+                    PointF[] points = sticker.getCornerPoints();
                     for (int j = 0, i; j < points.length; j++) {
                         i = j;
                         if (i == points.length - 1)

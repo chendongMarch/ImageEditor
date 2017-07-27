@@ -12,7 +12,7 @@ import com.march.dev.app.activity.BaseActivity;
 import com.march.dev.utils.ActivityAnimUtils;
 import com.march.dev.utils.FileUtils;
 import com.march.picedit.R;
-import com.march.piceditor.graffiti.GraffitiLayer;
+import com.march.piceditor.graffiti.GraffitiLayerConfig;
 import com.march.piceditor.graffiti.GraffitiOverlay;
 import com.march.turbojpeg.TurboJpegUtils;
 
@@ -81,20 +81,20 @@ public class GraffitiActivity extends BaseActivity {
     public void clickView2(View view) {
         switch (view.getId()) {
             case R.id.tv_effect_blur:
-                mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newBlurLayer(GraffitiLayer.DEF_VALUE));
+                mGraffitiOverlay.setGraffitiLayer(GraffitiLayerConfig.newBlurLayer(GraffitiLayerConfig.DEF_VALUE));
                 break;
             case R.id.tv_effect_color:
-                mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newColorLayer(Color.parseColor("#ff60ead5")));
+                mGraffitiOverlay.setGraffitiLayer(GraffitiLayerConfig.newColorLayer(Color.parseColor("#ff60ead5")));
                 break;
             case R.id.tv_effect_poly:
-                mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newLowPolyLayer(GraffitiLayer.DEF_VALUE));
+                mGraffitiOverlay.setGraffitiLayer(GraffitiLayerConfig.newLowPolyLayer(GraffitiLayerConfig.DEF_VALUE));
                 break;
             case R.id.tv_effect_mosaic:
-                mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newMosaicLayer(40));
+                mGraffitiOverlay.setGraffitiLayer(GraffitiLayerConfig.newMosaicLayer(40));
                 break;
             case R.id.tv_effect_image:
                 Bitmap bitmap = BitmapFactory.decodeFile(FileUtils.newRootFile("bg.jpg").getAbsolutePath());
-                mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newImageLayer(bitmap));
+                mGraffitiOverlay.setGraffitiLayer(GraffitiLayerConfig.newImageLayer(bitmap));
                 break;
         }
     }
