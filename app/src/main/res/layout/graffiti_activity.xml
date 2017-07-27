@@ -19,9 +19,47 @@
         android:orientation="horizontal">
 
         <TextView
+            android:id="@+id/tv_effect_blur"
+            style="@style/TvMenu"
+            android:text="blur"/>
+
+        <TextView
+            android:id="@+id/tv_effect_poly"
+            style="@style/TvMenu"
+            android:text="poly"/>
+
+
+        <TextView
+            android:id="@+id/tv_effect_image"
+            style="@style/TvMenu"
+            android:text="image"/>
+
+        <TextView
+            android:id="@+id/tv_effect_mosaic"
+            style="@style/TvMenu"
+            android:text="mosaic"/>
+
+        <TextView
+            android:id="@+id/tv_effect_color"
+            style="@style/TvMenu"
+            android:text="color"/>
+
+    </android.support.v7.widget.LinearLayoutCompat>
+
+    <View
+
+        style="@style/common_line"/>
+
+    <android.support.v7.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/white"
+        android:orientation="horizontal">
+
+        <TextView
             android:id="@+id/tv_path"
             style="@style/TvMenu"
-            android:text="path" />
+            android:text="path"/>
 
         <TextView
             android:id="@+id/tv_rect"
@@ -31,17 +69,17 @@
 
         <TextView
             android:id="@+id/tv_erase"
-            android:text="erase"
-            style="@style/TvMenu"/>
+            style="@style/TvMenu"
+            android:text="erase"/>
 
         <TextView
             android:id="@+id/tv_draw"
-            android:text="draw"
-            style="@style/TvMenu"/>
+            style="@style/TvMenu"
+            android:text="draw"/>
 
         <TextView
             android:id="@+id/tv_save"
-            android:text="save"
-            style="@style/TvMenu"/>
+            style="@style/TvMenu"
+            android:text="save"/>
     </android.support.v7.widget.LinearLayoutCompat>
 </LinearLayout>

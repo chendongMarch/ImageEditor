@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 
@@ -39,12 +40,7 @@ public class GraffitiActivity extends BaseActivity {
     public void onInitViews(View view, Bundle saveData) {
         super.onInitViews(view, saveData);
         mGraffitiOverlay.setSrc(FileUtils.newRootFile("2.jpg").getAbsolutePath());
-//        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
-//        Bitmap bitmap = BitmapFactory.decodeFile(FileUtils.newRootFile("bg.jpg").getAbsolutePath());
-//        mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newImageLayer(bitmap));
-//        mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newMosaicLayer(40));
 
-        mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newLowPolyLayer(GraffitiLayer.DEF_VALUE));
     }
 
 
@@ -54,7 +50,7 @@ public class GraffitiActivity extends BaseActivity {
     }
 
 
-    @OnClick({R.id.tv_path, R.id.tv_rect, R.id.tv_erase, R.id.tv_draw,R.id.tv_save})
+    @OnClick({R.id.tv_path, R.id.tv_rect, R.id.tv_erase, R.id.tv_draw, R.id.tv_save})
     public void clickView(View view) {
         switch (view.getId()) {
             case R.id.tv_path:
@@ -71,7 +67,34 @@ public class GraffitiActivity extends BaseActivity {
                 break;
             case R.id.tv_save:
                 Bitmap save = mGraffitiOverlay.save();
-                TurboJpegUtils.compressBitmap(save,100,FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath(),true);
+                TurboJpegUtils.compressBitmap(save, 100, FileUtils.newRootFile(System.currentTimeMillis() + ".jpg").getAbsolutePath(), true);
+                break;
+        }
+    }
+
+
+    @OnClick({R.id.tv_effect_blur,
+                     R.id.tv_effect_color,
+                     R.id.tv_effect_poly,
+                     R.id.tv_effect_mosaic,
+                     R.id.tv_effect_image})
+    public void clickView2(View view) {
+        switch (view.getId()) {
+            case R.id.tv_effect_blur:
+                mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newBlurLayer(GraffitiLayer.DEF_VALUE));
+                break;
+            case R.id.tv_effect_color:
+                mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newColorLayer(Color.parseColor("#ff60ead5")));
+                break;
+            case R.id.tv_effect_poly:
+                mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newLowPolyLayer(GraffitiLayer.DEF_VALUE));
+                break;
+            case R.id.tv_effect_mosaic:
+                mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newMosaicLayer(40));
+                break;
+            case R.id.tv_effect_image:
+                Bitmap bitmap = BitmapFactory.decodeFile(FileUtils.newRootFile("bg.jpg").getAbsolutePath());
+                mGraffitiOverlay.setGraffitiLayer(GraffitiLayer.newImageLayer(bitmap));
                 break;
         }
     }

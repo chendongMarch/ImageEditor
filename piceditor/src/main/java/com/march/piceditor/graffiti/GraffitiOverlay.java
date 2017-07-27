@@ -157,7 +157,8 @@ public class GraffitiOverlay extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (!isEnabled() || event.getPointerCount() > 1) {
+        if (!isEnabled() || event.getPointerCount() > 1
+                || mSourceImage == null || mGraffitiImage == null) {
             return super.onTouchEvent(event);
         }
         switch (event.getActionMasked()) {
