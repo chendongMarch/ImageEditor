@@ -184,8 +184,7 @@ public class GraffitiOverlay extends View {
         return true;
     }
 
-
-
+    
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
