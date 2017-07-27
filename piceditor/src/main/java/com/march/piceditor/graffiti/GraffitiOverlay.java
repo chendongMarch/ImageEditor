@@ -186,7 +186,7 @@ public class GraffitiOverlay extends View {
                 if (mIsErase) {
                     // 向其他涂层添加擦除路径
                     for (GraffitiLayer layer : mGraffitiLayers) {
-                        if (layer.equals(mGraffitiLayer)) {
+                        if (!layer.equals(mGraffitiLayer)) {
                             layer.mTouchPartHolders.add(mTouchPartHolder);
                         }
                     }
