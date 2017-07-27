@@ -6,7 +6,7 @@ import com.march.piceditor.common.model.PointF;
 
 /**
  * CreateAt : 7/20/17
- * Describe :
+ * Describe : 计算类
  *
  * @author chendong
  */
