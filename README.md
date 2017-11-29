@@ -47,8 +47,8 @@
 4. 高斯模糊模式 done
 5. 纯色模式 done
 6. 图片模式 done
-7. poly 模式
-8. 支持多层涂鸦 todo
+7. poly 模式 done
+8. 支持多层涂鸦 done
 
 ### 虚化
 

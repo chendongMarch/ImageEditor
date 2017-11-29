@@ -16,14 +16,14 @@ import com.march.dev.utils.PermissionUtils;
 import com.march.dev.utils.ToastUtils;
 import com.march.picedit.R;
 import com.march.picedit.sticker.ResourceFactory;
-import com.march.piceditor.graffiti.GraffitiOverlay;
-import com.march.piceditor.sticker.EasyMenuHandler;
-import com.march.piceditor.sticker.StickerDrawOverlay;
-import com.march.piceditor.sticker.listener.OnStickerEventListener;
-import com.march.piceditor.sticker.listener.StickerMenuHandler;
-import com.march.piceditor.sticker.model.Position;
-import com.march.piceditor.sticker.model.Sticker;
-import com.march.piceditor.sticker.model.StickerMenu;
+import com.march.piceditor.functions.graffiti.GraffitiOverlayView;
+import com.march.piceditor.functions.sticker.EasyMenuHandler;
+import com.march.piceditor.functions.sticker.StickerDrawOverlay;
+import com.march.piceditor.functions.sticker.listener.OnStickerEventListener;
+import com.march.piceditor.functions.sticker.listener.StickerMenuHandler;
+import com.march.piceditor.functions.sticker.model.Position;
+import com.march.piceditor.functions.sticker.model.Sticker;
+import com.march.piceditor.functions.sticker.model.StickerMenu;
 import com.march.turbojpeg.TurboJpegUtils;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -61,7 +61,7 @@ public class TestCompressImageActivity extends BaseActivity {
 
     @BindView(R.id.iv_image)       ImageView          mImageView;
     @BindView(R.id.iv_image2)      ImageView          mImageView2;
-    @BindView(R.id.mosaic_overlay) GraffitiOverlay    mMosaicOverlay;
+    @BindView(R.id.mosaic_overlay) GraffitiOverlayView mMosaicOverlay;
     @BindView(R.id.sdo)            StickerDrawOverlay mStickerDrawOverlay;
 
     private ResourceFactory mResourceFactory;
@@ -220,5 +220,6 @@ public class TestCompressImageActivity extends BaseActivity {
         ToastUtils.show("permission denied");
         return super.handlePermissionResult(reqPermissionsAndResult);
     }
+
 
 }

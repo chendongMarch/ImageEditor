@@ -2,7 +2,7 @@ package com.march.piceditor.utils;
 
 import android.view.MotionEvent;
 
-import com.march.piceditor.common.model.PointF;
+import com.march.piceditor.model.PointF;
 
 /**
  * CreateAt : 7/20/17
@@ -44,6 +44,7 @@ public class CalculateUtils {
 //    k=W(a,v)/W(a,b);
 //    在內部 <==> ( 0<h && h<1 && 0<k && k<1 )
 
+
     private static float W(PointF p, PointF q) {
         return p.x * q.y - p.y * q.x;
     }
@@ -54,6 +55,7 @@ public class CalculateUtils {
         PointF b = new PointF(D.x - A.x, D.y - A.y);
         float h = W(v, b) / W(a, b);
         float k = W(a, v) / W(a, b);
+
         return 0 < h && h < 1 && 0 < k && k < 1;
 
     }

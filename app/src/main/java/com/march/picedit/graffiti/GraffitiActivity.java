@@ -12,8 +12,8 @@ import com.march.dev.app.activity.BaseActivity;
 import com.march.dev.utils.ActivityAnimUtils;
 import com.march.dev.utils.FileUtils;
 import com.march.picedit.R;
-import com.march.piceditor.graffiti.GraffitiLayerConfig;
-import com.march.piceditor.graffiti.GraffitiOverlay;
+import com.march.piceditor.functions.graffiti.GraffitiLayerConfig;
+import com.march.piceditor.functions.graffiti.GraffitiOverlayView;
 import com.march.turbojpeg.TurboJpegUtils;
 
 import butterknife.BindView;
@@ -27,7 +27,7 @@ import butterknife.OnClick;
  */
 public class GraffitiActivity extends BaseActivity {
 
-    @BindView(R.id.graffiti_overlay) GraffitiOverlay mGraffitiOverlay;
+    @BindView(R.id.graffiti_overlay) GraffitiOverlayView mGraffitiOverlay;
 
     public static void start(Activity activity) {
         Intent intent = new Intent(activity, GraffitiActivity.class);
@@ -54,10 +54,10 @@ public class GraffitiActivity extends BaseActivity {
     public void clickView(View view) {
         switch (view.getId()) {
             case R.id.tv_path:
-                mGraffitiOverlay.setTouchMode(GraffitiOverlay.TouchMode.PATH);
+                mGraffitiOverlay.setTouchMode(GraffitiOverlayView.TouchMode.PATH);
                 break;
             case R.id.tv_rect:
-                mGraffitiOverlay.setTouchMode(GraffitiOverlay.TouchMode.RECT);
+                mGraffitiOverlay.setTouchMode(GraffitiOverlayView.TouchMode.RECT);
                 break;
             case R.id.tv_erase:
                 mGraffitiOverlay.setErase(true);
@@ -81,20 +81,20 @@ public class GraffitiActivity extends BaseActivity {
     public void clickView2(View view) {
         switch (view.getId()) {
             case R.id.tv_effect_blur:
-                mGraffitiOverlay.setGraffitiLayer(GraffitiLayerConfig.newBlurLayer(GraffitiLayerConfig.DEF_VALUE));
+                mGraffitiOverlay.addGraffitiLayer(GraffitiLayerConfig.newBlurLayer(GraffitiLayerConfig.DEF_VALUE));
                 break;
             case R.id.tv_effect_color:
-                mGraffitiOverlay.setGraffitiLayer(GraffitiLayerConfig.newColorLayer(Color.parseColor("#ff60ead5")));
+                mGraffitiOverlay.addGraffitiLayer(GraffitiLayerConfig.newColorLayer(Color.parseColor("#ff60ead5")));
                 break;
             case R.id.tv_effect_poly:
-                mGraffitiOverlay.setGraffitiLayer(GraffitiLayerConfig.newLowPolyLayer(GraffitiLayerConfig.DEF_VALUE));
+                mGraffitiOverlay.addGraffitiLayer(GraffitiLayerConfig.newLowPolyLayer(GraffitiLayerConfig.DEF_VALUE));
                 break;
             case R.id.tv_effect_mosaic:
-                mGraffitiOverlay.setGraffitiLayer(GraffitiLayerConfig.newMosaicLayer(40));
+                mGraffitiOverlay.addGraffitiLayer(GraffitiLayerConfig.newMosaicLayer(40));
                 break;
             case R.id.tv_effect_image:
                 Bitmap bitmap = BitmapFactory.decodeFile(FileUtils.newRootFile("bg.jpg").getAbsolutePath());
-                mGraffitiOverlay.setGraffitiLayer(GraffitiLayerConfig.newImageLayer(bitmap));
+                mGraffitiOverlay.addGraffitiLayer(GraffitiLayerConfig.newImageLayer(bitmap));
                 break;
         }
     }

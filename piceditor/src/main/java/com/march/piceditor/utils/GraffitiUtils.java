@@ -6,7 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
-import com.march.dev.utils.BitmapUtils;
+import com.march.piceditor.utils.BitmapUtils;
 
 /**
  * CreateAt : 7/25/17

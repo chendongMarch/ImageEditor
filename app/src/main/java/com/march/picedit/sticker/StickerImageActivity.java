@@ -15,11 +15,11 @@ import com.march.dev.app.activity.BaseActivity;
 import com.march.dev.utils.ActivityAnimUtils;
 import com.march.dev.utils.GlideUtils;
 import com.march.picedit.R;
-import com.march.piceditor.sticker.EasyMenuHandler;
-import com.march.piceditor.sticker.StickerDrawOverlay;
-import com.march.piceditor.sticker.model.Position;
-import com.march.piceditor.sticker.model.Sticker;
-import com.march.piceditor.sticker.model.StickerMenu;
+import com.march.piceditor.functions.sticker.EasyMenuHandler;
+import com.march.piceditor.functions.sticker.StickerDrawOverlay;
+import com.march.piceditor.functions.sticker.model.Position;
+import com.march.piceditor.functions.sticker.model.Sticker;
+import com.march.piceditor.functions.sticker.model.StickerMenu;
 
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;

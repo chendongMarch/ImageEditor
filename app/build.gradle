@@ -36,13 +36,15 @@ android {
 }
 
 dependencies {
+
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
-    compile rootProject.ext.support.design
-    compile rootProject.ext.support.appcompat_v7
+    compile rootProject.ext.google.design
+    compile rootProject.ext.google.appcompat_v7
 
-    apt rootProject.ext.support.butterknife840_processor
-    compile rootProject.ext.support.butterknife840
+    apt rootProject.ext.libs.butterknife840_processor
+    compile rootProject.ext.libs.butterknife840
+    compile rootProject.ext.libs.devKit
 
     compile project(':piceditor')
 }

@@ -16,7 +16,7 @@ import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
 import android.view.View;
 
-import com.march.dev.utils.BitmapUtils;
+import com.march.piceditor.utils.BitmapUtils;
 
 public class Blur {
 

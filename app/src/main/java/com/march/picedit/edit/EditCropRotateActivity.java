@@ -32,8 +32,8 @@ import com.march.lightadapter.listener.SimpleItemListener;
 import com.march.lightadapter.module.SelectorModule;
 import com.march.picedit.MainActivity;
 import com.march.picedit.R;
-import com.march.piceditor.crop.CropOverlay;
-import com.march.piceditor.rotate.RotateFrameLayout;
+import com.march.piceditor.functions.crop.CropOverlayView;
+import com.march.piceditor.functions.rotate.RotateFrameLayout;
 import com.march.turbojpeg.TurboJpegUtils;
 
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class EditCropRotateActivity extends BaseActivity {
 
     @BindView(R.id.fl_crop_ly)    FrameLayout mCropFrameLayout;
     @BindView(R.id.iv_crop_image) ImageView   mCropImageView;
-    @BindView(R.id.col_crop)      CropOverlay mCropOverlay;
+    @BindView(R.id.col_crop) CropOverlayView mCropOverlay;
 
     @BindView(R.id.rfl_rotate_ly)   RotateFrameLayout mRotateFrameLayout;
     @BindView(R.id.iv_rotate_image) ImageView         mRotateImageView;
@@ -365,7 +365,7 @@ public class EditCropRotateActivity extends BaseActivity {
     // 裁剪模式列表
     private void createCropModeAdapter() {
         List<CropMode> list = new ArrayList<>();
-        list.add(new CropMode(CropOverlay.NO_ASPECT_RATIO, "free", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_freedom_b, R.drawable.edit_cut_crop_freedom_a)));
+        list.add(new CropMode(CropOverlayView.NO_ASPECT_RATIO, "free", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_freedom_b, R.drawable.edit_cut_crop_freedom_a)));
         list.add(new CropMode(1f, "1:1", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_1_1_b, R.drawable.edit_cut_crop_1_1_a)));
         list.add(new CropMode(2f / 3, "2:3", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_2_3_b, R.drawable.edit_cut_crop_2_3_a)));
         list.add(new CropMode(3f / 2, "3:2", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_3_2_b, R.drawable.edit_cut_crop_3_2_a)));

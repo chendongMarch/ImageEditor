@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:text="选图"/>
 
-    <com.march.piceditor.graffiti.GraffitiOverlay
+    <com.march.piceditor.functions.graffiti.GraffitiOverlayView
         android:id="@+id/mosaic_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

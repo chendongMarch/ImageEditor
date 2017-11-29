@@ -14,7 +14,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_weight="1">
         <!--旋转区域-->
-        <com.march.piceditor.rotate.RotateFrameLayout
+        <com.march.piceditor.functions.rotate.RotateFrameLayout
             android:id="@+id/rfl_rotate_ly"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -29,7 +29,7 @@
                 android:layout_gravity="center"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_launcher"/>
-        </com.march.piceditor.rotate.RotateFrameLayout>
+        </com.march.piceditor.functions.rotate.RotateFrameLayout>
 
         <FrameLayout
             android:id="@+id/fl_crop_ly"
@@ -44,7 +44,7 @@
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_launcher"/>
 
-            <com.march.piceditor.crop.CropOverlay
+            <com.march.piceditor.functions.crop.CropOverlayView
                 android:id="@+id/col_crop"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

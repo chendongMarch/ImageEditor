@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.march.piceditor.graffiti.GraffitiOverlay
+    <com.march.piceditor.functions.graffiti.GraffitiOverlayView
         android:id="@+id/graffiti_overlay"
         android:layout_width="match_parent"
         android:layout_height="0dp"
