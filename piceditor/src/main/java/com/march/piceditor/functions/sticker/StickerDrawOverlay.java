@@ -15,7 +15,7 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
 import com.march.piceditor.utils.DrawUtils;
-import com.march.piceditor.model.ClickChecker;
+import com.march.piceditor.common.ClickChecker;
 import com.march.piceditor.model.PointF;
 import com.march.piceditor.functions.sticker.gesture.StickerBaseTouchHandler;
 import com.march.piceditor.functions.sticker.gesture.impl.BottomRightCornerHandler;
@@ -278,7 +278,7 @@ public class StickerDrawOverlay extends View {
                     // case MotionEvent.ACTION_POINTER_UP:
                     // case MotionEvent.ACTION_CANCEL:
                     // 如果是点击事件
-                    if (mClickChecker.isClick(event)) {
+                    if (mClickChecker.checkIsClickOnTouchUp(event)) {
                         // 分发菜单点击事件
                         if (!dispatchMenuClick(event)) {
                             // 不是菜单点击的话， 查看是不是选择了新的贴纸
@@ -361,7 +361,7 @@ public class StickerDrawOverlay extends View {
 
     // 分发菜单点击事件
     private boolean dispatchMenuClick(MotionEvent event) {
-        if (mActiveSticker != null && mClickChecker.isClick(event)) {
+        if (mActiveSticker != null && mClickChecker.checkIsClickOnTouchUp(event)) {
             for (StickerMenu menu : mActiveSticker.getStickerMenus()) {
                 if (menu != null && menu.isTouchIn(event.getX(), event.getY())) {
                     if (menu.getStickerMenuHandler() != null)

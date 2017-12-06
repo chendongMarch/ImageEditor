@@ -42,11 +42,11 @@ public class GraffitiOverlayView extends View {
         this(context, null);
     }
 
-    public GraffitiOverlayView(Context context,   AttributeSet attrs) {
+    public GraffitiOverlayView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public GraffitiOverlayView(Context context,   AttributeSet attrs, int defStyleAttr) {
+    public GraffitiOverlayView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
@@ -71,23 +71,23 @@ public class GraffitiOverlayView extends View {
     private Paint mTouchGraffitiPaint;
     private Paint mTouchPointPaint;
 
-    private RectF   mImageRect;
-    private int     mPathWidth;
-    private float   mImageWidth;
-    private float   mImageHeight;
+    private RectF mImageRect;
+    private int mPathWidth;
+    private float mImageWidth;
+    private float mImageHeight;
     private boolean mIsTouching;
     private boolean mIsErase;
 
     private Bitmap mSourceImage;
 
     private TouchPartHolder mTouchPartHolder;
-    private PointF          mTouchPoint;
+    private PointF mTouchPoint;
 
     private int mEraseColor = Color.WHITE;
-    private int mDrawColor  = Color.GRAY;
+    private int mDrawColor = Color.GRAY;
 
     private List<GraffitiLayer> mGraffitiLayers;
-    private GraffitiLayer       mGraffitiLayer;
+    private GraffitiLayer mGraffitiLayer;
 
     private TouchMode mTouchMode = TouchMode.PATH;
 
@@ -96,7 +96,7 @@ public class GraffitiOverlayView extends View {
     private class GraffitiLayer {
 
         List<TouchPartHolder> mTouchPartHolders;
-        Bitmap                mGraffitiImage;
+        Bitmap mGraffitiImage;
 
         GraffitiLayer(Bitmap bitmap) {
             mGraffitiImage = bitmap;
@@ -229,9 +229,9 @@ public class GraffitiOverlayView extends View {
 
     // 分两层绘制，source image & mosaic image
     // 1.初始设计(已弃用)：
-    // 马赛克层需要结合3部分，擦除路径，涂抹路径，马赛克涂层
+    // 马赛克层需要结合3部分，擦除路径，涂抹路径，涂鸦图层
     // 先绘制涂抹路径，然后使用 clear 模式绘制擦除路径，清除与涂抹路径重叠的部分，
-    // 然后使用 srcIn 模式绘制马赛克涂层，绘制马赛克涂层与清除后的涂抹路径重合地方
+    // 然后使用 srcIn 模式绘制涂鸦图层，绘制涂鸦图层与清除后的涂抹路径重合地方
     // 2.修复设计：
     // 擦除和涂抹在一个列表中，使用 clear mode 绘制擦除
     // 使用 src over mode 绘制涂抹
@@ -250,7 +250,7 @@ public class GraffitiOverlayView extends View {
 
             drawLayer(canvas);
 
-            // draw current touch
+            // 如果不是保存最终结果，需要将用户手势动态绘制出来
             if (!isSave) {
                 if (mTouchPartHolder != null && mTouchPartHolder.getRectF() != null) {
                     // mTouchPartHolder.onDraw(canvas, mTouchGraffitiPaint);
@@ -279,9 +279,7 @@ public class GraffitiOverlayView extends View {
                 // Collections.sort(mTouchPartHolders);
                 // 按照时间排序绘制，erase 的用 clear mode，否则用 src over mode
                 for (TouchPartHolder graffitiPart : layer.mTouchPartHolders) {
-                    mGraffitiLayerPaint.setXfermode(graffitiPart.isErase()
-                            ? mClearXfermode
-                            : mSrcOverXfermode);
+                    mGraffitiLayerPaint.setXfermode(graffitiPart.isErase() ? mClearXfermode : mSrcOverXfermode);
                     graffitiPart.onDraw(canvas, mGraffitiLayerPaint);
                 }
 

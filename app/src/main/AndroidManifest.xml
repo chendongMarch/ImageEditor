@@ -36,6 +36,9 @@
         <activity
             android:name=".graffiti.GraffitiActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
+        <activity
+            android:name=".test.TestPorterDuffXfermodeActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"/>
     </application>
 
 </manifest>
