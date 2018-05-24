@@ -1,8 +1,10 @@
 package com.march.picedit;
 
-import com.antfortune.freeline.FreelineCore;
-import com.march.dev.app.BaseApplication;
-import com.march.dev.utils.CrashUtils;
+import com.march.common.Common;
+import com.march.common.utils.CrashUtils;
+import com.march.uikit.UIKit;
+import com.march.uikit.app.BaseApplication;
+import com.march.uikit.common.JsonParseAdapterImpl;
 
 /**
  * CreateAt : 7/17/17
@@ -15,13 +17,7 @@ public class MyApplication extends BaseApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        FreelineCore.init(this);
 
-        CrashUtils.init(new CrashUtils.OnCrashListener() {
-            @Override
-            public void onCrash(Thread t, Throwable e) {
-                e.printStackTrace();
-            }
-        });
+
     }
 }

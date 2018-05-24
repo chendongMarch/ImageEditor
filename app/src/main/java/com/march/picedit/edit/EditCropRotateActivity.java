@@ -1,5 +1,6 @@
 package com.march.picedit.edit;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -7,38 +8,40 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
+import android.os.Build;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.march.dev.app.activity.BaseActivity;
-import com.march.dev.utils.ActivityAnimUtils;
-import com.march.dev.utils.BitmapUtils;
-import com.march.dev.utils.DimensUtils;
-import com.march.dev.utils.DrawableUtils;
-import com.march.dev.utils.FileUtils;
-import com.march.dev.utils.PermissionUtils;
-import com.march.dev.utils.ToastUtils;
-import com.march.dev.utils.ViewUtils;
-import com.march.dev.widget.TitleBarView;
-import com.march.lightadapter.core.LightAdapter;
-import com.march.lightadapter.core.ViewHolder;
-import com.march.lightadapter.listener.OnHolderUpdateListener;
+import com.march.common.utils.ActivityAnimUtils;
+import com.march.common.utils.BitmapUtils;
+import com.march.common.utils.DimensUtils;
+import com.march.common.utils.DrawableUtils;
+import com.march.common.utils.FileUtils;
+import com.march.common.utils.ToastUtils;
+import com.march.common.utils.ViewUtils;
+import com.march.lightadapter.LightAdapter;
+import com.march.lightadapter.LightHolder;
+import com.march.lightadapter.LightInjector;
+import com.march.lightadapter.extend.SelectManager;
+import com.march.lightadapter.helper.LightManager;
+import com.march.lightadapter.inject.AdapterConfig;
+import com.march.lightadapter.inject.AdapterLayout;
+import com.march.lightadapter.listener.AdapterViewBinder;
 import com.march.lightadapter.listener.SimpleItemListener;
-import com.march.lightadapter.module.SelectorModule;
 import com.march.picedit.MainActivity;
+import com.march.picedit.PicEditActivity;
 import com.march.picedit.R;
 import com.march.piceditor.functions.crop.CropOverlayView;
 import com.march.piceditor.functions.rotate.RotateFrameLayout;
 import com.march.turbojpeg.TurboJpegUtils;
+import com.march.uikit.annotation.UILayout;
+import com.march.uikit.annotation.UITitle;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -56,18 +59,24 @@ import io.reactivex.schedulers.Schedulers;
  *
  * @author chendong
  */
-public class EditCropRotateActivity extends BaseActivity {
+@UILayout(R.layout.edit_activity)
+@UITitle("裁剪旋转")
+public class EditCropRotateActivity extends PicEditActivity {
 
     public static final String KEY_PATH = "KEY_PATH";
     public static final String TAG      = MainActivity.class.getSimpleName();
 
-    private String                 mCurrentPicturePath;
-    private String                 mOriginPicturePath;
-    private LightAdapter<CropMode> mCropModeAdapter;
+    private String                  mCurrentPicturePath;
+    private String                  mOriginPicturePath;
+    @AdapterLayout(itemLayoutId = R.layout.edit_crop_mode_item)
+    private LightAdapter<CropMode>  mCropModeAdapter;
+    private SelectManager<CropMode> mCropModeSelectManager;
+
     private int                    mEnsureColor;
     private int                    mUnsureColor;
 
-    private Bitmap mCurrentBitmap;
+    private Bitmap                   mCurrentBitmap;
+    private LightAdapter<RotateMode> mRotateModeLightAdapter;
 
     public static void start(Activity activity, String path) {
         Intent intent = new Intent(activity, EditCropRotateActivity.class);
@@ -95,28 +104,31 @@ public class EditCropRotateActivity extends BaseActivity {
     @BindView(R.id.iv_tab_rotate)   ImageView mRotateTabView;
     @BindView(R.id.ll_crop_ly)      View      mCropLy;
 
+
     @Override
-    public void onReceiveData() {
-        super.onReceiveData();
+    public void initBeforeViewCreated() {
+        super.initBeforeViewCreated();
         mOriginPicturePath = getIntent().getStringExtra(KEY_PATH);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(new String[]{
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+            }, 100);
+        }
     }
 
     @Override
-    public void onInitViews(View view, Bundle saveData) {
-        super.onInitViews(view, saveData);
-        mTitleBarView.setText(TitleBarView.CENTER, "裁剪");
-        mTitleBarView.setText(TitleBarView.LEFT, "返回");
-        mTitleBarView.setLeftBackListener(mActivity);
-
-        mCropTabView.setImageDrawable(DrawableUtils.newSelectStateDrawable(mContext, R.drawable.img_edit_tab_clip_b, R.drawable.img_edit_tab_clip_a));
-        mRotateTabView.setImageDrawable(DrawableUtils.newSelectStateDrawable(mContext, R.drawable.img_edit_tab_rotate_b, R.drawable.img_edit_tab_rotate_a));
+    public void initAfterViewCreated() {
+        super.initAfterViewCreated();
+        mCropTabView.setImageDrawable(DrawableUtils.newSelectStateDrawable(getContext(), R.drawable.img_edit_tab_clip_b, R.drawable.img_edit_tab_clip_a));
+        mRotateTabView.setImageDrawable(DrawableUtils.newSelectStateDrawable(getContext(), R.drawable.img_edit_tab_rotate_b, R.drawable.img_edit_tab_rotate_a));
         mCropTabView.setSelected(true);
 
-        mEnsureColor = ContextCompat.getColor(mContext, R.color.ensureColor);
-        mUnsureColor = ContextCompat.getColor(mContext, R.color.unsureColor);
+        mEnsureColor = ContextCompat.getColor(getContext(), R.color.ensureColor);
+        mUnsureColor = ContextCompat.getColor(getContext(), R.color.unsureColor);
 
-        ViewUtils.setBackground(mConfirmTv, DrawableUtils.newRoundRectDrawable(mContext, mEnsureColor, 20));
-        ViewUtils.setBackground(mResetTv, DrawableUtils.newRoundRectDrawable(mContext, mUnsureColor, 20));
+        ViewUtils.setBackground(mConfirmTv, DrawableUtils.newRoundRectDrawable(mEnsureColor, 20));
+        ViewUtils.setBackground(mResetTv, DrawableUtils.newRoundRectDrawable(mUnsureColor, 20));
 
         mCurrentBitmap = BitmapFactory.decodeFile(mOriginPicturePath);
 
@@ -136,11 +148,11 @@ public class EditCropRotateActivity extends BaseActivity {
             public void run() {
                 mParentHeight = mParentFl.getMeasuredHeight();
                 mCropOverlay.attachImage(bitmap,
-                        DimensUtils.getScreenWidth(mContext),
+                        DimensUtils.WIDTH,
                         mParentHeight, .9f, mCropImageView);
                 mCropImageView.setImageBitmap(bitmap);
                 mRotateImageView.setImageBitmap(bitmap);
-                ViewUtils.setLayoutParam((int) (DimensUtils.getScreenWidth(mContext) * .9f), (int) (mParentHeight * .9f), mRotateImageView);
+                ViewUtils.setLayoutParam((int) (DimensUtils.WIDTH * .9f), (int) (mParentHeight * .9f), mRotateImageView);
             }
         };
         if (mParentHeight == 0)
@@ -304,29 +316,27 @@ public class EditCropRotateActivity extends BaseActivity {
     // 创建旋转菜单 list
     private void createRotateModeAdapter() {
         List<RotateMode> list = new ArrayList<>();
-        list.add(new RotateMode(RotateMode.RESET, DrawableUtils.newRoundRectDrawable(mContext, mUnsureColor, 20)));
-        list.add(new RotateMode(RotateMode.LEFT, DrawableUtils.newPressedDrawable(mContext, R.drawable.edit_rotate_left_pressed, R.drawable.edit_rotate_left_released)));
-        list.add(new RotateMode(RotateMode.RIGHT, DrawableUtils.newPressedDrawable(mContext, R.drawable.edit_rotate_right_pressed, R.drawable.edit_rotate_right_released)));
-        list.add(new RotateMode(RotateMode.FLIPX, DrawableUtils.newPressedDrawable(mContext, R.drawable.edit_rotate_flipx_pressed, R.drawable.edit_rotate_flipx_released)));
-        list.add(new RotateMode(RotateMode.FLIPY, DrawableUtils.newPressedDrawable(mContext, R.drawable.edit_rotate_flipy_pressed, R.drawable.edit_rotate_flipy_released)));
-        LightAdapter<RotateMode> lightAdapter = new LightAdapter<RotateMode>(mContext, list, R.layout.eidt_rotate_mode_item) {
+        list.add(new RotateMode(RotateMode.RESET, DrawableUtils.newRoundRectDrawable(mUnsureColor, 20)));
+        list.add(new RotateMode(RotateMode.LEFT, DrawableUtils.newPressedDrawable(getContext(), R.drawable.edit_rotate_left_pressed, R.drawable.edit_rotate_left_released)));
+        list.add(new RotateMode(RotateMode.RIGHT, DrawableUtils.newPressedDrawable(getContext(), R.drawable.edit_rotate_right_pressed, R.drawable.edit_rotate_right_released)));
+        list.add(new RotateMode(RotateMode.FLIPX, DrawableUtils.newPressedDrawable(getContext(), R.drawable.edit_rotate_flipx_pressed, R.drawable.edit_rotate_flipx_released)));
+        list.add(new RotateMode(RotateMode.FLIPY, DrawableUtils.newPressedDrawable(getContext(), R.drawable.edit_rotate_flipy_pressed, R.drawable.edit_rotate_flipy_released)));
+        mRotateModeLightAdapter = new LightAdapter<RotateMode>(getContext(), list) {
             @Override
-            public void onBindView(ViewHolder<RotateMode> holder, RotateMode data, int pos, int type) {
-                holder.layoutParams(DimensUtils.getScreenWidth(mContext) / 5, ViewHolder.UNSET);
+            public void onBindView(LightHolder holder, RotateMode data, int pos, int type) {
+                holder.setLayoutParams(DimensUtils.WIDTH / 5, LightAdapter.UNSET);
                 if (data.type == RotateMode.RESET) {
-                    holder.gone(R.id.iv_icon)
-                            .visible(R.id.tv_desc);
+                    holder.setGone(R.id.iv_icon).setVisible(R.id.tv_desc);
                     ViewUtils.setBackground(holder.getView(R.id.tv_desc), data.drawable);
                 } else {
-                    holder.visible(R.id.iv_icon)
-                            .gone(R.id.tv_desc);
+                    holder.setVisible(R.id.iv_icon).setGone(R.id.tv_desc);
                     holder.<ImageView>getView(R.id.iv_icon).setImageDrawable(data.drawable);
                 }
             }
         };
-        lightAdapter.setOnItemListener(new SimpleItemListener<RotateMode>() {
+        mRotateModeLightAdapter.setOnItemListener(new SimpleItemListener<RotateMode>() {
             @Override
-            public void onClick(int pos, ViewHolder holder, RotateMode data) {
+            public void onClick(int pos, LightHolder holder, RotateMode data) {
                 switch (data.type) {
                     case RotateMode.RESET:
                         mRotateFrameLayout.resetWithAnimation();
@@ -346,8 +356,8 @@ public class EditCropRotateActivity extends BaseActivity {
                 }
             }
         });
-        mRotateRv.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false));
-        mRotateRv.setAdapter(lightAdapter);
+        AdapterConfig config = AdapterConfig.newConfig().itemLayoutId(R.layout.eidt_rotate_mode_item);
+        LightInjector.initAdapter(mRotateModeLightAdapter, config, mRotateRv, LightManager.hLinear(getContext()));
     }
 
     private class CropMode {
@@ -362,67 +372,53 @@ public class EditCropRotateActivity extends BaseActivity {
         }
     }
 
+
     // 裁剪模式列表
     private void createCropModeAdapter() {
         List<CropMode> list = new ArrayList<>();
-        list.add(new CropMode(CropOverlayView.NO_ASPECT_RATIO, "free", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_freedom_b, R.drawable.edit_cut_crop_freedom_a)));
-        list.add(new CropMode(1f, "1:1", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_1_1_b, R.drawable.edit_cut_crop_1_1_a)));
-        list.add(new CropMode(2f / 3, "2:3", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_2_3_b, R.drawable.edit_cut_crop_2_3_a)));
-        list.add(new CropMode(3f / 2, "3:2", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_3_2_b, R.drawable.edit_cut_crop_3_2_a)));
-        list.add(new CropMode(3f / 4, "3:4", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_3_4_b, R.drawable.edit_cut_crop_3_4_a)));
-        list.add(new CropMode(4f / 3, "4:3", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_4_3_b, R.drawable.edit_cut_crop_4_3_a)));
-        list.add(new CropMode(9f / 16, "9:16", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_9_16_b, R.drawable.edit_cut_crop_9_16_a)));
-        list.add(new CropMode(16f / 9, "16:9", DrawableUtils.newSelectStateDrawable(mContext, R.drawable.edit_cut_crop_16_9_b, R.drawable.edit_cut_crop_16_9_a)));
+        list.add(new CropMode(CropOverlayView.NO_ASPECT_RATIO, "free", DrawableUtils.newSelectStateDrawable(getContext(), R.drawable.edit_cut_crop_freedom_b, R.drawable.edit_cut_crop_freedom_a)));
+        list.add(new CropMode(1f, "1:1", DrawableUtils.newSelectStateDrawable(getContext(), R.drawable.edit_cut_crop_1_1_b, R.drawable.edit_cut_crop_1_1_a)));
+        list.add(new CropMode(2f / 3, "2:3", DrawableUtils.newSelectStateDrawable(getContext(), R.drawable.edit_cut_crop_2_3_b, R.drawable.edit_cut_crop_2_3_a)));
+        list.add(new CropMode(3f / 2, "3:2", DrawableUtils.newSelectStateDrawable(getContext(), R.drawable.edit_cut_crop_3_2_b, R.drawable.edit_cut_crop_3_2_a)));
+        list.add(new CropMode(3f / 4, "3:4", DrawableUtils.newSelectStateDrawable(getContext(), R.drawable.edit_cut_crop_3_4_b, R.drawable.edit_cut_crop_3_4_a)));
+        list.add(new CropMode(4f / 3, "4:3", DrawableUtils.newSelectStateDrawable(getContext(), R.drawable.edit_cut_crop_4_3_b, R.drawable.edit_cut_crop_4_3_a)));
+        list.add(new CropMode(9f / 16, "9:16", DrawableUtils.newSelectStateDrawable(getContext(), R.drawable.edit_cut_crop_9_16_b, R.drawable.edit_cut_crop_9_16_a)));
+        list.add(new CropMode(16f / 9, "16:9", DrawableUtils.newSelectStateDrawable(getContext(), R.drawable.edit_cut_crop_16_9_b, R.drawable.edit_cut_crop_16_9_a)));
 
-        mCropModeAdapter = new LightAdapter<CropMode>(mContext, list, R.layout.edit_crop_mode_item) {
+        mCropModeAdapter = new LightAdapter<CropMode>(getContext(), list) {
             @Override
-            public void onBindView(ViewHolder<CropMode> holder, CropMode data, int pos, int type) {
+            public void onBindView(LightHolder holder, CropMode data, int pos, int type) {
                 ImageView iv = holder.getView(R.id.iv_icon);
                 iv.setImageDrawable(data.drawable);
-                holder.text(R.id.tv_desc, data.text);
+                holder.setText(R.id.tv_desc, data.text);
             }
         };
-        mCropModeAdapter.addSelectorModule(new SelectorModule<>(SelectorModule.TYPE_SINGLE, 0, new OnHolderUpdateListener<CropMode>() {
+        mCropModeSelectManager = new SelectManager<>(mCropModeAdapter, SelectManager.TYPE_SINGLE, new AdapterViewBinder<CropMode>() {
             @Override
-            public void onChanged(ViewHolder<CropMode> holder, CropMode data, int pos, boolean isSelect) {
-                holder.selectAll(isSelect, R.id.iv_icon);
-                holder.textColor(R.id.tv_desc, isSelect ? mEnsureColor : mUnsureColor);
-            }
-        }));
-        mCropModeAdapter.setOnItemListener(new SimpleItemListener<CropMode>() {
-            @Override
-            public void onClick(int pos, ViewHolder holder, CropMode data) {
-                if (!mCropModeAdapter.getSelectorModule().isSelect(data)) {
-                    mCropOverlay.setAspectRatio(data.ratio);
-                }
-                mCropModeAdapter.getSelectorModule().toggle(pos);
+            public void onBindViewHolder(LightHolder holder, CropMode data, int pos, int type) {
+                boolean isSelect = mCropModeSelectManager.isSelect(data);
+                holder.setSelect(R.id.iv_icon, isSelect);
+                holder.setTextColor(R.id.tv_desc, isSelect ? mEnsureColor : mUnsureColor);
             }
         });
-        mCropModeRv.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false));
-        mCropModeRv.setAdapter(mCropModeAdapter);
+
+        mCropModeAdapter.setOnItemListener(new SimpleItemListener<CropMode>() {
+            @Override
+            public void onClick(int pos, LightHolder holder, CropMode data) {
+                if (!mCropModeSelectManager.isSelect(data)) {
+                    mCropOverlay.setAspectRatio(data.ratio);
+                }
+                mCropModeSelectManager.select(pos);
+            }
+        });
+        LightInjector.initAdapter(mCropModeAdapter, this, mCropModeRv, LightManager.hLinear(getContext()));
     }
 
-    @Override
-    protected String[] getPermission2Check() {
-        return new String[]{PermissionUtils.PER_READ_EXTERNAL_STORAGE,
-                PermissionUtils.PER_WRITE_EXTERNAL_STORAGE};
-    }
-
-    @Override
-    protected boolean handlePermissionResult(Map<String, Integer> reqPermissionsAndResult) {
-        ToastUtils.show("permission denied");
-        return super.handlePermissionResult(reqPermissionsAndResult);
-    }
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.edit_activity;
-    }
 
     @Override
     public void finish() {
         super.finish();
-        ActivityAnimUtils.translateFinish(mActivity);
+        ActivityAnimUtils.translateFinish(getActivity());
     }
 
 }

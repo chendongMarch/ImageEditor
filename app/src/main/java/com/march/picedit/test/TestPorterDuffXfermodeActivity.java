@@ -1,17 +1,15 @@
 package com.march.picedit.test;
 
-import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 import android.view.ViewGroup;
 
-import com.march.dev.app.activity.BaseActivity;
-import com.march.dev.utils.DimensUtils;
-import com.march.lightadapter.core.LightAdapter;
-import com.march.lightadapter.core.ViewHolder;
+import com.march.lightadapter.LightAdapter;
+import com.march.lightadapter.LightHolder;
+import com.march.lightadapter.LightInjector;
+import com.march.lightadapter.helper.LightManager;
 import com.march.picedit.R;
+import com.march.uikit.annotation.UILayout;
+import com.march.uikit.app.BaseActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +22,9 @@ import butterknife.BindView;
  *
  * @author chendong
  */
+@UILayout(R.layout.xfermode_activity)
 public class TestPorterDuffXfermodeActivity extends BaseActivity {
-    @Override
-    protected int getLayoutId() {
-        return R.layout.xfermode_activity;
-    }
+
 
     @BindView(R.id.rv)
     RecyclerView mRecyclerView;
@@ -36,8 +32,8 @@ public class TestPorterDuffXfermodeActivity extends BaseActivity {
     private List<Integer> mIntegers;
 
     @Override
-    public void onInitDatas() {
-        super.onInitDatas();
+    public void initBeforeViewCreated() {
+        super.initBeforeViewCreated();
         mIntegers = new ArrayList<>();
         for (int i = 0; i < PorterDuffXfermodeView.mPorterDuffXfermodeArray.length; i++) {
             mIntegers.add(i);
@@ -45,17 +41,17 @@ public class TestPorterDuffXfermodeActivity extends BaseActivity {
     }
 
     @Override
-    public void onInitViews(View view, Bundle saveData) {
-        super.onInitViews(view, saveData);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(mActivity, 3, LinearLayoutManager.VERTICAL, false));
-        mRecyclerView.setAdapter(new LightAdapter<Integer>(mActivity, mIntegers, R.layout.xfermode_item) {
+    public void initAfterViewCreated() {
+        super.initAfterViewCreated();
+        LightAdapter<Integer> adapter = new LightAdapter<Integer>(getActivity(), mIntegers, R.layout.xfermode_item) {
             @Override
-            public void onBindView(ViewHolder<Integer> holder, Integer data, int pos, int type) {
-                PorterDuffXfermodeView porterDuffXfermodeView = holder.bindView().getView(R.id.pdxv);
-                holder.bindView().setText(R.id.name_tv,PorterDuffXfermodeView.mPorterDuffXfermodeArray[data].name());
+            public void onBindView(LightHolder holder, Integer data, int pos, int type) {
+                PorterDuffXfermodeView porterDuffXfermodeView = holder.getView(R.id.pdxv);
+                holder.setText(R.id.name_tv, PorterDuffXfermodeView.mPorterDuffXfermodeArray[data].name());
                 porterDuffXfermodeView.setPorterDuffXfermodeIndex(data);
-                holder.bindView().setLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                holder.setLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             }
-        });
+        };
+        LightInjector.initAdapter(adapter, this, mRecyclerView, LightManager.vGrid(getContext(), 3));
     }
 }

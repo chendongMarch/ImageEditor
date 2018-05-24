@@ -1,10 +1,11 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
-apply plugin: 'com.antfortune.freeline'
+
+def version = rootProject.ext.version
+def libs = rootProject.ext.libs
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.3"
+    compileSdkVersion version.compileSdkVersion
+
     defaultConfig {
         applicationId "com.march.picedit"
         minSdkVersion 15
@@ -20,12 +21,6 @@ android {
         }
     }
 
-    freeline {
-        hack true
-        applicationProxy false
-    }
-
-
     sourceSets {
         //定义编译时编译文件的路径
         main {
@@ -38,13 +33,19 @@ android {
 dependencies {
 
     compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation project(':piceditor', )
+    implementation project(':common', )
+    implementation project(':uikit', )
+    implementation project(':gallery', )
 
-    compile rootProject.ext.google.design
-    compile rootProject.ext.google.appcompat_v7
+    implementation libs.design
+    implementation libs.appcompat_v7
+    implementation libs.eventbus
+    implementation libs.glide
+    implementation libs.rxjava2
+    implementation libs.rxandroid
+    implementation libs.gson
 
-    apt rootProject.ext.libs.butterknife840_processor
-    compile rootProject.ext.libs.butterknife840
-    compile rootProject.ext.libs.devKit
-
-    compile project(':piceditor')
+    annotationProcessor libs.butterknife840_processor
+    implementation libs.butterknife840
 }

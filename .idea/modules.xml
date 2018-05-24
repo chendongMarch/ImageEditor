@@ -4,8 +4,12 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/PictureEditor.iml" filepath="$PROJECT_DIR$/PictureEditor.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/common/common.iml" filepath="$PROJECT_DIR$/common/common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/gallery/gallery.iml" filepath="$PROJECT_DIR$/gallery/gallery.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lightadapter/lightadapter.iml" filepath="$PROJECT_DIR$/lightadapter/lightadapter.iml" />
       <module fileurl="file://$PROJECT_DIR$/lowpoly/lowpoly.iml" filepath="$PROJECT_DIR$/lowpoly/lowpoly.iml" />
       <module fileurl="file://$PROJECT_DIR$/piceditor/piceditor.iml" filepath="$PROJECT_DIR$/piceditor/piceditor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/uikit/uikit.iml" filepath="$PROJECT_DIR$/uikit/uikit.iml" />
     </modules>
   </component>
 </project>

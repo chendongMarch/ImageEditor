@@ -1,37 +1,27 @@
 package com.march.picedit.test;
 
+import android.Manifest;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Bundle;
+import android.os.Build;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.march.dev.app.activity.BaseActivity;
-import com.march.dev.model.ImageInfo;
-import com.march.dev.uikit.selectimg.SelectImageActivity;
-import com.march.dev.utils.BitmapUtils;
-import com.march.dev.utils.FileUtils;
-import com.march.dev.utils.GlideUtils;
-import com.march.dev.utils.PermissionUtils;
-import com.march.dev.utils.ToastUtils;
+import com.bumptech.glide.Glide;
+import com.march.common.model.ImageInfo;
+import com.march.common.utils.BitmapUtils;
+import com.march.common.utils.FileUtils;
+import com.march.picedit.PicEditActivity;
 import com.march.picedit.R;
+import com.march.picedit.SelectImageActivity;
 import com.march.picedit.sticker.ResourceFactory;
 import com.march.piceditor.functions.graffiti.GraffitiOverlayView;
-import com.march.piceditor.functions.sticker.EasyMenuHandler;
-import com.march.piceditor.functions.sticker.StickerDrawOverlay;
-import com.march.piceditor.functions.sticker.listener.OnStickerEventListener;
-import com.march.piceditor.functions.sticker.listener.StickerMenuHandler;
-import com.march.piceditor.functions.sticker.model.Position;
-import com.march.piceditor.functions.sticker.model.Sticker;
-import com.march.piceditor.functions.sticker.model.StickerMenu;
 import com.march.turbojpeg.TurboJpegUtils;
-
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
+import com.march.uikit.annotation.UILayout;
 
 import java.io.File;
-import java.util.Map;
-import java.util.Random;
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -49,12 +39,8 @@ import io.reactivex.schedulers.Schedulers;
  *
  * @author chendong
  */
-public class TestCompressImageActivity extends BaseActivity {
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.test_compress_activity;
-    }
+@UILayout(R.layout.test_compress_activity)
+public class TestCompressImageActivity extends PicEditActivity {
 
     private String mPath;
     private String mPath2;
@@ -66,9 +52,11 @@ public class TestCompressImageActivity extends BaseActivity {
     private ResourceFactory mResourceFactory;
 
     @Override
-    public void onInitViews(View view, final Bundle saveData) {
-        super.onInitViews(view, saveData);
-
+    public void initBeforeViewCreated() {
+        super.initBeforeViewCreated();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
+        }
     }
 
     @OnClick({R.id.btn_action, R.id.btn_choose_pic})
@@ -105,8 +93,8 @@ public class TestCompressImageActivity extends BaseActivity {
                         .subscribe(new Consumer<String>() {
                             @Override
                             public void accept(@NonNull String s) throws Exception {
-                                GlideUtils.with(mContext, mPath).into(mImageView);
-                                GlideUtils.with(mContext, mPath2).into(mImageView2);
+                                Glide.with(getContext()).load(mPath).into(mImageView);
+                                Glide.with(getContext()).load(mPath2).into(mImageView2);
                             }
                         }, new Consumer<Throwable>() {
                             @Override
@@ -116,34 +104,20 @@ public class TestCompressImageActivity extends BaseActivity {
                         });
                 break;
             case R.id.btn_choose_pic:
-                SelectImageActivity.start(mActivity, 1, hashCode());
+                SelectImageActivity.startActivity(getActivity());
                 break;
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(SelectImageActivity.SelectImageEvent event) {
-        if (hashCode() != event.getTag())
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        ArrayList<ImageInfo> extra = data.getParcelableArrayListExtra(SelectImageActivity.KEY_DATA);
+        if (extra.size() != 1) {
             return;
-        switch (event.getMessage()) {
-            case SelectImageActivity.SelectImageEvent.ON_SUCCESS:
-                ImageInfo imageInfo = event.mImageInfos.get(0);
-                mMosaicOverlay.setSrc(imageInfo.getPath());
-                break;
         }
-    }
-
-
-    @Override
-    protected String[] getPermission2Check() {
-        return new String[]{PermissionUtils.PER_READ_EXTERNAL_STORAGE,
-                PermissionUtils.PER_WRITE_EXTERNAL_STORAGE};
-    }
-
-    @Override
-    protected boolean handlePermissionResult(Map<String, Integer> reqPermissionsAndResult) {
-        ToastUtils.show("permission denied");
-        return super.handlePermissionResult(reqPermissionsAndResult);
+        ImageInfo imageInfo = extra.get(0);
+        mMosaicOverlay.setSrc(imageInfo.getPath());
     }
 
 

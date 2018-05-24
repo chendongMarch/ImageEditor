@@ -8,13 +8,15 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 
-import com.march.dev.app.activity.BaseActivity;
-import com.march.dev.utils.ActivityAnimUtils;
-import com.march.dev.utils.FileUtils;
+import com.march.common.utils.ActivityAnimUtils;
+import com.march.common.utils.FileUtils;
+import com.march.picedit.PicEditActivity;
 import com.march.picedit.R;
 import com.march.piceditor.functions.graffiti.GraffitiLayerConfig;
 import com.march.piceditor.functions.graffiti.GraffitiOverlayView;
 import com.march.turbojpeg.TurboJpegUtils;
+import com.march.uikit.annotation.UILayout;
+import com.march.uikit.annotation.UITitle;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -25,7 +27,9 @@ import butterknife.OnClick;
  *
  * @author chendong
  */
-public class GraffitiActivity extends BaseActivity {
+@UILayout(R.layout.graffiti_activity)
+@UITitle(titleText = "涂鸦")
+public class GraffitiActivity extends PicEditActivity {
 
     @BindView(R.id.graffiti_overlay) GraffitiOverlayView mGraffitiOverlay;
 
@@ -36,19 +40,12 @@ public class GraffitiActivity extends BaseActivity {
 
     }
 
+
     @Override
-    public void onInitViews(View view, Bundle saveData) {
-        super.onInitViews(view, saveData);
+    public void initAfterViewCreated() {
+        super.initAfterViewCreated();
         mGraffitiOverlay.setSrc(FileUtils.newRootFile("2.jpg").getAbsolutePath());
-
     }
-
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.graffiti_activity;
-    }
-
 
     @OnClick({R.id.tv_path, R.id.tv_rect, R.id.tv_erase, R.id.tv_draw, R.id.tv_save})
     public void clickView(View view) {

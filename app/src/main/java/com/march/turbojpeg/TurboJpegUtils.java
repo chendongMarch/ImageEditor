@@ -3,7 +3,8 @@ package com.march.turbojpeg;
 import android.graphics.Bitmap;
 import android.os.Build;
 
-import com.march.dev.utils.BitmapUtils;
+
+import com.march.common.utils.BitmapUtils;
 
 import java.io.File;
 

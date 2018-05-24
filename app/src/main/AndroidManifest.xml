@@ -39,6 +39,9 @@
         <activity
             android:name=".test.TestPorterDuffXfermodeActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
+        <activity
+            android:name=".SelectImageActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"/>
     </application>
 
 </manifest>

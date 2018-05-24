@@ -2,56 +2,54 @@ package com.march.picedit.sticker;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.march.dev.app.activity.BaseActivity;
-import com.march.dev.extensions.eventbus.BaseEvent;
-import com.march.dev.utils.ActivityAnimUtils;
-import com.march.dev.utils.DimensUtils;
-import com.march.dev.utils.GlideUtils;
-import com.march.dev.utils.LogUtils;
-import com.march.lightadapter.core.LightAdapter;
-import com.march.lightadapter.core.ViewHolder;
+import com.march.common.utils.ActivityAnimUtils;
+import com.march.common.utils.DimensUtils;
+import com.march.common.utils.LogUtils;
+import com.march.lightadapter.LightAdapter;
+import com.march.lightadapter.LightHolder;
+import com.march.lightadapter.LightInjector;
+import com.march.lightadapter.inject.AdapterLayout;
 import com.march.lightadapter.listener.SimpleItemListener;
+import com.march.picedit.PicEditActivity;
 import com.march.picedit.R;
 import com.march.picedit.sticker.model.StickerSource;
+import com.march.uikit.annotation.UILayout;
+import com.march.uikit.annotation.UITitle;
+import com.march.uikit.widget.TitleView;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.util.List;
 
 import butterknife.BindView;
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
-
 /**
  * CreateAt : 7/22/17
  * Describe :
  *
  * @author chendong
  */
-public class StickerSourceActivity extends BaseActivity {
+@UILayout(R.layout.sticker_source_activity)
+@UITitle(titleText = "贴纸一览")
+public class StickerSourceActivity extends PicEditActivity {
 
     public static final String TAG = StickerSourceActivity.class.getSimpleName();
 
-    @Override
-    protected int getLayoutId() {
-        return R.layout.sticker_source_activity;
-    }
 
-    @BindView(R.id.rv_sticker) RecyclerView mStickerRv;
+    @BindView(R.id.rv_sticker) RecyclerView                mStickerRv;
+    @AdapterLayout(itemLayoutId = R.layout.sticker_item)
+    private                    LightAdapter<StickerSource> mAdapter;
 
     public static void start(Activity activity) {
         Intent intent = new Intent(activity, StickerSourceActivity.class);
@@ -60,67 +58,55 @@ public class StickerSourceActivity extends BaseActivity {
     }
 
 
-    public static class StickerSourceEvent extends BaseEvent {
+    public static class StickerSourceEvent {
         public StickerSource mStickerSource;
 
         public StickerSourceEvent(StickerSource stickerSource) {
             mStickerSource = stickerSource;
         }
+
+        public void post() {
+            EventBus.getDefault().post(this);
+        }
     }
 
     @Override
-    public void onInitViews(View view, Bundle saveData) {
-        super.onInitViews(view, saveData);
-        mTitleBarView.setText("返回", "贴纸一览", null);
-        mTitleBarView.setLeftBackListener(mActivity);
-        Observable.create(new ObservableOnSubscribe<List<StickerSource>>() {
-            @Override
-            public void subscribe(@NonNull ObservableEmitter<List<StickerSource>> e) throws Exception {
-                List<StickerSource> mStickerSources = new Gson().fromJson(
-                        new BufferedReader(new InputStreamReader(
-                                getAssets().open("sticker.json"))),
-                        new TypeToken<List<StickerSource>>() {
-                        }.getType());
-                e.onNext(mStickerSources);
-            }
-        }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<List<StickerSource>>() {
-                    @Override
-                    public void accept(@NonNull List<StickerSource> stickerSources) throws Exception {
-                        createAdapter(stickerSources);
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(@NonNull Throwable throwable) throws Exception {
-                        throwable.printStackTrace();
-                    }
-                });
+    public void initAfterViewCreated() {
+        super.initAfterViewCreated();
+        mViewDelegate.setTitleText(TitleView.LEFT, "返回");
+        mViewDelegate.getTitleView().setLeftBackListener(getActivity());
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(getAssets().open("sticker.json")));
+            Type type = new TypeToken<List<StickerSource>>() {
+            }.getType();
+            List<StickerSource> mStickerSources = new Gson().fromJson(reader, type);
+            createAdapter(mStickerSources);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
     private void createAdapter(List<StickerSource> list) {
         LogUtils.e(TAG, Thread.currentThread().getName());
-        LightAdapter<StickerSource> adapter = new LightAdapter<StickerSource>(mContext, list, R.layout.sticker_item) {
+        mAdapter = new LightAdapter<StickerSource>(getContext(), list) {
             int spanCount = 3;
-            int size = (int) (DimensUtils.getScreenWidth(mContext) * 1f / spanCount);
+            int size = (int) (DimensUtils.WIDTH * 1f / spanCount);
 
             @Override
-            public void onBindView(ViewHolder<StickerSource> holder, StickerSource data, int pos, int type) {
-                holder.layoutParams(size, size);
-                GlideUtils.with(mContext, data.getSourceUrl())
-                        .size(size)
-                        .into((ImageView) holder.getView(R.id.iv_image));
+            public void onBindView(LightHolder holder, StickerSource data, int pos, int type) {
+                holder.setLayoutParams(size, size);
+                Glide.with(getContext()).load(data.getSourceUrl()).override(size, size).into(holder.<ImageView>getView(R.id.iv_image));
             }
         };
-        adapter.setOnItemListener(new SimpleItemListener<StickerSource>() {
+        mAdapter.setOnItemListener(new SimpleItemListener<StickerSource>() {
             @Override
-            public void onClick(int pos, ViewHolder holder, StickerSource data) {
+            public void onClick(int pos, LightHolder holder, StickerSource data) {
                 new StickerSourceEvent(data).post();
                 onBackPressed();
             }
         });
-        mStickerRv.setLayoutManager(new GridLayoutManager(mContext, 3, LinearLayoutManager.VERTICAL, false));
-        mStickerRv.setAdapter(adapter);
+        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3, LinearLayoutManager.VERTICAL, false);
+        LightInjector.initAdapter(mAdapter,this,mStickerRv,layoutManager);
     }
 }

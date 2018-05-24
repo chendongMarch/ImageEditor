@@ -1,53 +1,52 @@
 package com.march.picedit;
 
-import android.os.Bundle;
+import android.Manifest;
+import android.content.Intent;
+import android.os.Build;
 import android.view.View;
-import android.widget.SimpleAdapter;
 
-import com.march.dev.app.activity.BaseActivity;
-import com.march.dev.model.ImageInfo;
-import com.march.dev.uikit.selectimg.SelectImageActivity;
-import com.march.dev.utils.FileUtils;
+import com.march.common.model.ImageInfo;
 import com.march.picedit.edit.EditCropRotateActivity;
 import com.march.picedit.graffiti.GraffitiActivity;
 import com.march.picedit.sticker.StickerImageActivity;
 import com.march.picedit.test.TestCompressImageActivity;
 import com.march.picedit.test.TestPorterDuffXfermodeActivity;
+import com.march.uikit.annotation.UILayout;
+import com.march.uikit.annotation.UITitle;
 
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
+import java.util.ArrayList;
 
 import butterknife.OnClick;
 
-public class MainActivity extends BaseActivity {
-
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.home_activity;
-    }
-
+@UILayout(R.layout.home_activity)
+@UITitle(titleText = "首页")
+public class MainActivity extends PicEditActivity {
 
     @Override
-    public void onInitViews(View view, Bundle saveData) {
-        super.onInitViews(view, saveData);
-        // StickerImageActivity.start(mActivity, FileUtils.newRootFile("2.jpg").getAbsolutePath());
+    public void initBeforeViewCreated() {
+        super.initBeforeViewCreated();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
+        }
     }
+
+    private int launchViewId = -1;
 
     @OnClick({R.id.btn_xfermode, R.id.btn_choose_pic, R.id.btn_test, R.id.btn_sticker_test, R.id.btn_graffiti})
     public void clickView(View view) {
+        launchViewId = view.getId();
         switch (view.getId()) {
             case R.id.btn_choose_pic:
-                SelectImageActivity.start(mActivity, 1, 1);
+                SelectImageActivity.startActivity(getActivity());
                 break;
             case R.id.btn_test:
                 startActivity(TestCompressImageActivity.class);
                 break;
             case R.id.btn_sticker_test:
-                SelectImageActivity.start(mActivity, 1, 2);
+                SelectImageActivity.startActivity(getActivity());
                 break;
             case R.id.btn_graffiti:
-                GraffitiActivity.start(mActivity);
+                GraffitiActivity.start(getActivity());
                 break;
             case R.id.btn_xfermode:
                 startActivity(TestPorterDuffXfermodeActivity.class);
@@ -55,16 +54,25 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEvent(SelectImageActivity.SelectImageEvent event) {
-        switch (event.getMessage()) {
-            case SelectImageActivity.SelectImageEvent.ON_SUCCESS:
-                ImageInfo imageInfo = event.mImageInfos.get(0);
-                if (event.getTag() == 1) {
-                    EditCropRotateActivity.start(mActivity, imageInfo.getPath());
-                } else if (event.getTag() == 2) {
-                    StickerImageActivity.start(mActivity, imageInfo.getPath());
-                }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(data == null){
+            return;
+        }
+        if (launchViewId == -1) {
+            return;
+        }
+        ArrayList<ImageInfo> extra = data.getParcelableArrayListExtra(SelectImageActivity.KEY_DATA);
+        if (extra.size() != 1) {
+            return;
+        }
+        switch (launchViewId) {
+            case R.id.btn_choose_pic:
+                EditCropRotateActivity.start(getActivity(), extra.get(0).getPath());
+                break;
+            case R.id.btn_sticker_test:
+                StickerImageActivity.start(getActivity(), extra.get(0).getPath());
                 break;
         }
     }

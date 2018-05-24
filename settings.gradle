@@ -1,1 +1,7 @@
-include ':app', ':piceditor', ':lowpoly'
+include ':app'
+include ':piceditor'
+include ':lowpoly'
+include ':uikit'
+include ':lightadapter'
+include ':common'
+include ':gallery'
