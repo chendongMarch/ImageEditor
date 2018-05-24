@@ -16,6 +16,7 @@ import com.march.common.utils.LogUtils;
 import com.march.lightadapter.LightAdapter;
 import com.march.lightadapter.LightHolder;
 import com.march.lightadapter.LightInjector;
+import com.march.lightadapter.helper.LightManager;
 import com.march.lightadapter.inject.AdapterLayout;
 import com.march.lightadapter.listener.SimpleItemListener;
 import com.march.picedit.PicEditActivity;
@@ -48,8 +49,9 @@ public class StickerSourceActivity extends PicEditActivity {
 
 
     @BindView(R.id.rv_sticker) RecyclerView                mStickerRv;
-    @AdapterLayout(itemLayoutId = R.layout.sticker_item)
-    private                    LightAdapter<StickerSource> mAdapter;
+
+    @AdapterLayout(R.layout.sticker_item)
+    private LightAdapter<StickerSource> mAdapter;
 
     public static void start(Activity activity) {
         Intent intent = new Intent(activity, StickerSourceActivity.class);
@@ -94,9 +96,15 @@ public class StickerSourceActivity extends PicEditActivity {
             int size = (int) (DimensUtils.WIDTH * 1f / spanCount);
 
             @Override
-            public void onBindView(LightHolder holder, StickerSource data, int pos, int type) {
-                holder.setLayoutParams(size, size);
-                Glide.with(getContext()).load(data.getSourceUrl()).override(size, size).into(holder.<ImageView>getView(R.id.iv_image));
+            public void onBindView(LightHolder holder, final StickerSource data, int pos, int type) {
+                holder
+                        .setLayoutParams(size, size)
+                        .setCallback(R.id.iv_image, new LightHolder.Callback<ImageView>() {
+                            @Override
+                            public void bind(LightHolder holder, ImageView view, int pos) {
+                                Glide.with(getContext()).load(data.getSourceUrl()).into(view);
+                            }
+                        });
             }
         };
         mAdapter.setOnItemListener(new SimpleItemListener<StickerSource>() {
@@ -106,7 +114,6 @@ public class StickerSourceActivity extends PicEditActivity {
                 onBackPressed();
             }
         });
-        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3, LinearLayoutManager.VERTICAL, false);
-        LightInjector.initAdapter(mAdapter,this,mStickerRv,layoutManager);
+        LightInjector.initAdapter(mAdapter,this,mStickerRv, LightManager.vGrid(getContext(),3));
     }
 }
